@@ -20,12 +20,13 @@ namespace PuppetMaster
         AtMostOnce = 1,
         ExactlyOnce = 2
     }
-    class Operator
+    class OperatorCreationInfo
     {
         public string ID { get;  set; }
         public int ReplicationFactor { get; set; }
         public RoutingStrategy RtStrategy { get; set; }
         public IList<string> InputOperators { get; set; }
+        public IList<string> OutputOperators { get; set; }
         public IList<string> Addresses { get; set; } // of the multiple replicas
         public string OperatorFunction { get; set; }
         public IList<string> OperatorFunctionArgs { get; set; }
@@ -33,7 +34,7 @@ namespace PuppetMaster
     }
     class PuppetMaster
     {
-        public IList<Operator> operators = new List<Operator>();
+        public static IDictionary<string, OperatorCreationInfo> operators = new Dictionary<string, OperatorCreationInfo>();
         public static bool fullLogging = false;
         public static Semantic semantic;
         public static void read(string config)
@@ -49,23 +50,22 @@ namespace PuppetMaster
                 var sources = op.Groups["sources"].Value.Split(',');
                 var addresses = op.Groups["addresses"].Value.Split(',');
                 var functionArgs = op.Groups["function_args"].Value.Split(',');
-                addresses.AsParallel().ForAll((s) => s.Trim());
-                functionArgs.AsParallel().ForAll((s) => s.Trim());
 
+                var hashingArg = op.Groups["routing_arg"].Success ? Int32.Parse(op.Groups["routing_arg"].Value) : 0;
                 var stratString = op.Groups["routing"].Value.Trim().ToLower();
                 var strat =  stratString == "random" ? RoutingStrategy.Random : stratString == "hashing" ? RoutingStrategy.Hashing : RoutingStrategy.Primary;
-                var newOp = new Operator
+                var newOp = new OperatorCreationInfo
                 {
                     ID = op.Groups["name"].Value.Trim(),
                     InputOperators = sources.Select((x) => x.Trim()).ToList(),
                     ReplicationFactor = Int32.Parse(op.Groups["rep_fact"].Value),
                     RtStrategy = strat,
                     Addresses = addresses.Select((x) => x.Trim()).ToList(),
-                    OperatorFunction = op.Groups["function"].Value.Trim(),
-                    OperatorFunctionArgs = functionArgs.Select((x) => x.Trim()).ToList(),
-                    HashingArg = Int32.Parse(op.Groups["routing_arg"].Value)
+                    OperatorFunction = op.Groups["function"].Value.Trim().Replace("\"", ""),
+                    OperatorFunctionArgs = functionArgs.Select((x) => x.Trim().Replace("\"", "")).ToList(),
+                    HashingArg = hashingArg
                 };
-                //operators.Add(newOp);
+                operators[newOp.ID] = newOp;
             }
 
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
@@ -85,6 +85,12 @@ namespace PuppetMaster
             } else
             {
                 semantic = Semantic.AtLeastOnce;
+            }
+
+            foreach (var op in operators.Values)
+            {
+                // query to search all operators and match inputs to outputs
+                op.OutputOperators = operators.Where((x) => x.Value.InputOperators.Contains(op.ID)).Select((x) => x.Key).ToList();
             }
         }
     }
