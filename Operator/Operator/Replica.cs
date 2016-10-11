@@ -14,6 +14,7 @@ namespace Operator
         private IList<Destination> destinations;
         private IList<Replica> myReplicas;
         //private Semantic semantic;
+        private int totalSeenTuples = 0;
 
 
         public Replica(string replicaInfo)
