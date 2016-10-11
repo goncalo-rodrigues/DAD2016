@@ -10,7 +10,7 @@ namespace Operator
     {
         public static ProcessDelegate GetDupOperation()
         {
-            return new ProcessDelegate((x) => x);
+            return new ProcessDelegate((x) => new IList<string>[] { x });
         }
 
         public static ProcessDelegate GetUniqOperation(int fieldNumber)

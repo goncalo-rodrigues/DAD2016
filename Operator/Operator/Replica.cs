@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    public delegate IList<string> ProcessDelegate(IList<string> tuple);
+    public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
     class Replica : MarshalByRefObject
     {
         public string OperatorId { get; }
