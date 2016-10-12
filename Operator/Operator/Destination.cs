@@ -8,7 +8,7 @@ namespace Operator
 {
     abstract class Destination
     {
-
+        
         abstract public String send(CTuple tuple, int semantic);
 
     }

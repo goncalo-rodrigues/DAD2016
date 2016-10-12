@@ -78,7 +78,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
+    <ProjectReference Include="..\..\SharedTypes\SharedTypes.csproj">
       <Project>{469CC0D4-10FE-481A-97DF-99545EC73378}</Project>
       <Name>SharedTypes</Name>
     </ProjectReference>

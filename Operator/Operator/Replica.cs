@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,19 +13,31 @@ namespace Operator
         public string OperatorId { get; }
         private readonly ProcessDelegate processFunction;
         private IList<Destination> destinations;
-        private IList<Replica> myReplicas;
+        private IList<Replica> otherReplicas;
         //private Semantic semantic;
         private int totalSeenTuples = 0;
 
 
-        public Replica(string replicaInfo)
+        public Replica(OperatorCreationInfo info)
         {
+            this.OperatorId = info.ID;
+            this.otherReplicas = info.Addresses.Select((address) => GetStub(address)).ToList();
+            this.destinations = info.OutputOperators.Select((dstInfo) => (Destination) new NeighbourOperator
+            {
+                replicas = dstInfo.Addresses.Select((address) => GetStub(address)).ToList()
+            }).ToList();
+            this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
         }
         //public Replica(IDictionary<string,object> replicaInfo)
         //{
 
         //}
 
+        // This method should get the remote objects
+        public Replica GetStub(string address)
+        {
+            throw new NotImplementedException();
+        }
         private CTuple Process(CTuple tuple)
         {
             throw new NotImplementedException();

@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMaster", "PuppetMaster\PuppetMaster.csproj", "{B83B5992-C009-4FEB-8AA2-C612AD9F93D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "SharedTypes\SharedTypes.csproj", "{469CC0D4-10FE-481A-97DF-99545EC73378}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "..\SharedTypes\SharedTypes.csproj", "{469CC0D4-10FE-481A-97DF-99545EC73378}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

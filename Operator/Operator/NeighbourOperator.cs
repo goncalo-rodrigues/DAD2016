@@ -8,6 +8,7 @@ namespace Operator
 {
     class NeighbourOperator : Destination
     {
+        public List<Replica> replicas;
         public override string send(CTuple tuple, int semantic)
         {
             throw new NotImplementedException();
