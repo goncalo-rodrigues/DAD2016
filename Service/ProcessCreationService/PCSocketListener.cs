@@ -50,13 +50,14 @@ namespace ProcessCreationService
                     done = true;
                 }
             }
+            Console.WriteLine("New Request:\n" + result);
             clientSocket.Close();
             CreateProcess(result);
         }
 
         private void CreateProcess(string arg)
         {
-            Process.Start("Operator.exe", arg);
+            Process.Start(ProcessCreationService.processName ?? "Operator.exe", arg);
         }
     }
 }

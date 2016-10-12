@@ -13,6 +13,7 @@ namespace ProcessCreationService
     public partial class ProcessCreationService : ServiceBase
     {
         PCServer server;
+        public static string processName = null;
         public ProcessCreationService()
         {
             InitializeComponent();
@@ -20,6 +21,10 @@ namespace ProcessCreationService
 
         protected override void OnStart(string[] args)
         {
+            if (args.Length >= 1)
+            {
+                processName = args[0];
+            }
             server = new PCServer();
             server.StartServer();
         }
