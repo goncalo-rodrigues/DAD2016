@@ -19,8 +19,9 @@ namespace Operator
         private int totalSeenTuples = 0;
 
 
-        public Replica(OperatorCreationInfo info)
+        public Replica(ReplicaCreationInfo rep)
         {
+            var info = rep.Operator;
             this.OperatorId = info.ID;
             this.otherReplicas = info.Addresses.Select((address) => GetStub(address)).ToList();
             this.destinations = info.OutputOperators.Select((dstInfo) => (Destination) new NeighbourOperator

@@ -12,7 +12,7 @@ namespace PuppetMaster
 
     class PuppetMaster
     {
-        public static IDictionary<string, OperatorCreationInfo> operators = new Dictionary<string, OperatorCreationInfo>();
+        public static IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
         public static bool fullLogging = false;
         public static Semantic semantic;
         public static void read(string config)
@@ -54,7 +54,7 @@ namespace PuppetMaster
                 var hashingArg = op.Groups["routing_arg"].Success ? Int32.Parse(op.Groups["routing_arg"].Value) : -1;
                 var stratString = op.Groups["routing"].Value.Trim().ToLower();
                 var strat =  stratString == "random" ? RoutingStrategy.Random : stratString == "hashing" ? RoutingStrategy.Hashing : RoutingStrategy.Primary;
-                var newOp = new OperatorCreationInfo
+                var newOp = new OperatorInfo
                 {
                     ID = op.Groups["name"].Value.Trim(),
                     InputOperators = sources.Select((x) => x.Trim()).ToList(),
@@ -92,15 +92,20 @@ namespace PuppetMaster
             }
         }
 
-        public static string Serialize(OperatorCreationInfo op)
+        public static string Serialize(OperatorInfo info, string address)
         {
+            var rep = new ReplicaCreationInfo
+            {
+                Operator = info,
+                Address = address
+            };
             TextWriter tw = new StringWriter();
-            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(op.GetType());
-            x.Serialize(tw, op);
+            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(rep.GetType());
+            x.Serialize(tw, rep);
             return tw.ToString();
         }
 
-        public static bool assert(OperatorCreationInfo op)
+        public static bool assert(OperatorInfo op)
         {
             Dictionary<string, int> functions = new Dictionary<string, int>()
             {

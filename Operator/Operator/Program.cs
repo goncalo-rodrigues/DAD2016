@@ -19,11 +19,11 @@ namespace Operator
             }
 
             TextReader tr = new StringReader(args[0]);
-            OperatorCreationInfo info = null;
+            ReplicaCreationInfo rep = null;
             try
             {
-                System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(OperatorCreationInfo));
-                info = (OperatorCreationInfo)x.Deserialize(tr);
+                System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(ReplicaCreationInfo));
+                rep = (ReplicaCreationInfo)x.Deserialize(tr);
             } catch (Exception e)
             {
                 Console.WriteLine($"Creation info XML has a wrong format. Exception: {e.Message}");
@@ -32,32 +32,14 @@ namespace Operator
                 tr.Close();
             }
 
-            if (info == null) return;
+            if (rep == null) return;
+            var info = rep.Operator;
+            string address = rep.Address;
+            address = args[1];
+            info.Addresses.Remove(address);
+            
 
-            string address = "";
-            if (args.Length < 2)
-            {
-                if (info.Addresses.Count == 1)
-                {
-                    address = info.Addresses[0];
-                    info.Addresses.Clear();
-                } else
-                {
-                    Console.WriteLine("Missing address argument.");
-                    return;
-                }
-            } else
-            {
-                address = args[1];
-                var success = info.Addresses.Remove(address);
-                if (!success)
-                {
-                    Console.WriteLine("Address argument does not match with any of the replica addresses");
-                    return;
-                }
-            }
-
-            Replica replica = new Replica(info);
+            Replica replica = new Replica(rep);
 
             //create port and listen
         }

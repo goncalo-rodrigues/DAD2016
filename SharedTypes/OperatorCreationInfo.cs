@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharedTypes
 {
-    public class OperatorCreationInfo
+    public class OperatorInfo
     {
         public string ID { get; set; }
         public int ReplicationFactor { get; set; }
