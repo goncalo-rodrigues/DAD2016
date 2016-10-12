@@ -56,6 +56,7 @@ namespace PuppetMaster
                 var sources = op.Groups["sources"].Value.Split(',');
                 var addresses = op.Groups["addresses"].Value.Split(',');
                 var functionArgs = op.Groups["function_args"].Value.Split(',');
+                
 
                 var hashingArg = op.Groups["routing_arg"].Success ? Int32.Parse(op.Groups["routing_arg"].Value) : -1;
                 var stratString = op.Groups["routing"].Value.Trim().ToLower();
@@ -96,6 +97,8 @@ namespace PuppetMaster
                         ReplicationFactor = x.Value.ReplicationFactor,
                         RtStrategy = x.Value.RtStrategy
                     }).ToList();
+                // those inputs that do not match any operator name are considered file inputs
+                op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
             }
 
             //CreateAllProcesses(operators.Values);
