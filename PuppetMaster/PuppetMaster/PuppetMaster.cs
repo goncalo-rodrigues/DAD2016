@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,12 +9,6 @@ using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
-    public enum RoutingStrategy
-    {
-        Primary = 0,
-        Random = 1,
-        Hashing = 2
-    }
 
     enum Semantic
     {
@@ -22,26 +17,6 @@ namespace PuppetMaster
         ExactlyOnce = 2
     }
 
-    public class OperatorCreationInfo
-    {
-        public string ID { get;  set; }
-        public int ReplicationFactor { get; set; }
-        public RoutingStrategy RtStrategy { get; set; }
-        public List<string> InputOperators { get; set; }
-        public List<DestinationInfo> OutputOperators { get; set; }
-        public List<string> Addresses { get; set; } // of the multiple replicas
-        public string OperatorFunction { get; set; }
-        public List<string> OperatorFunctionArgs { get; set; }
-        public int HashingArg { get; set; } // only applicable if routingstrat == hashing
-    }
-
-    public class DestinationInfo
-    {
-        public string ID { get; set; }
-        public int ReplicationFactor { get; set; }
-        public RoutingStrategy RtStrategy { get; set; }
-        public List<string> Addresses { get; set; }
-    }
     class PuppetMaster
     {
         public static IDictionary<string, OperatorCreationInfo> operators = new Dictionary<string, OperatorCreationInfo>();
