@@ -8,14 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PuppetMaster
-{
-
-    enum Semantic
-    {
-        AtLeastOnce = 0,
-        AtMostOnce = 1,
-        ExactlyOnce = 2
-    }
+{ 
 
     class PuppetMaster
     {
@@ -24,6 +17,28 @@ namespace PuppetMaster
         public static Semantic semantic;
         public static void read(string config)
         {
+
+            var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
+            if (logRegex.Match(config).Groups["level"].Value.ToLower() == "full")
+            {
+                fullLogging = true;
+            }
+
+            var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))", RegexOptions.IgnoreCase);
+            var sem = semanticRegex.Match(config).Groups["sem"].Value.ToLower();
+            if (sem == "at-most-once")
+            {
+                semantic = Semantic.AtMostOnce;
+            }
+            else if (sem == "exactly-once")
+            {
+                semantic = Semantic.ExactlyOnce;
+            }
+            else
+            {
+                semantic = Semantic.AtLeastOnce;
+            }
+
             string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
             string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
@@ -48,7 +63,9 @@ namespace PuppetMaster
                     Addresses = addresses.Select((x) => x.Trim()).ToList(),
                     OperatorFunction = op.Groups["function"].Value.Trim().Replace("\"", ""),
                     OperatorFunctionArgs = functionArgs.Select((x) => x.Trim().Replace("\"", "")).ToList(),
-                    HashingArg = hashingArg
+                    HashingArg = hashingArg,
+                    Semantic = semantic,
+                    ShouldNotify = fullLogging
                 };
                 
                 if (assert(newOp))
@@ -58,24 +75,7 @@ namespace PuppetMaster
                 }
             }
             
-            var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
-            if (logRegex.Match(config).Groups["level"].Value.ToLower() == "full")
-            {
-                fullLogging = true;
-            }
 
-            var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))", RegexOptions.IgnoreCase);
-            var sem = semanticRegex.Match(config).Groups["sem"].Value.ToLower();
-            if (sem == "at-most-once")
-            {
-                semantic = Semantic.AtMostOnce;
-            } else if (sem == "exactly-once")
-            {
-                semantic = Semantic.ExactlyOnce;
-            } else
-            {
-                semantic = Semantic.AtLeastOnce;
-            }
 
             foreach (var op in operators.Values)
             {

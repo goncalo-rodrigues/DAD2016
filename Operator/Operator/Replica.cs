@@ -14,6 +14,7 @@ namespace Operator
         private readonly ProcessDelegate processFunction;
         private IList<Destination> destinations;
         private IList<Replica> otherReplicas;
+        private bool shouldNotify = false;
         //private Semantic semantic;
         private int totalSeenTuples = 0;
 
@@ -27,6 +28,7 @@ namespace Operator
                 replicas = dstInfo.Addresses.Select((address) => GetStub(address)).ToList()
             }).ToList();
             this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
+            this.shouldNotify = info.ShouldNotify;
         }
         //public Replica(IDictionary<string,object> replicaInfo)
         //{

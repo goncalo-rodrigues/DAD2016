@@ -17,5 +17,7 @@ namespace SharedTypes
         public string OperatorFunction { get; set; }
         public List<string> OperatorFunctionArgs { get; set; }
         public int HashingArg { get; set; } // only applicable if routingstrat == hashing
+        public Semantic Semantic { get; set; }
+        public bool ShouldNotify { get; set; }
     }
 }
