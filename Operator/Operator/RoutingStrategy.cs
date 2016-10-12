@@ -6,11 +6,32 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    class RoutingStrategy
+    abstract class RoutingStrategy
     {
-        //TODO: change string for url type
-        public string chooseURL(List<string> urls, CTuple tuple) {
-            return "";
+        public List<Replica> list {
+            get { return list; }
+            set { }
         }
+        public int field_id
+        {
+            get { return field_id; }
+            set { }
+        }
+
+       
+        public RoutingStrategy(List<Replica> replicas)
+        {
+            list = replicas;
+        }
+
+       public RoutingStrategy(List<Replica> replicas, int id)
+        {
+            list = replicas;
+            field_id = id;
+        }
+
+       abstract public Replica chooseReplica();
     }
 }
+
+
