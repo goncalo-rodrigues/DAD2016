@@ -10,19 +10,23 @@ using System.Threading.Tasks;
 
 namespace ProcessCreationService
 {
-    public partial class Service1 : ServiceBase
+    public partial class ProcessCreationService : ServiceBase
     {
-        public Service1()
+        PCServer server;
+        public ProcessCreationService()
         {
             InitializeComponent();
         }
 
         protected override void OnStart(string[] args)
         {
+            server = new PCServer();
+            server.StartServer();
         }
 
         protected override void OnStop()
         {
+            server.StopServer();
         }
     }
 }
