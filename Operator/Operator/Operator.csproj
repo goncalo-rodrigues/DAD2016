@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CTuple.cs" />
-    <Compile Include="Destination.cs" />
     <Compile Include="HashingStrategy.cs" />
     <Compile Include="NeighbourOperator.cs" />
     <Compile Include="Operations.cs" />

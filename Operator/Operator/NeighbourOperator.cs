@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    class NeighbourOperator : Destination
+    class NeighbourOperator 
     {
         public List<Replica> replicas;
-        public override string send(CTuple tuple, int semantic)
+        public string send(CTuple tuple, int semantic)
         {
             throw new NotImplementedException();
         }
