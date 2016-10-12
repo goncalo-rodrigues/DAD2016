@@ -12,7 +12,7 @@ namespace Operator
     {
         public string OperatorId { get; }
         private readonly ProcessDelegate processFunction;
-        private IList<Destination> destinations;
+        private IList<NeighbourOperator> destinations;
         private IList<Replica> otherReplicas;
         private bool shouldNotify = false;
         //private Semantic semantic;
