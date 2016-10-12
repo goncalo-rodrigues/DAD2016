@@ -3,21 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PuppetMaster
 { 
-
+    class OperatorNode
+    {
+        public string ID { get; set; }
+        public List<string> Addresses { get; set; }
+    }
     class PuppetMaster
     {
-        public static IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
+        
+        public static IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public static bool fullLogging = false;
         public static Semantic semantic;
-        public static void read(string config)
+        public static void ReadAndInitializeSystem(string config)
         {
-
+            IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
             if (logRegex.Match(config).Groups["level"].Value.ToLower() == "full")
             {
@@ -71,6 +77,7 @@ namespace PuppetMaster
                 if (assert(newOp))
                 {
                     operators[newOp.ID] = newOp;
+                    nodes.Add(newOp.ID, new OperatorNode { ID = newOp.ID, Addresses = newOp.Addresses });
                     Console.WriteLine($"Operator {newOp.ID} successfully parsed.");
                 }
             }
@@ -90,6 +97,8 @@ namespace PuppetMaster
                         RtStrategy = x.Value.RtStrategy
                     }).ToList();
             }
+
+            //CreateAllProcesses(operators.Values);
         }
 
         public static string Serialize(OperatorInfo info, string address)
@@ -152,6 +161,51 @@ namespace PuppetMaster
                 return false;
             }
             return true;
+        }
+
+        private static void CreateProcessAt(string addr, OperatorInfo info)
+        {
+            try
+            {
+                Regex addrRegex = new Regex(@"tcp://(?<host>(\w|\.)+):(?<port>(\d+))(/\w*)?", RegexOptions.IgnoreCase);
+                var match = addrRegex.Match(addr);
+                if (!match.Groups["host"].Success)
+                {
+                    Console.WriteLine($"URL ({addr}) malformed. Unable to create process.");
+                    return;
+                }
+                TcpClient client = new TcpClient(match.Groups["host"].Value, 10000);
+
+                NetworkStream ns = client.GetStream();
+                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr)); 
+                try
+                {
+                    ns.Write(arg, 0, arg.Length);
+                    ns.Close();
+                    client.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
+                }
+                
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
+            }
+        }
+        public static void CreateAllProcesses(ICollection<OperatorInfo> ops)
+        {
+            foreach (var op in ops)
+            {
+                foreach (var addr in op.Addresses)
+                {
+                    CreateProcessAt(addr, op);
+                }
+            }
         }
     }
 }
