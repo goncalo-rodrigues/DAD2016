@@ -16,7 +16,7 @@ namespace Operator
         private bool shouldNotify = false;
         //private Semantic semantic;
         public int totalSeenTuples = 0;
-        public HashSet<string> seenTuples;
+        public HashSet<string> SeenTupleFieldValues = new HashSet<string>();
 
 
         public Replica(ReplicaCreationInfo rep)

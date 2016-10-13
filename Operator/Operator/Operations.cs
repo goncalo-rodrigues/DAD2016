@@ -41,7 +41,7 @@ namespace Operator
         {
             return new ProcessDelegate((x) =>
             {
-                var table = ReplicaInstance.seenTuples;
+                var table = ReplicaInstance.SeenTupleFieldValues;
                 lock(table)
                 {
                     if (table.Contains(x[fieldNumber]))
