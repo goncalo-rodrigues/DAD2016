@@ -44,12 +44,12 @@ namespace Operator
             {
                 var seenTuples = ReplicaInstance.SeenTupleFieldValues;
                 
-                if (seenTuples.ContainsKey(x[fieldNumber]))
+                var isUnique = seenTuples.TryAdd(x[fieldNumber], true);
+                if (isUnique)
                 {
                     return new IList<string>[0];
                 } else
                 {
-                    seenTuples.TryAdd(x[fieldNumber], true);
                     return new IList<string>[] { x };
                 }
                 
