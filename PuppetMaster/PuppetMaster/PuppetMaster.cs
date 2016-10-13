@@ -101,7 +101,7 @@ namespace PuppetMaster
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
             }
 
-            //CreateAllProcesses(operators.Values);
+            CreateAllProcesses(operators.Values);
         }
 
         public static string Serialize(OperatorInfo info, string address)

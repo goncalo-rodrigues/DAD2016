@@ -1,6 +1,6 @@
 ﻿namespace ProcessCreationService
 {
-    partial class Service1
+    partial class ProcessCreationService
     {
         /// <summary> 
         /// Required designer variable.
