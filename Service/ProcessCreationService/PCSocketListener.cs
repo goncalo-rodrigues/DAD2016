@@ -40,8 +40,9 @@ namespace ProcessCreationService
             {
                 try
                 {
-                    size = clientSocket.Receive(byteBuffer);
-                    done = true;
+                    size = clientSocket.Receive(byteBuffer, byteBuffer.Length - 1, SocketFlags.None);
+                    if (size == 0)
+                        done = true;
                     byteBuffer[size] = (byte)'\0';
                     result += System.Text.Encoding.ASCII.GetString(byteBuffer);
                 }
@@ -50,14 +51,22 @@ namespace ProcessCreationService
                     done = true;
                 }
             }
-            Console.WriteLine("New Request:\n" + result);
+            var process = CreateProcess(result);
+            //clientSocket.Send(process?.Id ?? -1);
             clientSocket.Close();
-            CreateProcess(result);
+            
         }
 
-        private void CreateProcess(string arg)
+        private Process CreateProcess(string arg)
         {
-            Process.Start(ProcessCreationService.processName ?? "Operator.exe", arg);
+            try
+            {
+                var processName = ProcessCreationService.processName ?? "Operator.exe";
+                var pro = Process.Start(processName, arg);
+                return pro;
+            } catch (Exception) { };
+            return null;
+           
         }
     }
 }
