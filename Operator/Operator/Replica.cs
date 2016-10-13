@@ -15,7 +15,8 @@ namespace Operator
         private IList<string> inputFiles;
         private bool shouldNotify = false;
         //private Semantic semantic;
-        private int totalSeenTuples = 0;
+        public int totalSeenTuples = 0;
+        public HashSet<string> seenTuples;
 
 
         public Replica(ReplicaCreationInfo rep)

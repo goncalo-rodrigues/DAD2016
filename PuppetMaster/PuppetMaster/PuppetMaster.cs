@@ -127,6 +127,7 @@ namespace PuppetMaster
                 { "UNIQ", 1 },
                 { "CUSTOM", 3 }
             };
+            string[] validOperators = new string[] { "=", ">", "<", ">=", "<=" };
             if (string.IsNullOrWhiteSpace(op.ID))
             {
                 Console.WriteLine("Error while parsing config file. Operator ID cannot be empty.");
@@ -163,6 +164,10 @@ namespace PuppetMaster
                 Console.WriteLine($"Error while parsing config file at Operator {op.ID}. Hashing requires an argument >= 0");
                 return false;
             }
+            if (op.OperatorFunction.ToUpper() == "FILTER" && !validOperators.Contains(op.OperatorFunctionArgs[1]))
+            {
+                Console.WriteLine($"Error while parsing config file. Operator {op.ID} doesn't have a valid function. Match: {op.OperatorFunctionArgs[1]}. Expected one of {String.Join(",", validOperators)}.");
+            }
             return true;
         }
 
@@ -180,7 +185,8 @@ namespace PuppetMaster
                 TcpClient client = new TcpClient(match.Groups["host"].Value, 10000);
 
                 NetworkStream ns = client.GetStream();
-                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr)); 
+                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr));
+                byte[] response = new byte[4];
                 try
                 {
                     ns.Write(arg, 0, arg.Length);

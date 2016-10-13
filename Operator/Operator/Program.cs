@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Operator
@@ -15,7 +16,7 @@ namespace Operator
             if (args.Length < 1)
             {
                 Console.WriteLine("Missing creation info argument.");
-                return;
+                loop();
             }
 
             TextReader tr = new StringReader(args[0]);
@@ -32,7 +33,7 @@ namespace Operator
                 tr.Close();
             }
 
-            if (rep == null) return;
+            if (rep == null) loop();
             var info = rep.Operator;
             string address = rep.Address;
             address = args[1];
@@ -40,8 +41,15 @@ namespace Operator
             
 
             Replica replica = new Replica(rep);
+            Operations.ReplicaInstance = replica;
 
+            loop();
             //create port and listen
+        }
+
+        static void loop()
+        {
+            Thread.Sleep(100000);
         }
     }
 }
