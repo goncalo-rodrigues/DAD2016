@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Operator
@@ -61,11 +62,7 @@ namespace Operator
 
             return new ProcessDelegate((x) =>
             {
-                int count;
-                lock (ReplicaInstance)
-                {
-                    count = ReplicaInstance.totalSeenTuples++;
-                }
+                int count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
                 return new IList<string>[] { new List<string> { count.ToString() } };
             });
         }
