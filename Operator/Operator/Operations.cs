@@ -41,18 +41,17 @@ namespace Operator
         {
             return new ProcessDelegate((x) =>
             {
-                var table = ReplicaInstance.SeenTupleFieldValues;
-                lock(table)
+                var seenTuples = ReplicaInstance.SeenTupleFieldValues;
+                
+                if (seenTuples.ContainsKey(x[fieldNumber]))
                 {
-                    if (table.Contains(x[fieldNumber]))
-                    {
-                        return new IList<string>[0];
-                    } else
-                    {
-                        table.Add(x[fieldNumber]);
-                        return new IList<string>[] { x };
-                    }
+                    return new IList<string>[0];
+                } else
+                {
+                    seenTuples.TryAdd(x[fieldNumber], true);
+                    return new IList<string>[] { x };
                 }
+                
 
             });
         }

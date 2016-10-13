@@ -1,5 +1,6 @@
 ﻿using SharedTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace Operator
         private bool shouldNotify = false;
         //private Semantic semantic;
         public int totalSeenTuples = 0;
-        public HashSet<string> SeenTupleFieldValues = new HashSet<string>();
+        public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
 
 
         public Replica(ReplicaCreationInfo rep)
