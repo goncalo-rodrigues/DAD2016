@@ -7,7 +7,7 @@ using System.Linq;
 namespace Operator
 {
     public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
-    class Replica : MarshalByRefObject
+    class Replica : MarshalByRefObject, IReplica
     {
         public string OperatorId { get; }
         private readonly ProcessDelegate processFunction;
