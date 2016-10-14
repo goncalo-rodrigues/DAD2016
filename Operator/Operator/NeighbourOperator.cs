@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Operator
 {
     class NeighbourOperator 
     {
-        public List<Replica> replicas;
+        public List<IReplica> replicas;
         public string send(CTuple tuple, int semantic)
         {
             throw new NotImplementedException();

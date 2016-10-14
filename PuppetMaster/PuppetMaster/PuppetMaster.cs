@@ -13,15 +13,15 @@ namespace PuppetMaster
     class OperatorNode
     {
         public string ID { get; set; }
-        public List<string> Addresses { get; set; }
+        public List<IReplica> Replicas { get; set; }
     }
     class PuppetMaster
     {
         
-        public static IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
-        public static bool fullLogging = false;
-        public static Semantic semantic;
-        public static void ReadAndInitializeSystem(string config)
+        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
+        public bool fullLogging = false;
+        public Semantic semantic;
+        public void ReadAndInitializeSystem(string config)
         {
             IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
@@ -78,7 +78,10 @@ namespace PuppetMaster
                 if (assert(newOp))
                 {
                     operators[newOp.ID] = newOp;
-                    nodes.Add(newOp.ID, new OperatorNode { ID = newOp.ID, Addresses = newOp.Addresses });
+                    nodes.Add(newOp.ID, new OperatorNode {
+                        ID = newOp.ID,
+                        Replicas = newOp.Addresses.Select((address) => GetStub(address)).ToList()
+                    });
                     Console.WriteLine($"Operator {newOp.ID} successfully parsed.");
                 }
             }
@@ -104,7 +107,12 @@ namespace PuppetMaster
             CreateAllProcesses(operators.Values);
         }
 
-        public static string Serialize(OperatorInfo info, string address)
+        private IReplica GetStub(string address)
+        {
+            return null;
+        }
+
+        public string Serialize(OperatorInfo info, string address)
         {
             var rep = new ReplicaCreationInfo
             {
@@ -117,7 +125,7 @@ namespace PuppetMaster
             return tw.ToString();
         }
 
-        public static bool assert(OperatorInfo op)
+        public bool assert(OperatorInfo op)
         {
             Dictionary<string, int> functions = new Dictionary<string, int>()
             {
@@ -171,7 +179,7 @@ namespace PuppetMaster
             return true;
         }
 
-        private static void CreateProcessAt(string addr, OperatorInfo info)
+        private  void CreateProcessAt(string addr, OperatorInfo info)
         {
             try
             {
@@ -206,7 +214,7 @@ namespace PuppetMaster
                 Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
             }
         }
-        public static void CreateAllProcesses(ICollection<OperatorInfo> ops)
+        public void CreateAllProcesses(ICollection<OperatorInfo> ops)
         {
             foreach (var op in ops)
             {

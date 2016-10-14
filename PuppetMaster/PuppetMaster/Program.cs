@@ -16,6 +16,7 @@ namespace PuppetMaster
         static void Main()
         {
             string config = null;
+            PuppetMaster master = new PuppetMaster();
             try
             {
                 config = File.ReadAllText("config.txt");
@@ -25,7 +26,7 @@ namespace PuppetMaster
                 return;
             }
            
-            PuppetMaster.ReadAndInitializeSystem(config);
+            master.ReadAndInitializeSystem(config);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

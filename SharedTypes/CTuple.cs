@@ -1,4 +1,4 @@
-﻿namespace Operator
+﻿namespace SharedTypes
 {
     public class CTuple
     {

@@ -43,9 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CTuple.cs" />
     <Compile Include="HashingStrategy.cs" />
-    <Compile Include="IReplica.cs" />
     <Compile Include="NeighbourOperator.cs" />
     <Compile Include="Operations.cs" />
     <Compile Include="PrimaryStrategy.cs" />

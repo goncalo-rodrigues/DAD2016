@@ -12,7 +12,7 @@ namespace Operator
         public string OperatorId { get; }
         private readonly ProcessDelegate processFunction;
         private IList<NeighbourOperator> destinations;
-        private IList<Replica> otherReplicas;
+        private IList<IReplica> otherReplicas;
         private IList<string> inputFiles;
         private bool shouldNotify = false;
         //private Semantic semantic;
@@ -35,7 +35,7 @@ namespace Operator
         }
 
         // This method should get the remote object given its address
-        private Replica GetStub(string address)
+        private IReplica GetStub(string address)
         {
             throw new NotImplementedException();
         }
