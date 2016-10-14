@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Operator
 {
@@ -13,12 +11,24 @@ namespace Operator
     class HashingStrategy : RoutingStrategy
     {
 
-        public HashingStrategy(List<Replica> replicas, int id):base(replicas, id){
+        public HashingStrategy(List<Replica> replicas, int id, CTuple tuple):base(replicas, id, tuple){
 
         }
 
         public override Replica chooseReplica()
         {
+
+            //found replica with field_id = id
+           /* foreach (CTuple tup in this.tuple) {
+                if (rep.Des)
+            }
+
+            HashAlgorithm hash;
+            hash.ComputeHash(this.list[]);
+            */
+
+
+
             throw new NotImplementedException();
         }
     }
