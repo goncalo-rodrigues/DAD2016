@@ -5,11 +5,13 @@ namespace SharedTypes
 
     public class CTuple
     {
-        private List<string> fields;
+        private List<string> fields = new List<string>();
+
         public CTuple() {
         }
         public CTuple(List<string> fields) {
-            this.fields = fields;
+            foreach (string f in fields)
+                this.fields.Add(f);
         }
         public void AddField(string field) {
             this.fields.Add(field);
