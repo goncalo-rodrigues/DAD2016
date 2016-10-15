@@ -3,7 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,13 +42,26 @@ namespace Operator
             string address = rep.Address;
             address = args[1];
             info.Addresses.Remove(address);
-            
+
 
             Replica replica = new Replica(rep);
             Operations.ReplicaInstance = replica;
 
             loop();
-            //create port and listen
+
+            // get port from address 
+            Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/\w*)?", RegexOptions.IgnoreCase);
+            var match = portRegex.Match(address);
+            if (!match.Groups["port"].Success) { 
+                Console.WriteLine($"URL ({address}) malformed. Unable to create process.");
+                return;
+            }
+            var port = Int32.Parse(match.Groups["port"].Value);
+            TcpChannel channel = new TcpChannel(port);
+            ChannelServices.RegisterChannel(channel, false);
+            RemotingServices.Marshal(replica, "Replica", typeof(Replica));
+            // como temos referência física, é mesmo necessario colocar o readLine?
+            Console.ReadLine();
         }
 
         static void loop()
