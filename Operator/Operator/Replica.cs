@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 namespace Operator
 {
     public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
+    // A delegate type for handling events from PuppetMaster
+    public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
+    
     class Replica : MarshalByRefObject, IReplica
     {
         public string OperatorId { get; }
@@ -18,38 +21,46 @@ namespace Operator
         private IList<string> inputFiles;
         private bool shouldNotify = false;
         private bool isProcessing = false;
-        //private Semantic semantic;
+        private Semantic semantic;
         public int totalSeenTuples = 0;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
-        
+
+        // event is raised when processing starts
+        public event PuppetMasterEventHandler OnStart;
 
         public Replica(ReplicaCreationInfo rep)
         {
             var info = rep.Operator;
             this.OperatorId = info.ID;
-            this.otherReplicas = info.Addresses.Select((address) => GetStub(address)).ToList();
-            this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator
-            {
-                replicas = dstInfo.Addresses.Select((address) => GetStub(address)).ToList()
-            }).ToList();
             this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
+            this.semantic = info.Semantic;
+
+
+            this.OnStart += (sender, args) =>
+            {
+                this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
+                isProcessing = true;
+            };
+            
         }
 
-        // This method should get the remote object given its address
-        private IReplica GetStub(string address)
-        {
-            throw new NotImplementedException();
-        }
         private CTuple Process(CTuple tuple)
         {
-            throw new NotImplementedException();
+            var data = tuple.GetFields();
+            var resultData = processFunction(data);
+            var resultTuple = new CTuple(data.ToList());
+            return resultTuple;
         }
 
         private void SendToAll(CTuple tuple)
         {
-            throw new NotImplementedException();
+            foreach (var neighbor in destinations)
+            {
+                neighbor.send(tuple, semantic);
+            }
         }
 
         #region IReplica Implementation
@@ -61,7 +72,7 @@ namespace Operator
 
         public void Start()
         {
-            isProcessing = true;
+            OnStart.Invoke(this, new EventArgs());
         }
 
         public void Interval(int mils)

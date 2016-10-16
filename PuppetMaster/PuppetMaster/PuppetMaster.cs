@@ -12,8 +12,29 @@ namespace PuppetMaster
 { 
     class OperatorNode
     {
-        public string ID { get; set; }
-        public List<IReplica> Replicas { get; set; }
+        public string ID { get; }
+
+        #region Replicas Field
+        // only gets the stubs when needed (when Replicas field is needed)
+        private IList<string> addresses;
+        private IList<IReplica> replicas;
+        public IList<IReplica> Replicas {
+            get
+            {
+                if (replicas == null)
+                {
+                    replicas = addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+                }
+                return replicas;
+            }
+        }
+        #endregion Replicas Field
+
+        public OperatorNode(string ID, IList<string> addresses)
+        {
+            this.ID = ID;
+            this.addresses = addresses;
+        }
 
         #region PuppetMaster's Commands
         public void Start()
@@ -46,6 +67,8 @@ namespace PuppetMaster
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
+
+        #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
             IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
@@ -103,10 +126,7 @@ namespace PuppetMaster
                 if (assert(newOp))
                 {
                     operators[newOp.ID] = newOp;
-                    nodes.Add(newOp.ID, new OperatorNode {
-                        ID = newOp.ID,
-                        Replicas = newOp.Addresses.Select((address) => GetStub(address)).ToList()
-                    });
+                    nodes.Add(newOp.ID, new OperatorNode(newOp.ID, newOp.Addresses));
                     Console.WriteLine($"Operator {newOp.ID} successfully parsed.");
                 }
             }
@@ -131,12 +151,6 @@ namespace PuppetMaster
 
             CreateAllProcesses(operators.Values);
         }
-
-        private IReplica GetStub(string address)
-        {
-            return null;
-        }
-
         public string Serialize(OperatorInfo info, string address)
         {
             var rep = new ReplicaCreationInfo
@@ -149,7 +163,6 @@ namespace PuppetMaster
             x.Serialize(tw, rep);
             return tw.ToString();
         }
-
         public bool assert(OperatorInfo op)
         {
             Dictionary<string, int> functions = new Dictionary<string, int>()
@@ -203,7 +216,6 @@ namespace PuppetMaster
             }
             return true;
         }
-
         private  void CreateProcessAt(string addr, OperatorInfo info)
         {
             try
@@ -246,6 +258,7 @@ namespace PuppetMaster
                 }
             }
         }
+        #endregion Initialization
 
         #region PuppetMaster's commands
         public void Start(string opId)

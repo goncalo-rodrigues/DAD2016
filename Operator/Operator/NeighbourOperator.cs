@@ -10,7 +10,13 @@ namespace Operator
     class NeighbourOperator 
     {
         public List<IReplica> replicas;
-        public string send(CTuple tuple, int semantic)
+
+        public NeighbourOperator(DestinationInfo info)
+        {
+            replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+        }
+
+        public string send(CTuple tuple, Semantic semantic)
         {
             throw new NotImplementedException();
         }
