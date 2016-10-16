@@ -104,6 +104,7 @@ namespace Operator
                 }
 
                 status += "Working Replicas: " + repCnt + " (of " + otherReplicas.Count +")]";
+                Console.WriteLine(status);
             }
         }
 
