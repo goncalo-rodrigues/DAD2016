@@ -18,7 +18,7 @@ namespace Operator
         private readonly ProcessDelegate processFunction;
         private IList<NeighbourOperator> destinations;
         private IList<IReplica> otherReplicas;
-        private IList<string> inputFiles;
+        private List<string> inputFiles;
         private bool shouldNotify = false;
         private bool isProcessing = false;
         private Semantic semantic;

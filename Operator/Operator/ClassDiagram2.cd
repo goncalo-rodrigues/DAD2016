@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Operator.NeighbourOperatorIsDeadException">
+    <Position X="4" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\NeighbourOperatorIsDeadException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.HashingStrategy" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>HashingStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.NeighbourOperator">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAQAAAAEAAAAAAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>NeighbourOperator.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="RoutingStrategy" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="replicas" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Operator.Operations">
+    <Position X="0.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAkAAAAAAAQCAAAAAQAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>Operations.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.PrimaryStrategy" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PrimaryStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.Program">
+    <Position X="2.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.RandomStrategy" Collapsed="true">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RandomStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Operator.Replica" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAIEECBAACCBEtAAAAAAAAAAAAAAAIAABEEAAAA=</HashCode>
+      <FileName>Replica.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="destinations" />
+      <Field Name="otherReplicas" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Orientation="Left" Position="0.1" Collapsed="true" />
+  </Class>
+  <Class Name="Operator.RoutingStrategy" Collapsed="true">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAQAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>RoutingStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="SharedTypes.IReplica">
+    <Position X="12" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Delegate Name="Operator.ProcessDelegate" Collapsed="true">
+    <Position X="5.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Replica.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="Operator.PuppetMasterEventHandler" Collapsed="true">
+    <Position X="5.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Replica.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

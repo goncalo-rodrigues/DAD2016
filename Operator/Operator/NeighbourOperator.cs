@@ -10,6 +10,7 @@ namespace Operator
     class NeighbourOperator 
     {
         public List<IReplica> replicas;
+        public RoutingStrategy RoutingStrategy { get; set; }
 
         public NeighbourOperator(DestinationInfo info)
         {
