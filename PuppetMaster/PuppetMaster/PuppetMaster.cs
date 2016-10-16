@@ -14,6 +14,31 @@ namespace PuppetMaster
     {
         public string ID { get; set; }
         public List<IReplica> Replicas { get; set; }
+
+        #region PuppetMaster's Commands
+        public void Start()
+        {
+            foreach(IReplica irep in Replicas)
+            {
+                irep.Start();
+            }
+        }
+        public void Interval(int mills)
+        {
+            // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
+            foreach (IReplica irep in Replicas)
+            {
+                irep.Interval(mills);
+            }
+        }
+        public void Status()
+        {
+            foreach (IReplica irep in Replicas)
+            {
+                irep.Status();
+            }
+        }
+        #endregion
     }
     class PuppetMaster
     {
@@ -205,9 +230,6 @@ namespace PuppetMaster
                 {
                     Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
                 }
-                
-
-
             }
             catch (Exception e)
             {
@@ -224,5 +246,32 @@ namespace PuppetMaster
                 }
             }
         }
+
+        #region PuppetMaster's commands
+        public void Start(string opId)
+        {
+            try
+            {
+                nodes[opId].Start();
+            } catch (KeyNotFoundException knfe)
+            {
+                Console.WriteLine($"Puppet master could not find operator {opId}");
+            }
+        }
+        public void Interval(string opId, int x_mls)
+        {
+            try
+            {
+                nodes[opId].Interval(x_mls);
+            } catch (KeyNotFoundException knfe)
+            {
+                Console.WriteLine($"Puppet master could not find operator {opId}");
+            }
+        }
+        public void Status() {
+            foreach(KeyValuePair<string, OperatorNode> pair in nodes)
+                pair.Value.Status();
+        }
+        #endregion
     }
 }

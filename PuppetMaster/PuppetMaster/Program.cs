@@ -22,7 +22,7 @@ namespace PuppetMaster
                 config = File.ReadAllText("config.txt");
             } catch (Exception e)
             {
-                Console.WriteLine($"Unable parse config file. {e.Message}. Exiting...");
+                Console.WriteLine($"Unable to parse config file. {e.Message}. Exiting...");
                 return;
             }
            

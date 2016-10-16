@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="HashingStrategy.cs" />
     <Compile Include="NeighbourOperator.cs" />
+    <Compile Include="Exceptions\NeighbourOperatorIsDeadException.cs" />
     <Compile Include="Operations.cs" />
     <Compile Include="PrimaryStrategy.cs" />
     <Compile Include="Program.cs" />

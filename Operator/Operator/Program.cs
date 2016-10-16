@@ -50,17 +50,17 @@ namespace Operator
             loop();
 
             // get port from address 
-            Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/\w*)?", RegexOptions.IgnoreCase);
+            Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/(?<name>\w*))?", RegexOptions.IgnoreCase);
             var match = portRegex.Match(address);
-            if (!match.Groups["port"].Success) { 
+            if (!match.Groups["port"].Success || !match.Groups["name"].Success) { 
                 Console.WriteLine($"URL ({address}) malformed. Unable to create process.");
                 return;
             }
             var port = Int32.Parse(match.Groups["port"].Value);
+            var name = match.Groups["name"].Value;
             TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, false);
-            RemotingServices.Marshal(replica, "Replica", typeof(Replica));
-            // como temos referência física, é mesmo necessario colocar o readLine?
+            RemotingServices.Marshal(replica, name, typeof(Replica));
             Console.ReadLine();
         }
 
