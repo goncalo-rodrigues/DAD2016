@@ -63,35 +63,63 @@ namespace PuppetMaster
     }
     class PuppetMaster
     {
-        
+
+        public IDictionary<string, ACommand> allCommands;
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
 
+        public PuppetMaster()
+        {
+            allCommands = new Dictionary<string, ACommand>
+            {
+                { "start" , new StartCommand(this) },
+                { "interval", new IntervalCommand(this) },
+                { "status", new StatusCommand(this) }
+            };
+        }
         #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
             IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
+
+            //remove comments
+            var commentRegex = new Regex(@"%[^\n]*", RegexOptions.IgnoreCase);
+            config = commentRegex.Replace(config, "");
+
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
-            if (logRegex.Match(config).Groups["level"].Value.ToLower() == "full")
-            {
-                fullLogging = true;
+            var logMatch = logRegex.Match(config);
+            if (logMatch.Success) {
+                config.Remove(logMatch.Index, logMatch.Length);
+                if (logMatch.Groups["level"].Value.ToLower() == "full")
+                {
+                    fullLogging = true;
+                }
             }
 
+
             var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))", RegexOptions.IgnoreCase);
-            var sem = semanticRegex.Match(config).Groups["sem"].Value.ToLower();
-            if (sem == "at-most-once")
+            var semMatch = semanticRegex.Match(config);
+            
+
+            if (semMatch.Success)
             {
-                semantic = Semantic.AtMostOnce;
+                config.Remove(semMatch.Index, semMatch.Length);
+                var sem = semMatch.Groups["sem"].Value.ToLower();
+                if (sem == "at-most-once")
+                {
+                    semantic = Semantic.AtMostOnce;
+                }
+                else if (sem == "exactly-once")
+                {
+                    semantic = Semantic.ExactlyOnce;
+                }
+                else
+                {
+                    semantic = Semantic.AtLeastOnce;
+                }
             }
-            else if (sem == "exactly-once")
-            {
-                semantic = Semantic.ExactlyOnce;
-            }
-            else
-            {
-                semantic = Semantic.AtLeastOnce;
-            }
+
 
             string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
@@ -129,6 +157,9 @@ namespace PuppetMaster
                     nodes.Add(newOp.ID, new OperatorNode(newOp.ID, newOp.Addresses));
                     Console.WriteLine($"Operator {newOp.ID} successfully parsed.");
                 }
+
+                // remove from the original string
+                config.Remove(op.Index, op.Length);
             }
             
 
@@ -150,6 +181,37 @@ namespace PuppetMaster
             }
 
             CreateAllProcesses(operators.Values);
+
+        }
+
+        public void ExecuteCommands(string commands)
+        {
+            StringReader reader = new StringReader(commands);
+            String line = null;
+            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)", RegexOptions.IgnoreCase);
+            while ((line = reader.ReadLine()) != null)
+            {
+                
+                var match = commandRegex.Match(commands);
+                if (!match.Success) continue;
+                var command = match.Groups["command"].Value;
+                if (!allCommands.ContainsKey(command)) continue;
+
+                // if it is a valid command
+                string[] args;
+                var argsMatch = match.Groups["args"];
+                if (argsMatch.Success && !String.IsNullOrWhiteSpace(argsMatch.Value))
+                {
+                    var argsString = argsMatch.Value.Trim();
+                    args = argsString.Split(null).Select((x) => x.Trim()).ToArray();
+                }
+                else
+                {
+                    args = new string[0];
+                }
+                Console.WriteLine("Executing: " + match.Value);
+                Task.Run(() => allCommands[command].execute(args));
+            }
         }
         public string Serialize(OperatorInfo info, string address)
         {
