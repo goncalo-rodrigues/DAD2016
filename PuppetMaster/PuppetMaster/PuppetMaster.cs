@@ -184,15 +184,15 @@ namespace PuppetMaster
 
         }
 
-        public void ExecuteCommands(string commands)
+        public async void ExecuteNextCommand(StringReader reader)
         {
-            StringReader reader = new StringReader(commands);
-            String line = null;
             var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)", RegexOptions.IgnoreCase);
-            while ((line = reader.ReadLine()) != null)
+            var line = reader.ReadLine();
+            var done = false;
+            while (!done && (line = reader.ReadLine()) != null )
             {
-                
-                var match = commandRegex.Match(commands);
+
+                var match = commandRegex.Match(line);
                 if (!match.Success) continue;
                 var command = match.Groups["command"].Value;
                 if (!allCommands.ContainsKey(command)) continue;
@@ -210,8 +210,16 @@ namespace PuppetMaster
                     args = new string[0];
                 }
                 Console.WriteLine("Executing: " + match.Value);
-                Task.Run(() => allCommands[command].execute(args));
+                await Task.Run(()=>allCommands[command].execute(args));
+                done = true;
             }
+        }
+
+        public void ExecuteCommands(string commands)
+        {
+            StringReader reader = new StringReader(commands);
+            while (reader.Peek() != -1) ExecuteNextCommand(reader);
+            reader.Close();
         }
         public string Serialize(OperatorInfo info, string address)
         {
