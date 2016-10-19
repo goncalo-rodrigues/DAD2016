@@ -41,7 +41,7 @@ namespace ProcessCreationService
                 try
                 {
                     size = clientSocket.Receive(byteBuffer, byteBuffer.Length - 1, SocketFlags.None);
-                    if (size == 0)
+                    if (size == 0 || byteBuffer[size-1] == (byte) '\0')
                         done = true;
                     byteBuffer[size] = (byte)'\0';
                     result += System.Text.Encoding.ASCII.GetString(byteBuffer);
@@ -52,7 +52,8 @@ namespace ProcessCreationService
                 }
             }
             var process = CreateProcess(result);
-            //clientSocket.Send(process?.Id ?? -1);
+            var response = process == null ? -1 : process.Id;
+            clientSocket.Send(BitConverter.GetBytes(response));
             clientSocket.Close();
             
         }

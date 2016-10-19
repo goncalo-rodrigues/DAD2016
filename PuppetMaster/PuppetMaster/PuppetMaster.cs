@@ -278,6 +278,7 @@ namespace PuppetMaster
             }
             return true;
         }
+
         private  void CreateProcessAt(string addr, OperatorInfo info)
         {
             try
@@ -292,17 +293,31 @@ namespace PuppetMaster
                 TcpClient client = new TcpClient(match.Groups["host"].Value, 10000);
 
                 NetworkStream ns = client.GetStream();
-                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr));
+                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr) + "\0");
                 byte[] response = new byte[4];
                 try
                 {
+                    // send request
                     ns.Write(arg, 0, arg.Length);
+
+                    // receive reply
+                    ns.Read(response, 0, response.Length);
+                    
+                    //close connection
                     ns.Close();
                     client.Close();
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
+                }
+                var pcsResponse = BitConverter.ToInt32(response, 0);
+                if (pcsResponse == -1)
+                {
+                    throw new Exception("PCS replied with an error.");
+                } else
+                {
+                    Console.WriteLine($"Successfuly created {info.ID} at {addr}. PID: {pcsResponse}");
                 }
             }
             catch (Exception e)
