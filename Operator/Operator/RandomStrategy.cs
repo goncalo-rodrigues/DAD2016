@@ -15,7 +15,7 @@ namespace Operator
 
         }
 
-        public override Replica chooseReplica()
+        public override Replica ChooseReplica()
         {
             Random rnd = new Random();
             int number = rnd.Next(0, this.list.Count);

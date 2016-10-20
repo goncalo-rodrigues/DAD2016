@@ -44,7 +44,7 @@ namespace Operator
 
      
 
-        abstract public Replica chooseReplica();
+        abstract public Replica ChooseReplica();
     }
 }
 

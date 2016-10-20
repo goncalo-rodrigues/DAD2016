@@ -15,7 +15,7 @@ namespace Operator
 
         }
 
-        public override Replica chooseReplica()
+        public override Replica ChooseReplica()
         {
 
             //found replica with field_id = id
