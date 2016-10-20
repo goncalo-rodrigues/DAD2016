@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,18 +15,18 @@ namespace PuppetMaster
         [STAThread]
         static void Main()
         {
-            var config = @"Semantics exactly-once
-LoggingLevel full
-OP1 input_ops tweeters.data
-rep_fact 1 routing hashing(1)
-address tcp://localhost:11000/op
-operator_spec FILTER 3,""="",""www.tecnico.ulisboa.pt""
-OP2 input_ops OP1
-rep_fact 1 routing random
-address tcp://localhost:11001/op
-operator_spec FILTER 3,""="",""www.tecnico.ulisboa.pt""
-";
-            PuppetMaster.ReadAndInitializeSystem(config);
+            string config = null;
+            PuppetMaster master = new PuppetMaster();
+            try
+            {
+                config = File.ReadAllText("config.txt");
+            } catch (Exception e)
+            {
+                Console.WriteLine($"Unable to parse config file. {e.Message}. Exiting...");
+                return;
+            }
+           
+            master.ReadAndInitializeSystem(config);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

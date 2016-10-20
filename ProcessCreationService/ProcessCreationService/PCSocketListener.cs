@@ -27,6 +27,8 @@ namespace ProcessCreationService
                   new Thread(new ThreadStart(SocketListenerThreadStart));
 
                 clientListenerThread.Start();
+
+                Console.WriteLine("Accepting request at " + clientSocket.RemoteEndPoint.ToString());
             }
         }
 
@@ -62,7 +64,7 @@ namespace ProcessCreationService
         {
             try
             {
-                var processName = ProcessCreationService.processName ?? "Operator.exe";
+                var processName = Program.processName ?? "Operator.exe";
                 var pro = Process.Start(processName, arg);
                 return pro;
             } catch (Exception) { };

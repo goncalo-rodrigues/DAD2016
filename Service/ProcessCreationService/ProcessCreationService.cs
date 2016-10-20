@@ -23,7 +23,7 @@ namespace ProcessCreationService
         {
             if (args.Length >= 1)
             {
-                processName = args[0];
+                processName = args[0].Remove(0,1);
             }
             server = new PCServer();
             server.StartServer();

@@ -12,38 +12,114 @@ namespace PuppetMaster
 { 
     class OperatorNode
     {
-        public string ID { get; set; }
-        public List<string> Addresses { get; set; }
+        public string ID { get; }
+
+        #region Replicas Field
+        // only gets the stubs when needed (when Replicas field is needed)
+        private IList<string> addresses;
+        private IList<IReplica> replicas;
+        public IList<IReplica> Replicas {
+            get
+            {
+                if (replicas == null)
+                {
+                    replicas = addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+                }
+                return replicas;
+            }
+        }
+        #endregion Replicas Field
+
+        public OperatorNode(string ID, IList<string> addresses)
+        {
+            this.ID = ID;
+            this.addresses = addresses;
+        }
+
+        #region PuppetMaster's Commands
+        public void Start()
+        {
+            foreach(IReplica irep in Replicas)
+            {
+                irep.Start();
+            }
+        }
+        public void Interval(int mills)
+        {
+            // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
+            foreach (IReplica irep in Replicas)
+            {
+                irep.Interval(mills);
+            }
+        }
+        public void Status()
+        {
+            foreach (IReplica irep in Replicas)
+            {
+                irep.Status();
+            }
+        }
+        #endregion
     }
     class PuppetMaster
     {
-        
-        public static IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
-        public static bool fullLogging = false;
-        public static Semantic semantic;
-        public static void ReadAndInitializeSystem(string config)
+
+        public IDictionary<string, ACommand> allCommands;
+        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
+        public bool fullLogging = false;
+        public Semantic semantic;
+
+        public PuppetMaster()
+        {
+            allCommands = new Dictionary<string, ACommand>
+            {
+                { "start" , new StartCommand(this) },
+                { "interval", new IntervalCommand(this) },
+                { "status", new StatusCommand(this) }
+            };
+        }
+        #region Initialization
+        public void ReadAndInitializeSystem(string config)
         {
             IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
+
+            //remove comments
+            var commentRegex = new Regex(@"%[^\n]*", RegexOptions.IgnoreCase);
+            config = commentRegex.Replace(config, "");
+
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
-            if (logRegex.Match(config).Groups["level"].Value.ToLower() == "full")
-            {
-                fullLogging = true;
+            var logMatch = logRegex.Match(config);
+            if (logMatch.Success) {
+                config.Remove(logMatch.Index, logMatch.Length);
+                if (logMatch.Groups["level"].Value.ToLower() == "full")
+                {
+                    fullLogging = true;
+                }
             }
 
+
             var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))", RegexOptions.IgnoreCase);
-            var sem = semanticRegex.Match(config).Groups["sem"].Value.ToLower();
-            if (sem == "at-most-once")
+            var semMatch = semanticRegex.Match(config);
+            
+
+            if (semMatch.Success)
             {
-                semantic = Semantic.AtMostOnce;
+                config.Remove(semMatch.Index, semMatch.Length);
+                var sem = semMatch.Groups["sem"].Value.ToLower();
+                if (sem == "at-most-once")
+                {
+                    semantic = Semantic.AtMostOnce;
+                }
+                else if (sem == "exactly-once")
+                {
+                    semantic = Semantic.ExactlyOnce;
+                }
+                else
+                {
+                    semantic = Semantic.AtLeastOnce;
+                }
             }
-            else if (sem == "exactly-once")
-            {
-                semantic = Semantic.ExactlyOnce;
-            }
-            else
-            {
-                semantic = Semantic.AtLeastOnce;
-            }
+
 
             string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
@@ -78,9 +154,12 @@ namespace PuppetMaster
                 if (assert(newOp))
                 {
                     operators[newOp.ID] = newOp;
-                    nodes.Add(newOp.ID, new OperatorNode { ID = newOp.ID, Addresses = newOp.Addresses });
+                    nodes.Add(newOp.ID, new OperatorNode(newOp.ID, newOp.Addresses));
                     Console.WriteLine($"Operator {newOp.ID} successfully parsed.");
                 }
+
+                // remove from the original string
+                config.Remove(op.Index, op.Length);
             }
             
 
@@ -102,9 +181,47 @@ namespace PuppetMaster
             }
 
             CreateAllProcesses(operators.Values);
+
         }
 
-        public static string Serialize(OperatorInfo info, string address)
+        public async void ExecuteNextCommand(StringReader reader)
+        {
+            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)", RegexOptions.IgnoreCase);
+            var line = reader.ReadLine();
+            var done = false;
+            while (!done && (line = reader.ReadLine()) != null )
+            {
+
+                var match = commandRegex.Match(line);
+                if (!match.Success) continue;
+                var command = match.Groups["command"].Value;
+                if (!allCommands.ContainsKey(command)) continue;
+
+                // if it is a valid command
+                string[] args;
+                var argsMatch = match.Groups["args"];
+                if (argsMatch.Success && !String.IsNullOrWhiteSpace(argsMatch.Value))
+                {
+                    var argsString = argsMatch.Value.Trim();
+                    args = argsString.Split(null).Select((x) => x.Trim()).ToArray();
+                }
+                else
+                {
+                    args = new string[0];
+                }
+                Console.WriteLine("Executing: " + match.Value);
+                await Task.Run(()=>allCommands[command].execute(args));
+                done = true;
+            }
+        }
+
+        public void ExecuteCommands(string commands)
+        {
+            StringReader reader = new StringReader(commands);
+            while (reader.Peek() != -1) ExecuteNextCommand(reader);
+            reader.Close();
+        }
+        public string Serialize(OperatorInfo info, string address)
         {
             var rep = new ReplicaCreationInfo
             {
@@ -116,8 +233,7 @@ namespace PuppetMaster
             x.Serialize(tw, rep);
             return tw.ToString();
         }
-
-        public static bool assert(OperatorInfo op)
+        public bool assert(OperatorInfo op)
         {
             Dictionary<string, int> functions = new Dictionary<string, int>()
             {
@@ -127,6 +243,7 @@ namespace PuppetMaster
                 { "UNIQ", 1 },
                 { "CUSTOM", 3 }
             };
+            string[] validOperators = new string[] { "=", ">", "<", ">=", "<=" };
             if (string.IsNullOrWhiteSpace(op.ID))
             {
                 Console.WriteLine("Error while parsing config file. Operator ID cannot be empty.");
@@ -163,10 +280,14 @@ namespace PuppetMaster
                 Console.WriteLine($"Error while parsing config file at Operator {op.ID}. Hashing requires an argument >= 0");
                 return false;
             }
+            if (op.OperatorFunction.ToUpper() == "FILTER" && !validOperators.Contains(op.OperatorFunctionArgs[1]))
+            {
+                Console.WriteLine($"Error while parsing config file. Operator {op.ID} doesn't have a valid function. Match: {op.OperatorFunctionArgs[1]}. Expected one of {String.Join(",", validOperators)}.");
+            }
             return true;
         }
 
-        private static void CreateProcessAt(string addr, OperatorInfo info)
+        private  void CreateProcessAt(string addr, OperatorInfo info)
         {
             try
             {
@@ -180,10 +301,17 @@ namespace PuppetMaster
                 TcpClient client = new TcpClient(match.Groups["host"].Value, 10000);
 
                 NetworkStream ns = client.GetStream();
-                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr)); 
+                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr) + "\0");
+                byte[] response = new byte[4];
                 try
                 {
+                    // send request
                     ns.Write(arg, 0, arg.Length);
+
+                    // receive reply
+                    ns.Read(response, 0, response.Length);
+                    
+                    //close connection
                     ns.Close();
                     client.Close();
                 }
@@ -191,16 +319,21 @@ namespace PuppetMaster
                 {
                     Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
                 }
-                
-
-
+                var pcsResponse = BitConverter.ToInt32(response, 0);
+                if (pcsResponse == -1)
+                {
+                    throw new Exception("PCS replied with an error.");
+                } else
+                {
+                    Console.WriteLine($"Successfuly created {info.ID} at {addr}. PID: {pcsResponse}");
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Unable to create process for replica at {addr}. Exception: {e.ToString()}");
             }
         }
-        public static void CreateAllProcesses(ICollection<OperatorInfo> ops)
+        public void CreateAllProcesses(ICollection<OperatorInfo> ops)
         {
             foreach (var op in ops)
             {
@@ -210,5 +343,33 @@ namespace PuppetMaster
                 }
             }
         }
+        #endregion Initialization
+
+        #region PuppetMaster's commands
+        public void Start(string opId)
+        {
+            try
+            {
+                nodes[opId].Start();
+            } catch (KeyNotFoundException knfe)
+            {
+                Console.WriteLine($"Puppet master could not find operator {opId}");
+            }
+        }
+        public void Interval(string opId, int x_mls)
+        {
+            try
+            {
+                nodes[opId].Interval(x_mls);
+            } catch (KeyNotFoundException knfe)
+            {
+                Console.WriteLine($"Puppet master could not find operator {opId}");
+            }
+        }
+        public void Status() {
+            foreach(KeyValuePair<string, OperatorNode> pair in nodes)
+                pair.Value.Status();
+        }
+        #endregion
     }
 }

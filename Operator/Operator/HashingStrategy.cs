@@ -5,8 +5,9 @@ using System.Security.Cryptography;
 namespace Operator
 {
     /**
-    * Hashing(field id): tuples are forwarded to a replica of the downstream operator according to the value of a hashing function computed 
-    *                    on the tuple’s field with identifier field id.
+    * Hashing(field id): tuples are forwarded to a replica of the downstream operator according to the 
+    *                    value of a hashing function computed on the tuple’s field with identifier 
+    *                    field id.
     **/
     class HashingStrategy : RoutingStrategy
     {

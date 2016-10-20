@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,35 @@ namespace Operator
 {
     class NeighbourOperator 
     {
-        public List<Replica> replicas;
-        public string send(CTuple tuple, int semantic)
+        public List<IReplica> replicas;
+        public RoutingStrategy RoutingStrategy { get; set; }
+
+        public NeighbourOperator(DestinationInfo info)
+        {
+            replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+        }
+
+        public string send(CTuple tuple, Semantic semantic)
         {
             throw new NotImplementedException();
+        }
+
+        public void Ping()
+        {
+            // Just need to ensure that one replica is alive
+            foreach (IReplica rep in replicas)
+            {
+                try {
+                    var task = Task.Run(() => rep.Ping());
+                    if (task.Wait(TimeSpan.FromMilliseconds(10)))
+                        return;
+                } catch (Exception e)
+                {
+                    // does nothing, there might be a working replica
+                }
+            }
+            // there are no more replicas 
+            throw new NeighbourOperatorIsDeadException("Neighbour Operator has no working replicas.");
         }
     }
 }

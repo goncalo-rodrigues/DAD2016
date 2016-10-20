@@ -3,7 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Operator
@@ -15,7 +20,7 @@ namespace Operator
             if (args.Length < 1)
             {
                 Console.WriteLine("Missing creation info argument.");
-                return;
+                loop();
             }
 
             TextReader tr = new StringReader(args[0]);
@@ -32,16 +37,36 @@ namespace Operator
                 tr.Close();
             }
 
-            if (rep == null) return;
+            if (rep == null) loop();
             var info = rep.Operator;
             string address = rep.Address;
             address = args[1];
             info.Addresses.Remove(address);
-            
+
 
             Replica replica = new Replica(rep);
+            Operations.ReplicaInstance = replica;
 
-            //create port and listen
+            loop();
+
+            // get port from address 
+            Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/(?<name>\w*))?", RegexOptions.IgnoreCase);
+            var match = portRegex.Match(address);
+            if (!match.Groups["port"].Success || !match.Groups["name"].Success) { 
+                Console.WriteLine($"URL ({address}) malformed. Unable to create process.");
+                return;
+            }
+            var port = Int32.Parse(match.Groups["port"].Value);
+            var name = match.Groups["name"].Value;
+            TcpChannel channel = new TcpChannel(port);
+            ChannelServices.RegisterChannel(channel, false);
+            RemotingServices.Marshal(replica, name, typeof(Replica));
+            Console.ReadLine();
+        }
+
+        static void loop()
+        {
+            Thread.Sleep(100000);
         }
     }
 }
