@@ -18,21 +18,23 @@ namespace Operator
     
     class Replica : MarshalByRefObject, IReplica
     {
-
+        public string OperatorId { get; }
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
-        public string OperatorId { get; }
-        public int totalSeenTuples = 0;
-        public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
 
         private ILogger logger;
+
         private readonly ProcessDelegate processFunction;
         private IList<NeighbourOperator> destinations;
         private IList<IReplica> otherReplicas;
         private List<string> inputFiles;
+
+        private Semantic semantic;
+
+        public int totalSeenTuples = 0;
+        public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
         private bool isProcessing = false;
-        private Semantic semantic;
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
@@ -50,6 +52,7 @@ namespace Operator
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
 
+            // Get Stubs
             this.OnStart += (sender, args) =>
             {
                 this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
@@ -57,6 +60,7 @@ namespace Operator
                 isProcessing = true;
             };
 
+            // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
                 foreach (var path in inputFiles)

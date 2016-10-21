@@ -14,103 +14,6 @@ using System.Runtime.Remoting.Channels.Tcp;
 
 namespace PuppetMaster
 { 
-    class OperatorNode
-    {
-        public string ID { get; }
-
-        #region Replicas Field
-        // only gets the stubs when needed (when Replicas field is needed)
-        private IList<string> addresses;
-        private IList<IReplica> replicas;
-        public IList<IReplica> Replicas {
-            get
-            {
-                if (replicas == null)
-                {
-                    replicas = addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
-                }
-                return replicas;
-            }
-        }
-        #endregion Replicas Field
-
-        public OperatorNode(string ID, IList<string> addresses)
-        {
-            this.ID = ID;
-            this.addresses = addresses;
-        }
-
-        #region PuppetMaster's Commands
-        public void Start()
-        {
-            foreach(IReplica irep in Replicas)
-            {
-                irep.Start();
-            }
-        }
-        public void Interval(int mills)
-        {
-            // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
-            foreach (IReplica irep in Replicas)
-            {
-                irep.Interval(mills);
-            }
-        }
-        public void Status()
-        {
-            foreach (IReplica irep in Replicas)
-            {
-                irep.Status();
-            }
-        }
-        #endregion
-    }
-
-    class PMLoggerService : MarshalByRefObject, ILogger
-    {
-        private List<Record> eventsBuffer = new List<Record>();
-
-        public PMLoggerService()
-        {
-            // starts a dedicated thread that from time to time empties the buffer
-            Thread t = new Thread(FlushEventBuffer);
-            t.Start();
-        }
-
-        private void FlushEventBuffer()
-        {
-            lock (this)
-            {
-                while (eventsBuffer.Count == 0)
-                    Monitor.Wait(this);
-
-                // might be src of bug
-
-                int eventsLeft = eventsBuffer.Count;
-                eventsBuffer.Sort((r1, r2) => r1.CompareTo(r2));
-                foreach (Record s in eventsBuffer)
-                {
-                    // TODO - have to change the method when we have a GUI 
-                    Console.WriteLine(s.ToString());
-                }
-                eventsBuffer.Clear();
-                Monitor.Pulse(this);
-            }
-
-            Thread.Sleep(10);
-            FlushEventBuffer();
-        }
-
-        public override object InitializeLifetimeService() { return (null); }
-        public void Notify(Record record)
-        {
-            lock (this)
-            {
-                eventsBuffer.Add(record);
-                Monitor.Pulse(this);
-            }
-        }
-    }
 
     class PuppetMaster
     {
@@ -143,6 +46,7 @@ namespace PuppetMaster
             var commentRegex = new Regex(@"%[^\n]*\n?", RegexOptions.IgnoreCase);
             config = commentRegex.Replace(config, "");
 
+            // find log level (full or light)
             var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))\s*", RegexOptions.IgnoreCase);
             var logMatch = logRegex.Match(config);
             if (logMatch.Success) {
@@ -153,7 +57,7 @@ namespace PuppetMaster
                 }
             }
 
-
+            // find semantic
             var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))\s*", RegexOptions.IgnoreCase);
             var semMatch = semanticRegex.Match(config);
             
@@ -176,21 +80,24 @@ namespace PuppetMaster
                 }
             }
 
-
+            // find operators 
             const string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             const string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
             const string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
             const string opPattern = @"\s+OPERATOR_SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)\s*";
+
             Regex opRegex = new Regex(sourcesPattern + repPattern + addPattern + opPattern, RegexOptions.IgnoreCase);
 
+            // this variable is used to properly remove the matches in the original text
             var totalLengthRemoved = 0;
+
+            // actually match
             var ops = opRegex.Matches(config);
             foreach (Match op in ops) {
+                // get all variables found in the match, carefully removing whitespace
                 var sources = op.Groups["sources"].Value.Split(',');
                 var addresses = op.Groups["addresses"].Value.Split(',');
                 var functionArgs = op.Groups["function_args"].Value.Split(',');
-                
-
                 var hashingArg = op.Groups["routing_arg"].Success ? Int32.Parse(op.Groups["routing_arg"].Value) : -1;
                 var stratString = op.Groups["routing"].Value.Trim().ToLower();
                 var strat =  stratString == "random" ? RoutingStrategy.Random : stratString == "hashing" ? RoutingStrategy.Hashing : RoutingStrategy.Primary;
@@ -209,7 +116,8 @@ namespace PuppetMaster
                     ShouldNotify = fullLogging
                 };
                 
-                if (assert(newOp))
+                // check if everything is ok
+                if (Assert(newOp))
                 {
                     operators[newOp.ID] = newOp;
                     nodes.Add(newOp.ID, new OperatorNode(newOp.ID, newOp.Addresses));
@@ -239,6 +147,7 @@ namespace PuppetMaster
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
             }
 
+            // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
 
         }
@@ -250,46 +159,7 @@ namespace PuppetMaster
             RemotingServices.Marshal(pmLogger, "PMLogger");
         }
 
-        public async Task<bool> ExecuteNextCommand(TextReader reader)
-        {
-            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
-            var success = false;
-            var line = reader.ReadLine();
-            var done = false;
-            while (!done && (line = reader.ReadLine()) != null)
-            {
-                var match = commandRegex.Match(line);
-                if (!match.Success) continue;
-                var command = match.Groups["command"].Value;
-                if (!allCommands.ContainsKey(command.ToLower())) continue;
-                success = true;
-                // if it is a valid command
-                string[] args;
-                var argsMatch = match.Groups["args"];
-                if (argsMatch.Success && !String.IsNullOrWhiteSpace(argsMatch.Value))
-                {
-                    var argsString = argsMatch.Value.Trim();
-                    args = argsString.Split(null).Select((x) => x.Trim()).ToArray();
-                }
-                else
-                {
-                    args = new string[0];
-                }
-                Console.WriteLine("Executing: " + match.Value);
-
-                pmLogger.Notify((new Record(match.Value, DateTime.Now)));
-                await Task.Run(()=>allCommands[command].execute(args));
-                done = true;
-            }
-            return success;
-        }
-
-        public async void ExecuteCommands(string commands)
-        {
-            StringReader reader = new StringReader(commands);
-            while (reader.Peek() != -1) await ExecuteNextCommand(reader);
-            reader.Close();
-        }
+     
         public string Serialize(OperatorInfo info, string address)
         {
             var rep = new ReplicaCreationInfo
@@ -302,7 +172,7 @@ namespace PuppetMaster
             x.Serialize(tw, rep);
             return tw.ToString();
         }
-        public bool assert(OperatorInfo op)
+        public bool Assert(OperatorInfo op)
         {
             Dictionary<string, int> functions = new Dictionary<string, int>()
             {
@@ -356,8 +226,14 @@ namespace PuppetMaster
             return true;
         }
 
+        /// <summary>
+        /// Communicates with the PCS to create a process at a given address
+        /// </summary>
+        /// <param name="addr">The address of the replica</param>
+        /// <param name="info">The replica information</param>
         private  void CreateProcessAt(string addr, OperatorInfo info)
         {
+            const int PCS_PORT = 10000;
             try
             {
                 Regex addrRegex = new Regex(@"tcp://(?<host>(\w|\.)+):(?<port>(\d+))(/\w*)?", RegexOptions.IgnoreCase);
@@ -367,7 +243,7 @@ namespace PuppetMaster
                     Console.WriteLine($"URL ({addr}) malformed. Unable to create process.");
                     return;
                 }
-                TcpClient client = new TcpClient(match.Groups["host"].Value, 10000);
+                TcpClient client = new TcpClient(match.Groups["host"].Value, PCS_PORT);
 
                 NetworkStream ns = client.GetStream();
                 byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr) + "\0");
@@ -413,7 +289,55 @@ namespace PuppetMaster
             }
         }
         #endregion Initialization
+        #region Command Parsing
+        /// <summary>
+        /// Executes the next command given a stream (Reader). Ignores whitespace. The command is executed in a different thread.
+        /// </summary>
+        /// <param name="reader">The stream to search for the next command</param>
+        /// <returns>False if no more commands exist.</returns>
+        public async Task<bool> ExecuteNextCommand(TextReader reader)
+        {
+            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
+            var success = false;
+            var line = reader.ReadLine();
+            var done = false;
+            while (!done && (line = reader.ReadLine()) != null)
+            {
+                var match = commandRegex.Match(line);
+                if (!match.Success) continue;
+                var command = match.Groups["command"].Value;
+                if (!allCommands.ContainsKey(command.ToLower())) continue;
+                success = true;
+                // if it is a valid command
+                string[] args;
+                var argsMatch = match.Groups["args"];
+                if (argsMatch.Success && !String.IsNullOrWhiteSpace(argsMatch.Value))
+                {
+                    var argsString = argsMatch.Value.Trim();
+                    args = argsString.Split(null).Select((x) => x.Trim()).ToArray();
+                }
+                else
+                {
+                    args = new string[0];
+                }
+                Console.WriteLine("Executing: " + match.Value);
 
+                pmLogger.Notify((new Record(match.Value, DateTime.Now)));
+                await Task.Run(() => allCommands[command].execute(args));
+                done = true;
+            }
+            return success;
+        }
+
+        // Executes all commands sequentially
+        public async void ExecuteCommands(string commands)
+        {
+            using (var reader = new StringReader(commands))
+            {
+                while (reader.Peek() != -1) await ExecuteNextCommand(reader);
+            }
+        }
+        #endregion Command Parsing
         #region PuppetMaster's commands
         public void Start(string opId)
         {
