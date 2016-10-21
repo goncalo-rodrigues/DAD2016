@@ -121,10 +121,10 @@ namespace PuppetMaster
             }
 
 
-            string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
-            string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
-            string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
-            string opPattern = @"\s+OPERATOR_SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)\s*";
+            const string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
+            const string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
+            const string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
+            const string opPattern = @"\s+OPERATOR_SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)\s*";
             Regex opRegex = new Regex(sourcesPattern + repPattern + addPattern + opPattern, RegexOptions.IgnoreCase);
 
             var totalLengthRemoved = 0;
@@ -188,19 +188,19 @@ namespace PuppetMaster
 
         }
 
-        public async void ExecuteNextCommand(StringReader reader)
+        public async Task<bool> ExecuteNextCommand(TextReader reader)
         {
             var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
+            var success = false;
             var line = reader.ReadLine();
             var done = false;
             while (!done && (line = reader.ReadLine()) != null)
             {
-
                 var match = commandRegex.Match(line);
                 if (!match.Success) continue;
                 var command = match.Groups["command"].Value;
                 if (!allCommands.ContainsKey(command.ToLower())) continue;
-
+                success = true;
                 // if it is a valid command
                 string[] args;
                 var argsMatch = match.Groups["args"];
@@ -214,19 +214,22 @@ namespace PuppetMaster
                     args = new string[0];
                 }
 
+                // Log before executing
+
                 await Task.Run(() => {
-                    // Log before executing
                     allCommands[command].execute(args);
-                    // Log after execution has been sucessful
                 });
+
+                // Log after execution has been sucessful
                 done = true;
             }
+            return success;
         }
 
-        public void ExecuteCommands(string commands)
+        public async void ExecuteCommands(string commands)
         {
             StringReader reader = new StringReader(commands);
-            while (reader.Peek() != -1) ExecuteNextCommand(reader);
+            while (reader.Peek() != -1) await ExecuteNextCommand(reader);
             reader.Close();
         }
         public string Serialize(OperatorInfo info, string address)
