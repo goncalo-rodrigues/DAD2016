@@ -40,13 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CTuple.cs" />
+    <Compile Include="DataStructures\CTuple.cs" />
+    <Compile Include="Interface\ILogger.cs" />
+    <Compile Include="DataStructures\Record.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="IReplica.cs" />
-    <Compile Include="ReplicaCreationInfo.cs" />
+    <Compile Include="Interface\IReplica.cs" />
+    <Compile Include="DataStructures\ReplicaCreationInfo.cs" />
     <Compile Include="RtStrategy.cs" />
-    <Compile Include="DestinationInfo.cs" />
-    <Compile Include="OperatorCreationInfo.cs" />
+    <Compile Include="DataStructures\DestinationInfo.cs" />
+    <Compile Include="DataStructures\OperatorCreationInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Semantic.cs" />
   </ItemGroup>
