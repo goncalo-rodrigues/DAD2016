@@ -13,9 +13,9 @@ namespace SharedTypes
             TcpChannel channel = new TcpChannel();
             ChannelServices.RegisterChannel(channel, true);
 
-            /*Replica obj = (Replica)Activator.GetObject(
-                typeof(Replica), );*/
-            throw new NotImplementedException();
+             IReplica obj = (IReplica)Activator.GetObject(typeof(IReplica), address);
+
+            return (T)obj;
         }
     }
 }
