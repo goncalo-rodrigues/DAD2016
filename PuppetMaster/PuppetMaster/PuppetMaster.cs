@@ -7,6 +7,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 
 namespace PuppetMaster
 { 
@@ -61,14 +65,64 @@ namespace PuppetMaster
         }
         #endregion
     }
+
+    class PMLoggerService : MarshalByRefObject, ILogger
+    {
+        private List<Record> eventsBuffer = new List<Record>();
+
+        public PMLoggerService()
+        {
+            // starts a dedicated thread that from time to time empties the buffer
+            Thread t = new Thread(FlushEventBuffer);
+            t.Start();
+        }
+
+        private void FlushEventBuffer()
+        {
+            lock (this)
+            {
+                while (eventsBuffer.Count == 0)
+                    Monitor.Wait(this);
+
+                // might be src of bug
+
+                int eventsLeft = eventsBuffer.Count;
+                eventsBuffer.Sort((r1, r2) => r1.CompareTo(r2));
+                foreach (Record s in eventsBuffer)
+                {
+                    // TODO - have to change the method when we have a GUI 
+                    Console.WriteLine(s.ToString());
+                }
+                eventsBuffer.Clear();
+                Monitor.Pulse(this);
+            }
+
+            Thread.Sleep(10);
+            FlushEventBuffer();
+        }
+
+        public override object InitializeLifetimeService() { return (null); }
+        public void Notify(Record record)
+        {
+            lock (this)
+            {
+                eventsBuffer.Add(record);
+                Monitor.Pulse(this);
+            }
+        }
+    }
+
     class PuppetMaster
     {
+        public const int PM_SERVICE_PORT = 10001;
+        public const string PM_SERVICE_URL = "tcp://localhost:100001/PMLogger"; // mudar de acordo o necessário
 
+        private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
-
+        
         public PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
@@ -77,7 +131,9 @@ namespace PuppetMaster
                 { "interval", new IntervalCommand(this) },
                 { "status", new StatusCommand(this) }
             };
+            InitEventLogging();
         }
+
         #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
@@ -141,6 +197,7 @@ namespace PuppetMaster
                 var newOp = new OperatorInfo
                 {
                     ID = op.Groups["name"].Value.Trim(),
+                    MasterURL = PM_SERVICE_URL,
                     InputOperators = sources.Select((x) => x.Trim()).ToList(),
                     ReplicationFactor = Int32.Parse(op.Groups["rep_fact"].Value),
                     RtStrategy = strat,
@@ -184,8 +241,13 @@ namespace PuppetMaster
 
             CreateAllProcesses(operators.Values);
 
-            ExecuteCommands(config);
+        }
+        public void InitEventLogging() {
 
+            TcpChannel channel = new TcpChannel(PM_SERVICE_PORT);
+            ChannelServices.RegisterChannel(channel, false);
+            pmLogger = new PMLoggerService();
+            RemotingServices.Marshal(pmLogger, "PMLogger");
         }
 
         public async Task<bool> ExecuteNextCommand(TextReader reader)
@@ -213,14 +275,10 @@ namespace PuppetMaster
                 {
                     args = new string[0];
                 }
+                Console.WriteLine("Executing: " + match.Value);
 
-                // Log before executing
-
-                await Task.Run(() => {
-                    allCommands[command].execute(args);
-                });
-
-                // Log after execution has been sucessful
+                pmLogger.Notify((new Record(match.Value, DateTime.Now)));
+                await Task.Run(()=>allCommands[command].execute(args));
                 done = true;
             }
             return success;
