@@ -53,10 +53,17 @@ namespace ProcessCreationService
                     done = true;
                 }
             }
-            var process = CreateProcess(result);
-            var response = process == null ? -1 : process.Id;
-            clientSocket.Send(BitConverter.GetBytes(response));
-            clientSocket.Close();
+            try
+            {
+                var process = CreateProcess(result);
+                var response = process == null ? -1 : process.Id;
+                clientSocket.Send(BitConverter.GetBytes(response));
+                clientSocket.Close();
+            } catch (SocketException se)
+            {
+
+            }
+
             
         }
 
@@ -65,7 +72,7 @@ namespace ProcessCreationService
             try
             {
                 var processName = Program.processName ?? "Operator.exe";
-                var pro = Process.Start(processName, arg);
+                var pro = Process.Start(processName, $"\"{arg.Replace("\"", "\\\"")}\"");
                 return pro;
             } catch (Exception) { };
             return null;

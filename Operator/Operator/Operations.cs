@@ -62,6 +62,7 @@ namespace Operator
 
             return new ProcessDelegate((x) =>
             {
+                // thread-safe
                 int count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
                 return new IList<string>[] { new List<string> { count.ToString() } };
             });

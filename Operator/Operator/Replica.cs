@@ -2,7 +2,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +19,22 @@ namespace Operator
     class Replica : MarshalByRefObject, IReplica
     {
         public string OperatorId { get; }
+        public string MasterURL { get; set; }
+        public string selfURL { get; set; }
+
+        private ILogger logger;
+
         private readonly ProcessDelegate processFunction;
         private IList<NeighbourOperator> destinations;
         private IList<IReplica> otherReplicas;
         private List<string> inputFiles;
-        private bool shouldNotify = false;
-        private bool isProcessing = false;
+
         private Semantic semantic;
+
         public int totalSeenTuples = 0;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
+        private bool shouldNotify = false;
+        private bool isProcessing = false;
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
@@ -32,21 +43,63 @@ namespace Operator
         {
             var info = rep.Operator;
             this.OperatorId = info.ID;
+            this.MasterURL = info.MasterURL;
             this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
             this.semantic = info.Semantic;
 
+            this.selfURL = rep.Address;
+            this.MasterURL = info.MasterURL;
 
+            // Get Stubs
             this.OnStart += (sender, args) =>
             {
                 this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
                 this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
                 isProcessing = true;
             };
-            
+
+            // Start reading from file(s)
+            this.OnStart += (sender, args) =>
+            {
+                foreach (var path in inputFiles)
+                {
+                    Task.Run(() => StartProcessingFromFile(path));
+                }
+               
+            };
+
+            if (shouldNotify)
+                InitPMLogService();
         }
 
+        public void StartProcessingFromFile(string path)
+        {
+            using (var f = new StreamReader(path))
+            {
+                string line = null;
+                while ((line = f.ReadLine()) !=  null)
+                {
+                    var tupleData = line.Split(null).ToList();
+                    ProcessAndForward(new CTuple(tupleData));
+                }
+            }
+        }
+
+        public void InitPMLogService()
+        {
+            TcpChannel channel = new TcpChannel();
+            ChannelServices.RegisterChannel(channel, false);
+            
+            logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
+
+            if (logger == null) //debug purposes
+            {
+                System.Console.WriteLine("Could not locate server");
+            }
+        }
+ 
         private CTuple Process(CTuple tuple)
         {
             var data = tuple.GetFields();
@@ -59,7 +112,21 @@ namespace Operator
         {
             foreach (var neighbor in destinations)
             {
+                if (shouldNotify && logger != null)
+                    Notify(tuple);
                 neighbor.send(tuple, semantic);
+            }
+        }
+
+        private void Notify(CTuple tuple) {
+            try
+            {
+                String content = $"tuple {selfURL}, {tuple.ToString()}";
+                logger.Notify(new Record(content, DateTime.Now));
+            }
+            catch (SocketException) // Neste caso queremos voltar a tentar ligaçao? -- modelo de faltas...
+            {
+                System.Console.WriteLine("Could not locate server");
             }
         }
 

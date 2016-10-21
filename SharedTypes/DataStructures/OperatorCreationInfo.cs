@@ -5,6 +5,7 @@ namespace SharedTypes
     public class OperatorInfo
     {
         public string ID { get; set; }
+        public string MasterURL { get; set; }
         public int ReplicationFactor { get; set; }
         public RoutingStrategy RtStrategy { get; set; }
         public List<string> InputOperators { get; set; }
