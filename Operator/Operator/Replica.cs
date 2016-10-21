@@ -81,7 +81,7 @@ namespace Operator
                 string line = null;
                 while ((line = f.ReadLine()) !=  null)
                 {
-                    var tupleData = line.Split(null).ToList();
+                    var tupleData = line.Split(',').Select((x)=>x.Trim()).ToList();
                     ProcessAndForward(new CTuple(tupleData));
                 }
             }
@@ -91,7 +91,7 @@ namespace Operator
         {
             TcpChannel channel = new TcpChannel();
             ChannelServices.RegisterChannel(channel, false);
-            
+
             logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
 
             if (logger == null) //debug purposes
