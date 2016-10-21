@@ -13,25 +13,25 @@ namespace Operator
     class HashingStrategy : RoutingStrategy
     {
 
-        public HashingStrategy(List<Replica> replicas, int id, CTuple tuple):base(replicas, id, tuple){
+        public HashingStrategy(List<Replica> replicas):base(replicas){
 
         }
 
         public override Replica ChooseReplica()
         {
-
-            //found replica with field_id = id
-           /* foreach (CTuple tup in this.tuple) {
-                if (rep.Des)
-            }
-
-            HashAlgorithm hash;
-            hash.ComputeHash(this.list[]);
-            */
-
-
-
             throw new NotImplementedException();
         }
+
+        public Replica ChooseReplica(int id, CTuple tuple) {
+
+            String s = tuple.GetFieldByIndex(id);
+
+            int i = s.GetHashCode();
+
+            return (this.list[i%list.Count]);
+
+
+        }
+
     }
 }

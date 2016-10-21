@@ -17,6 +17,7 @@ namespace SharedTypes
             this.fields.Add(field);
         }
         public IList<string> GetFields() { return fields; }
+
         public string GetFieldByIndex(int index)
         {
             if (index > 0 && index < fields.Count)
