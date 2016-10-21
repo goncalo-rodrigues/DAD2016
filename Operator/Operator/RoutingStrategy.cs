@@ -16,7 +16,7 @@ namespace Operator
             set { }
         }
 
-        public CTuple tuple
+        public SharedTypes.CTuple tuple
         {
             get { return tuple; }
             set { }
@@ -33,9 +33,7 @@ namespace Operator
          
         }
 
-
-
-        public RoutingStrategy(List<Replica> replicas, int id, CTuple tup)
+        public RoutingStrategy(List<Replica> replicas, int id, SharedTypes.CTuple tup)
         {
             list = replicas;
             field_id = id;
