@@ -17,7 +17,7 @@ namespace Operator
         }
 
 
-        public override Replica chooseReplica()
+        public override Replica ChooseReplica()
         {
             //TODO: verify if "crash flag" is on - after checkpoint
             //      verify that it exists at least one element in the list

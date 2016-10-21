@@ -8,8 +8,17 @@ namespace Operator
 {
     abstract class RoutingStrategy
     {
+        private object p1;
+        private object p2;
+
         public List<Replica> list {
             get { return list; }
+            set { }
+        }
+
+        public CTuple tuple
+        {
+            get { return tuple; }
             set { }
         }
         public int field_id
@@ -18,19 +27,24 @@ namespace Operator
             set { }
         }
 
-       
         public RoutingStrategy(List<Replica> replicas)
         {
             list = replicas;
+         
         }
 
-       public RoutingStrategy(List<Replica> replicas, int id)
+
+
+        public RoutingStrategy(List<Replica> replicas, int id, CTuple tup)
         {
             list = replicas;
             field_id = id;
+            tuple = tup;
         }
 
-       abstract public Replica chooseReplica();
+     
+
+        abstract public Replica ChooseReplica();
     }
 }
 
