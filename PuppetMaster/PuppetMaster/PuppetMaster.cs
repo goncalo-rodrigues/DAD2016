@@ -84,13 +84,13 @@ namespace PuppetMaster
             IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
 
             //remove comments
-            var commentRegex = new Regex(@"%[^\n]*", RegexOptions.IgnoreCase);
+            var commentRegex = new Regex(@"%[^\n]*\n?", RegexOptions.IgnoreCase);
             config = commentRegex.Replace(config, "");
 
-            var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))", RegexOptions.IgnoreCase);
+            var logRegex = new Regex(@"LoggingLevel\s+(?<level>(full|light))\s*", RegexOptions.IgnoreCase);
             var logMatch = logRegex.Match(config);
             if (logMatch.Success) {
-                config.Remove(logMatch.Index, logMatch.Length);
+                config = config.Remove(logMatch.Index, logMatch.Length);
                 if (logMatch.Groups["level"].Value.ToLower() == "full")
                 {
                     fullLogging = true;
@@ -98,13 +98,13 @@ namespace PuppetMaster
             }
 
 
-            var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))", RegexOptions.IgnoreCase);
+            var semanticRegex = new Regex(@"Semantics\s+(?<sem>(at-most-once|at-least-once|exactly-once))\s*", RegexOptions.IgnoreCase);
             var semMatch = semanticRegex.Match(config);
             
 
             if (semMatch.Success)
             {
-                config.Remove(semMatch.Index, semMatch.Length);
+                config = config.Remove(semMatch.Index, semMatch.Length);
                 var sem = semMatch.Groups["sem"].Value.ToLower();
                 if (sem == "at-most-once")
                 {
@@ -124,9 +124,10 @@ namespace PuppetMaster
             string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT_OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             string repPattern = @"\s+REP_FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
             string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
-            string opPattern = @"\s+OPERATOR_SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)";
+            string opPattern = @"\s+OPERATOR_SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)\s*";
             Regex opRegex = new Regex(sourcesPattern + repPattern + addPattern + opPattern, RegexOptions.IgnoreCase);
 
+            var totalLengthRemoved = 0;
             var ops = opRegex.Matches(config);
             foreach (Match op in ops) {
                 var sources = op.Groups["sources"].Value.Split(',');
@@ -159,7 +160,8 @@ namespace PuppetMaster
                 }
 
                 // remove from the original string
-                config.Remove(op.Index, op.Length);
+                config = config.Remove(op.Index - totalLengthRemoved, op.Length);
+                totalLengthRemoved += op.Length;
             }
             
 
@@ -182,20 +184,22 @@ namespace PuppetMaster
 
             CreateAllProcesses(operators.Values);
 
+            ExecuteCommands(config);
+
         }
 
         public async void ExecuteNextCommand(StringReader reader)
         {
-            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)", RegexOptions.IgnoreCase);
+            var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
             var line = reader.ReadLine();
             var done = false;
-            while (!done && (line = reader.ReadLine()) != null )
+            while (!done && (line = reader.ReadLine()) != null)
             {
 
                 var match = commandRegex.Match(line);
                 if (!match.Success) continue;
                 var command = match.Groups["command"].Value;
-                if (!allCommands.ContainsKey(command)) continue;
+                if (!allCommands.ContainsKey(command.ToLower())) continue;
 
                 // if it is a valid command
                 string[] args;
@@ -209,8 +213,12 @@ namespace PuppetMaster
                 {
                     args = new string[0];
                 }
-                Console.WriteLine("Executing: " + match.Value);
-                await Task.Run(()=>allCommands[command].execute(args));
+
+                await Task.Run(() => {
+                    // Log before executing
+                    allCommands[command].execute(args);
+                    // Log after execution has been sucessful
+                });
                 done = true;
             }
         }

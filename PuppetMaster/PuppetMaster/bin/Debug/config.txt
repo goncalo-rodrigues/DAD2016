@@ -1,3 +1,4 @@
+%This is a comment
 Semantics exactly-once
 LoggingLevel full
 OP1 input_ops tweeters.data
@@ -8,3 +9,8 @@ OP2 input_ops OP1
 rep_fact 1 routing random
 address tcp://localhost:11001/op
 operator_spec FILTER 3,"=","www.tecnico.ulisboa.pt"
+crash 0
+crash 1
+crash 2
+crash 3
+crash 4
