@@ -30,6 +30,7 @@ namespace Operator
         private List<string> inputFiles;
 
         private Semantic semantic;
+        private RoutingStrategy routingStrategy;
 
         public int totalSeenTuples = 0;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
@@ -49,6 +50,7 @@ namespace Operator
             this.inputFiles = info.InputFiles;
             this.semantic = info.Semantic;
 
+
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
 
@@ -57,6 +59,23 @@ namespace Operator
             {
                 this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
                 this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
+
+                var allReplicas = (new List<IReplica>(otherReplicas));
+                allReplicas.Add(this);
+                // check if it sorts the same way for every remote replica
+                allReplicas.Sort();
+                if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
+                {
+                    this.routingStrategy = new PrimaryStrategy(allReplicas);
+                }
+                else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
+                {
+                    this.routingStrategy = new HashingStrategy(allReplicas, info.HashingArg);
+                }
+                else
+                {
+                    this.routingStrategy = new RandomStrategy(allReplicas);
+                }
                 isProcessing = true;
             };
 
@@ -81,8 +100,12 @@ namespace Operator
                 string line = null;
                 while ((line = f.ReadLine()) !=  null)
                 {
-                    var tupleData = line.Split(',').Select((x)=>x.Trim()).ToList();
-                    ProcessAndForward(new CTuple(tupleData));
+                    if (line.StartsWith("%")) continue;
+                    if (routingStrategy.ChooseReplica() == this)
+                    {
+                        var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
+                        ProcessAndForward(new CTuple(tupleData));
+                    }
                 }
             }
         }
@@ -114,7 +137,7 @@ namespace Operator
             {
                 if (shouldNotify && logger != null)
                     Notify(tuple);
-                neighbor.send(tuple, semantic);
+                neighbor.Send(tuple, semantic);
             }
         }
 

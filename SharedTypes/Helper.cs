@@ -13,7 +13,7 @@ namespace SharedTypes
             TcpChannel channel = new TcpChannel();
             ChannelServices.RegisterChannel(channel, true);
 
-             IReplica obj = (IReplica)Activator.GetObject(typeof(IReplica), address);
+            IReplica obj = (IReplica)Activator.GetObject(typeof(IReplica), address);
 
             return (T)obj;
         }

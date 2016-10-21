@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,11 +12,11 @@ namespace Operator
     **/
     class RandomStrategy : RoutingStrategy
     {
-        public RandomStrategy(List<Replica> replicas):base(replicas){
+        public RandomStrategy(List<IReplica> replicas):base(replicas){
 
         }
 
-        public override Replica ChooseReplica()
+        public override IReplica ChooseReplica()
         {
             Random rnd = new Random();
             int number = rnd.Next(0, this.list.Count);

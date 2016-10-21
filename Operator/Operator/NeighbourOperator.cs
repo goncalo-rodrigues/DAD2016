@@ -17,9 +17,9 @@ namespace Operator
             replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
         }
 
-        public string send(CTuple tuple, Semantic semantic)
+        public void Send(CTuple tuple, Semantic semantic)
         {
-            throw new NotImplementedException();
+            RoutingStrategy.ChooseReplica(replicas).ProcessAndForward(tuple);
         }
 
         public void Ping()

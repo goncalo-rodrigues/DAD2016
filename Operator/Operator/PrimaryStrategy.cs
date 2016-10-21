@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,12 +13,12 @@ namespace Operator
     **/
     class PrimaryStrategy : RoutingStrategy
     {
-        public PrimaryStrategy(List<Replica> replicas):base(replicas){
+        public PrimaryStrategy(List<IReplica> replicas):base(replicas){
            
         }
 
 
-        public override Replica ChooseReplica()
+        public override IReplica ChooseReplica()
         {
             //TODO: verify if "crash flag" is on - after checkpoint
             //      verify that it exists at least one element in the list

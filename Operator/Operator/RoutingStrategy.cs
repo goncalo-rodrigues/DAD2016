@@ -12,7 +12,7 @@ namespace Operator
         private object p1;
         private object p2;
 
-        public List<Replica> list {
+        public List<IReplica> list {
             get { return list; }
             set { }
         }
@@ -28,7 +28,7 @@ namespace Operator
             set { }
         }*/
 
-        public RoutingStrategy(List<Replica> replicas)
+        public RoutingStrategy(List<IReplica> replicas)
         {
             list = replicas;
          
@@ -43,7 +43,7 @@ namespace Operator
 
      
 
-        abstract public Replica ChooseReplica();
+        abstract public IReplica ChooseReplica();
     }
 }
 
