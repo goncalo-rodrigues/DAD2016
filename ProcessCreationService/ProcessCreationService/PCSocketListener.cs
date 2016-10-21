@@ -71,7 +71,7 @@ namespace ProcessCreationService
         {
             try
             {
-                var processName = "C:\\Users\\Goncalo\\Source\\Repos\\DAD2016\\Operator\\Operator\\bin\\Debug\\Operator.exe";
+                var processName = Program.processName ?? "Operator.exe";
                 var pro = Process.Start(processName, $"\"{arg.Replace("\"", "\\\"")}\"");
                 return pro;
             } catch (Exception) { };

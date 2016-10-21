@@ -17,8 +17,8 @@ namespace Operator
     {
         static void Main(string[] args)
         {
-            args = new string[1];
-            args[0] = 
+            //args = new string[1];
+            var s = 
                 @"<?xml version=""1.0"" encoding=""utf-16""?>
 <ReplicaCreationInfo xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <Address>tcp://localhost:12001/op</Address>
