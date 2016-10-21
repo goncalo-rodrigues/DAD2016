@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.Remoting.Channels;
@@ -55,8 +56,31 @@ namespace Operator
                 this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
                 isProcessing = true;
             };
+
+            this.OnStart += (sender, args) =>
+            {
+                foreach (var path in inputFiles)
+                {
+                    Task.Run(() => StartProcessingFromFile(path));
+                }
+               
+            };
+
             if (shouldNotify)
                 InitPMLogService();
+        }
+
+        public void StartProcessingFromFile(string path)
+        {
+            using (var f = new StreamReader(path))
+            {
+                string line = null;
+                while ((line = f.ReadLine()) !=  null)
+                {
+                    var tupleData = line.Split(null).ToList();
+                    ProcessAndForward(new CTuple(tupleData));
+                }
+            }
         }
 
         public void InitPMLogService()

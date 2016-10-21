@@ -115,7 +115,7 @@ namespace PuppetMaster
     class PuppetMaster
     {
         public const int PM_SERVICE_PORT = 10001;
-        public const string PM_SERVICE_URL = "tcp://localhost:100001/PMLogger"; // mudar de acordo o necessário
+        public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger"; // mudar de acordo o necessário
 
         private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;

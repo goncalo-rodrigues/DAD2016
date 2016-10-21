@@ -3,11 +3,11 @@ Semantics exactly-once
 LoggingLevel full
 OP1 input_ops tweeters.data
 rep_fact 1 routing hashing(1)
-address tcp://localhost:11000/op
+address tcp://localhost:12000/op
 operator_spec FILTER 3,"=","www.tecnico.ulisboa.pt"
 OP2 input_ops OP1
 rep_fact 1 routing random
-address tcp://localhost:11001/op
+address tcp://localhost:12001/op
 operator_spec FILTER 3,"=","www.tecnico.ulisboa.pt"
 crash 0
 crash 1
