@@ -10,12 +10,9 @@ namespace SharedTypes
         public static T GetStub<T>(string address)
         {
 
-            TcpChannel channel = new TcpChannel();
-            ChannelServices.RegisterChannel(channel, true);
+            T obj = (T)Activator.GetObject(typeof(T), address);
 
-            IReplica obj = (IReplica)Activator.GetObject(typeof(IReplica), address);
-
-            return (T)obj;
+            return obj;
         }
     }
 }
