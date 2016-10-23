@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
+    // Delegate for calling other remote operators asynchronously
+    public delegate void RemoteProcessAsyncDelegate(CTuple tuple);
     public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
     // A delegate type for handling events from PuppetMaster
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
@@ -156,6 +158,7 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
+            
             var result = Process(tuple);
             SendToAll(result);
         }

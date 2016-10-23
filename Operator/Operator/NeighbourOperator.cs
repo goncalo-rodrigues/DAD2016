@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +13,16 @@ namespace Operator
         public List<IReplica> replicas;
         public RoutingStrategy RoutingStrategy { get; set; }
 
+        // This is called after destination receives, processes and send the tuple
+        [OneWayAttribute]
+        public void TupleProcessedAsyncCallBack(IAsyncResult ar)
+        {
+            // Might be needed in the future
+            RemoteProcessAsyncDelegate del = (RemoteProcessAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            del.EndInvoke(ar);
+            return;
+        }
+
         public NeighbourOperator(DestinationInfo info)
         {
             replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
@@ -19,7 +30,10 @@ namespace Operator
 
         public void Send(CTuple tuple, Semantic semantic)
         {
-            RoutingStrategy.ChooseReplica(replicas).ProcessAndForward(tuple);
+            var rep = RoutingStrategy.ChooseReplica();
+            RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
+            IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
+            
         }
 
         public void Ping()
