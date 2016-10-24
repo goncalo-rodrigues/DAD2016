@@ -37,7 +37,6 @@
             this.TextBoxMilliseconds_interval = new System.Windows.Forms.TextBox();
             this.LabelMilliseconds_interval = new System.Windows.Forms.Label();
             this.ButtonStatus = new System.Windows.Forms.Button();
-            this.TextBoxStatus = new System.Windows.Forms.TextBox();
             this.LabelTitle1 = new System.Windows.Forms.Label();
             this.LabelTitle2 = new System.Windows.Forms.Label();
             this.TexBoxCrash = new System.Windows.Forms.TextBox();
@@ -52,6 +51,7 @@
             this.TextBoxWait = new System.Windows.Forms.TextBox();
             this.ButtonWait = new System.Windows.Forms.Button();
             this.LabelWait = new System.Windows.Forms.Label();
+            this.LabelStatus = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // LabelOpID_start
@@ -124,21 +124,13 @@
             // 
             // ButtonStatus
             // 
-            this.ButtonStatus.Location = new System.Drawing.Point(498, 64);
+            this.ButtonStatus.Location = new System.Drawing.Point(214, 194);
             this.ButtonStatus.Name = "ButtonStatus";
             this.ButtonStatus.Size = new System.Drawing.Size(75, 23);
             this.ButtonStatus.TabIndex = 8;
             this.ButtonStatus.Text = "Status";
             this.ButtonStatus.UseVisualStyleBackColor = true;
             this.ButtonStatus.Click += new System.EventHandler(this.ButtonStatus_Click);
-            // 
-            // TextBoxStatus
-            // 
-            this.TextBoxStatus.Location = new System.Drawing.Point(330, 64);
-            this.TextBoxStatus.Multiline = true;
-            this.TextBoxStatus.Name = "TextBoxStatus";
-            this.TextBoxStatus.Size = new System.Drawing.Size(152, 113);
-            this.TextBoxStatus.TabIndex = 9;
             // 
             // LabelTitle1
             // 
@@ -154,7 +146,7 @@
             // 
             this.LabelTitle2.AutoSize = true;
             this.LabelTitle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LabelTitle2.Location = new System.Drawing.Point(28, 212);
+            this.LabelTitle2.Location = new System.Drawing.Point(29, 244);
             this.LabelTitle2.Name = "LabelTitle2";
             this.LabelTitle2.Size = new System.Drawing.Size(224, 24);
             this.LabelTitle2.TabIndex = 11;
@@ -162,14 +154,14 @@
             // 
             // TexBoxCrash
             // 
-            this.TexBoxCrash.Location = new System.Drawing.Point(112, 254);
+            this.TexBoxCrash.Location = new System.Drawing.Point(113, 286);
             this.TexBoxCrash.Name = "TexBoxCrash";
             this.TexBoxCrash.Size = new System.Drawing.Size(86, 20);
             this.TexBoxCrash.TabIndex = 14;
             // 
             // ButtonCrash
             // 
-            this.ButtonCrash.Location = new System.Drawing.Point(214, 254);
+            this.ButtonCrash.Location = new System.Drawing.Point(215, 286);
             this.ButtonCrash.Name = "ButtonCrash";
             this.ButtonCrash.Size = new System.Drawing.Size(75, 23);
             this.ButtonCrash.TabIndex = 13;
@@ -179,7 +171,7 @@
             // LabelCrash
             // 
             this.LabelCrash.AutoSize = true;
-            this.LabelCrash.Location = new System.Drawing.Point(29, 254);
+            this.LabelCrash.Location = new System.Drawing.Point(30, 286);
             this.LabelCrash.Name = "LabelCrash";
             this.LabelCrash.Size = new System.Drawing.Size(77, 13);
             this.LabelCrash.TabIndex = 12;
@@ -187,14 +179,14 @@
             // 
             // TextBoxFreeze
             // 
-            this.TextBoxFreeze.Location = new System.Drawing.Point(113, 290);
+            this.TextBoxFreeze.Location = new System.Drawing.Point(114, 322);
             this.TextBoxFreeze.Name = "TextBoxFreeze";
             this.TextBoxFreeze.Size = new System.Drawing.Size(86, 20);
             this.TextBoxFreeze.TabIndex = 17;
             // 
             // ButtonFreeze
             // 
-            this.ButtonFreeze.Location = new System.Drawing.Point(215, 290);
+            this.ButtonFreeze.Location = new System.Drawing.Point(216, 322);
             this.ButtonFreeze.Name = "ButtonFreeze";
             this.ButtonFreeze.Size = new System.Drawing.Size(75, 23);
             this.ButtonFreeze.TabIndex = 16;
@@ -204,7 +196,7 @@
             // LabelFreeze
             // 
             this.LabelFreeze.AutoSize = true;
-            this.LabelFreeze.Location = new System.Drawing.Point(30, 290);
+            this.LabelFreeze.Location = new System.Drawing.Point(31, 322);
             this.LabelFreeze.Name = "LabelFreeze";
             this.LabelFreeze.Size = new System.Drawing.Size(77, 13);
             this.LabelFreeze.TabIndex = 15;
@@ -212,14 +204,14 @@
             // 
             // TextBoxUnfreeze
             // 
-            this.TextBoxUnfreeze.Location = new System.Drawing.Point(112, 326);
+            this.TextBoxUnfreeze.Location = new System.Drawing.Point(113, 358);
             this.TextBoxUnfreeze.Name = "TextBoxUnfreeze";
             this.TextBoxUnfreeze.Size = new System.Drawing.Size(86, 20);
             this.TextBoxUnfreeze.TabIndex = 20;
             // 
             // ButtonUnfreeze
             // 
-            this.ButtonUnfreeze.Location = new System.Drawing.Point(214, 326);
+            this.ButtonUnfreeze.Location = new System.Drawing.Point(215, 358);
             this.ButtonUnfreeze.Name = "ButtonUnfreeze";
             this.ButtonUnfreeze.Size = new System.Drawing.Size(75, 23);
             this.ButtonUnfreeze.TabIndex = 19;
@@ -229,7 +221,7 @@
             // LabelUnfreeze
             // 
             this.LabelUnfreeze.AutoSize = true;
-            this.LabelUnfreeze.Location = new System.Drawing.Point(29, 326);
+            this.LabelUnfreeze.Location = new System.Drawing.Point(30, 358);
             this.LabelUnfreeze.Name = "LabelUnfreeze";
             this.LabelUnfreeze.Size = new System.Drawing.Size(77, 13);
             this.LabelUnfreeze.TabIndex = 18;
@@ -237,14 +229,14 @@
             // 
             // TextBoxWait
             // 
-            this.TextBoxWait.Location = new System.Drawing.Point(112, 361);
+            this.TextBoxWait.Location = new System.Drawing.Point(113, 393);
             this.TextBoxWait.Name = "TextBoxWait";
             this.TextBoxWait.Size = new System.Drawing.Size(86, 20);
             this.TextBoxWait.TabIndex = 23;
             // 
             // ButtonWait
             // 
-            this.ButtonWait.Location = new System.Drawing.Point(214, 361);
+            this.ButtonWait.Location = new System.Drawing.Point(215, 393);
             this.ButtonWait.Name = "ButtonWait";
             this.ButtonWait.Size = new System.Drawing.Size(75, 23);
             this.ButtonWait.TabIndex = 22;
@@ -254,17 +246,27 @@
             // LabelWait
             // 
             this.LabelWait.AutoSize = true;
-            this.LabelWait.Location = new System.Drawing.Point(29, 361);
+            this.LabelWait.Location = new System.Drawing.Point(30, 393);
             this.LabelWait.Name = "LabelWait";
             this.LabelWait.Size = new System.Drawing.Size(67, 13);
             this.LabelWait.TabIndex = 21;
             this.LabelWait.Text = "Milliseconds:";
             // 
+            // LabelStatus
+            // 
+            this.LabelStatus.AutoSize = true;
+            this.LabelStatus.Location = new System.Drawing.Point(29, 199);
+            this.LabelStatus.Name = "LabelStatus";
+            this.LabelStatus.Size = new System.Drawing.Size(166, 13);
+            this.LabelStatus.TabIndex = 24;
+            this.LabelStatus.Text = "All nodes print their current status:";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(603, 404);
+            this.ClientSize = new System.Drawing.Size(317, 452);
+            this.Controls.Add(this.LabelStatus);
             this.Controls.Add(this.TextBoxWait);
             this.Controls.Add(this.ButtonWait);
             this.Controls.Add(this.LabelWait);
@@ -279,7 +281,6 @@
             this.Controls.Add(this.LabelCrash);
             this.Controls.Add(this.LabelTitle2);
             this.Controls.Add(this.LabelTitle1);
-            this.Controls.Add(this.TextBoxStatus);
             this.Controls.Add(this.ButtonStatus);
             this.Controls.Add(this.TextBoxMilliseconds_interval);
             this.Controls.Add(this.LabelMilliseconds_interval);
@@ -308,7 +309,6 @@
         private System.Windows.Forms.TextBox TextBoxMilliseconds_interval;
         private System.Windows.Forms.Label LabelMilliseconds_interval;
         private System.Windows.Forms.Button ButtonStatus;
-        private System.Windows.Forms.TextBox TextBoxStatus;
         private System.Windows.Forms.Label LabelTitle1;
         private System.Windows.Forms.Label LabelTitle2;
         private System.Windows.Forms.TextBox TexBoxCrash;
@@ -323,6 +323,7 @@
         private System.Windows.Forms.TextBox TextBoxWait;
         private System.Windows.Forms.Button ButtonWait;
         private System.Windows.Forms.Label LabelWait;
+        private System.Windows.Forms.Label LabelStatus;
     }
 }
 
