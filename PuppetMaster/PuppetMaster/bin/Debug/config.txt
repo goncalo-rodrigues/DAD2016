@@ -1,14 +1,14 @@
 %This is a comment
 Semantics exactly-once
 LoggingLevel full
-OP1 input_ops tweeters.data
-rep_fact 1 routing primary
+OP1 input ops tweeters.data
+rep fact 1 routing primary
 address tcp://localhost:12000/op
-operator_spec UNIQ 0
-OP2 input_ops OP1
-rep_fact 1 routing primary
+operator spec UNIQ 0
+OP2 input ops OP1
+rep fact 1 routing primary
 address tcp://localhost:12001/op
-operator_spec FILTER 1,"=","www.tecnico.ulisboa.pt"
+operator spec FILTER 1,"=","www.tecnico.ulisboa.pt"
 crash 0
 crash 1
 crash 2
