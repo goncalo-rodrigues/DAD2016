@@ -13,7 +13,6 @@ namespace PuppetMaster
     public partial class MainForm : Form
     {
         PuppetMaster master = null;
-        ACommand statusCmd = null, startCmd = null, intervalCmd = null;
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {

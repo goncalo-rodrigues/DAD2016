@@ -153,10 +153,10 @@ namespace PuppetMaster
         }
         public void InitEventLogging() {
 
-            TcpChannel channel = new TcpChannel(PM_SERVICE_PORT);
+          /*  TcpChannel channel = new TcpChannel(PM_SERVICE_PORT);
             ChannelServices.RegisterChannel(channel, false);
             pmLogger = new PMLoggerService();
-            RemotingServices.Marshal(pmLogger, "PMLogger");
+            RemotingServices.Marshal(pmLogger, "PMLogger");*/
         }
 
      
