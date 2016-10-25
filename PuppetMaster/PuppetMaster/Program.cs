@@ -20,7 +20,7 @@ namespace PuppetMaster
             PuppetMaster master = new PuppetMaster();
             try
             {
-                config = File.ReadAllText("config.txt");
+                config = File.ReadAllText("dadstorm.config");
             } catch (Exception e)
             {
                 Console.WriteLine($"Unable to parse config file. {e.Message}. Exiting...");

@@ -48,9 +48,9 @@ namespace PuppetMaster
         private void Form1_Load(object sender, EventArgs e)
         {
             // init puppetMaster
-            statusCmd = new StatusCommand(master);
-            startCmd = new StartCommand(master);
-            intervalCmd = new IntervalCommand(master);
+            //statusCmd = new StatusCommand(master);
+            //startCmd = new StartCommand(master);
+            //intervalCmd = new IntervalCommand(master);
         }
     }
 }

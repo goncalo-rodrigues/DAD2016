@@ -84,7 +84,7 @@ namespace PuppetMaster
             const string sourcesPattern = @"\s*(?<name>\w+)\s+INPUT OPS\s+(?<sources>([a-zA-Z0-9.:/_\\]+|\s*,\s*)+)";
             const string repPattern = @"\s+REP FACT\s+(?<rep_fact>\d+)\s+ROUTING\s+(?<routing>(random|primary|hashing))(\((?<routing_arg>\d+)\))?";
             const string addPattern = @"\s+ADDRESS\s+(?<addresses>([a-zA-Z0-9.:/_]+|\s*,\s*)+)";
-            const string opPattern = @"\s+OPERATOR SPEC\s+(?<function>(\w+))\s+(?<function_args>(\w+|\s*,\s*|(""[^""\n]*""))+)\s*";
+            const string opPattern = @"\s+OPERATOR SPEC\s+((?<function>(count|dup))|(?<function>(uniq|custom|filter))\s+(?<function_args>([\w=><.\\/:-]+|\s*,\s*|(""[^""\n]*""))+))\s*";
 
             Regex opRegex = new Regex(sourcesPattern + repPattern + addPattern + opPattern, RegexOptions.IgnoreCase);
 
@@ -97,7 +97,7 @@ namespace PuppetMaster
                 // get all variables found in the match, carefully removing whitespace
                 var sources = op.Groups["sources"].Value.Split(',');
                 var addresses = op.Groups["addresses"].Value.Split(',');
-                var functionArgs = op.Groups["function_args"].Value.Split(',');
+                var functionArgs = op.Groups["function_args"].Success ? op.Groups["function_args"].Value.Split(',') : new string[0];
                 var hashingArg = op.Groups["routing_arg"].Success ? Int32.Parse(op.Groups["routing_arg"].Value) : -1;
                 var stratString = op.Groups["routing"].Value.Trim().ToLower();
                 var strat =  stratString == "random" ? RoutingStrategy.Random : stratString == "hashing" ? RoutingStrategy.Hashing : RoutingStrategy.Primary;
