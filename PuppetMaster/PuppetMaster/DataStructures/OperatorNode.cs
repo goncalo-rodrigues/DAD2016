@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
-    class OperatorNode
+    public class OperatorNode
     {
         public string ID { get; }
 

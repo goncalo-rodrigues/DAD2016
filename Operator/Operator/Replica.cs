@@ -59,6 +59,7 @@ namespace Operator
             // Get Stubs
             this.OnStart += (sender, args) =>
             {
+                Console.WriteLine("Starting...");
                 this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
                 this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
 
@@ -97,27 +98,35 @@ namespace Operator
 
         public void StartProcessingFromFile(string path)
         {
-            using (var f = new StreamReader(path))
+            try
             {
-                string line = null;
-                while ((line = f.ReadLine()) !=  null)
+                using (var f = new StreamReader(path))
                 {
-                    if (line.StartsWith("%")) continue;
-                    if (routingStrategy.ChooseReplica() == this)
+                    string line = null;
+                    while ((line = f.ReadLine()) != null)
                     {
-                        var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                        ProcessAndForward(new CTuple(tupleData));
+                        if (line.StartsWith("%")) continue;
+                        if (routingStrategy.ChooseReplica() == this)
+                        {
+                            var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
+                            var ctuple = new CTuple(tupleData);
+                            new Thread(() =>ProcessAndForward(ctuple)).Start();
+                        }
                     }
                 }
+            } catch (Exception e)
+            {
+                Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
             }
+
         }
 
         public void InitPMLogService()
         {
-            TcpChannel channel = new TcpChannel();
-            ChannelServices.RegisterChannel(channel, false);
+            //TcpChannel channel = new TcpChannel();
+            //ChannelServices.RegisterChannel(channel, false);
 
-            logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
+            //logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
 
             if (logger == null) //debug purposes
             {

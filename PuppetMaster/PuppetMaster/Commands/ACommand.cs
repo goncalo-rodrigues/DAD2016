@@ -1,6 +1,6 @@
 ﻿namespace PuppetMaster
 {
-    abstract class ACommand
+    public abstract class ACommand
     {
         protected PuppetMaster master { get; set; }
         public string name { get; set; }

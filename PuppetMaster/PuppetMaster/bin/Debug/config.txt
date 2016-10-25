@@ -2,13 +2,13 @@
 Semantics exactly-once
 LoggingLevel full
 OP1 input_ops tweeters.data
-rep_fact 1 routing hashing(1)
+rep_fact 1 routing primary
 address tcp://localhost:12000/op
-operator_spec FILTER 3,"=","www.tecnico.ulisboa.pt"
+operator_spec UNIQ 0
 OP2 input_ops OP1
-rep_fact 1 routing random
+rep_fact 1 routing primary
 address tcp://localhost:12001/op
-operator_spec FILTER 3,"=","www.tecnico.ulisboa.pt"
+operator_spec FILTER 1,"=","www.tecnico.ulisboa.pt"
 crash 0
 crash 1
 crash 2

@@ -13,7 +13,8 @@ namespace Operator
     class HashingStrategy : RoutingStrategy
     {
 
-        public HashingStrategy(List<IReplica> replicas):base(replicas){
+        public HashingStrategy(List<IReplica> replicas, int id) : base(replicas)
+        {
 
         }
 

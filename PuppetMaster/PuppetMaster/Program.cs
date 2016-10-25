@@ -9,6 +9,7 @@ namespace PuppetMaster
 {
     static class Program
     {
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -29,7 +30,7 @@ namespace PuppetMaster
             master.ReadAndInitializeSystem(config);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run(new MainForm(master));
             
         }
     }
