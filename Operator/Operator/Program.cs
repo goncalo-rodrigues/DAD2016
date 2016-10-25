@@ -17,47 +17,6 @@ namespace Operator
     {
         static void Main(string[] args)
         {
-            //args = new string[1];
-            var s = 
-                @"<?xml version=""1.0"" encoding=""utf-16""?>
-<ReplicaCreationInfo xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <Address>tcp://localhost:12001/op</Address>
-  <Operator>
-    <ID>OP1</ID>
-    <MasterURL>tcp://localhost:100001/PMLogger</MasterURL>
-    <ReplicationFactor>1</ReplicationFactor>
-    <RtStrategy>Hashing</RtStrategy>
-    <InputOperators>
-      <string>tweeters.data</string>
-    </InputOperators>
-    <InputFiles>
-      <string>tweeters.data</string>
-    </InputFiles>
-    <OutputOperators>
-      <DestinationInfo>
-        <ID>OP2</ID>
-        <field_id>0</field_id>
-        <ReplicationFactor>1</ReplicationFactor>
-        <RtStrategy>Random</RtStrategy>
-        <Addresses>
-          <string>tcp://localhost:11001/op</string>
-        </Addresses>
-      </DestinationInfo>
-    </OutputOperators>
-    <Addresses>
-      <string>tcp://localhost:11000/op</string>
-    </Addresses>
-    <OperatorFunction>FILTER</OperatorFunction>
-    <OperatorFunctionArgs>
-      <string>3</string>
-      <string>=</string>
-      <string>www.tecnico.ulisboa.pt</string>
-    </OperatorFunctionArgs>
-    <HashingArg>1</HashingArg>
-    <Semantic>ExactlyOnce</Semantic>
-    <ShouldNotify>true</ShouldNotify>
-  </Operator>
-</ReplicaCreationInfo>";
             if (args.Length < 1)
             {
                 Console.WriteLine("Missing creation info argument.");
@@ -81,6 +40,7 @@ namespace Operator
 
             if (rep == null) loop();
             var info = rep.Operator;
+            Console.WriteLine($"Successfully initiated this replica of {info.ID}.");
             string address = rep.Address;
             info.Addresses.Remove(address);
 
@@ -102,12 +62,13 @@ namespace Operator
             TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, false);
             RemotingServices.Marshal(replica, name, typeof(Replica));
+            Console.WriteLine($"Listening at {address}. Press Enter to exit.");
             Console.ReadLine();
+            
         }
 
         static void loop()
         {
-            Thread.Sleep(10000);
         }
     }
 }

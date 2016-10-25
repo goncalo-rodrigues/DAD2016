@@ -15,7 +15,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 namespace PuppetMaster
 { 
 
-    class PuppetMaster
+    public class PuppetMaster
     {
         public const int PM_SERVICE_PORT = 10001;
         public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger"; // mudar de acordo o necessário

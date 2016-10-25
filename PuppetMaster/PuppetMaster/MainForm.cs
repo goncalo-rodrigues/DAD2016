@@ -38,6 +38,13 @@ namespace PuppetMaster
             InitializeComponent();
         }
 
+        public MainForm(PuppetMaster master)
+        {
+            
+            this.master = master;
+            InitializeComponent();
+        }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
