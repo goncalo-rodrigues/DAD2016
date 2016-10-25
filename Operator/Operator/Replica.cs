@@ -109,7 +109,8 @@ namespace Operator
                         if (routingStrategy.ChooseReplica() == this)
                         {
                             var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                            ProcessAndForward(new CTuple(tupleData));
+                            var ctuple = new CTuple(tupleData);
+                            new Thread(() =>ProcessAndForward(ctuple)).Start();
                         }
                     }
                 }
