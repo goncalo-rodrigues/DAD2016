@@ -31,8 +31,22 @@ namespace Operator
         public void Send(CTuple tuple, Semantic semantic)
         {
             var rep = RoutingStrategy.ChooseReplica();
-            RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
-            IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
+            switch(semantic)
+            {
+                case Semantic.AtLeastOnce:
+                    Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    break;
+                case Semantic.AtMostOnce:
+                    RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
+                    IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
+                    break;
+                case Semantic.ExactlyOnce:
+                    Console.WriteLine($"The semantic exaclty-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    break;
+                default:
+                    Console.WriteLine($"The specified semantic ({semantic}) is not supported within our system");
+                    return;
+            }
             
         }
 

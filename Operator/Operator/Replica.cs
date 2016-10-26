@@ -127,7 +127,7 @@ namespace Operator
             //ChannelServices.RegisterChannel(channel, false);
 
             //logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
-
+            Console.WriteLine($"MasterURL: {MasterURL}");
             if (logger == null) //debug purposes
             {
                 System.Console.WriteLine("Could not locate server");
@@ -146,8 +146,8 @@ namespace Operator
         {
             foreach (var neighbor in destinations)
             {
-                if (shouldNotify && logger != null)
-                    Notify(tuple);
+               // if (shouldNotify && logger != null)
+                 //   Notify(tuple);
                 neighbor.Send(tuple, semantic);
             }
         }
@@ -156,7 +156,8 @@ namespace Operator
             try
             {
                 String content = $"tuple {selfURL}, {tuple.ToString()}";
-                logger.Notify(new Record(content, DateTime.Now));
+              //  if(logger!=null)
+                //    logger.Notify(new Record(content, DateTime.Now));
             }
             catch (SocketException) // Neste caso queremos voltar a tentar ligaçao? -- modelo de faltas...
             {
