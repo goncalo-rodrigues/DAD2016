@@ -26,6 +26,7 @@ namespace Operator
         public NeighbourOperator(DestinationInfo info)
         {
             replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+            RoutingStrategy = new PrimaryStrategy(replicas);
         }
 
         public void Send(CTuple tuple, Semantic semantic)

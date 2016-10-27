@@ -50,9 +50,11 @@ namespace ProcessCreationService
                 }
                 catch (SocketException se)
                 {
-                    done = true;
+                    return;
                 }
             }
+
+
             try
             {
                 var process = CreateProcess(result);
@@ -61,10 +63,7 @@ namespace ProcessCreationService
                 clientSocket.Close();
             } catch (SocketException se)
             {
-
             }
-
-            
         }
 
         private Process CreateProcess(string arg)
