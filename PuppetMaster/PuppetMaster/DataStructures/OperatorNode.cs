@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,29 +33,32 @@ namespace PuppetMaster
         {
             this.ID = ID;
             this.addresses = addresses;
+            Console.WriteLine($"Operator {ID} initialized with {(Replicas.Count)} replicas.");
         }
 
         #region PuppetMaster's Commands
         public void Start()
         {
-            foreach (IReplica irep in Replicas)
-            {
-                irep.Start();
-            }
+            if (Replicas != null)
+                foreach (IReplica irep in Replicas)
+                    irep.Start();
         }
         public void Interval(int mills)
         {
-            // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
-            foreach (IReplica irep in Replicas)
-            {
-                irep.Interval(mills);
-            }
+            if (Replicas != null)
+                foreach (IReplica irep in Replicas)  // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
+                    irep.Interval(mills);
         }
         public void Status()
         {
-            foreach (IReplica irep in Replicas)
+            if( Replicas != null)
             {
-                irep.Status();
+                foreach (IReplica irep in Replicas)
+                    irep.Status();
+            }
+            else
+            {
+                Console.WriteLine("Status ain't doin' shit");
             }
         }
         #endregion

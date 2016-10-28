@@ -31,13 +31,11 @@ namespace Operator
         private IList<IReplica> otherReplicas;
         private List<string> inputFiles;
 
-        private Semantic semantic;
         private RoutingStrategy routingStrategy;
 
         public int totalSeenTuples = 0;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
-        private bool isProcessing = false;
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
@@ -50,8 +48,7 @@ namespace Operator
             this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
-            this.semantic = info.Semantic;
-
+           
 
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
@@ -61,7 +58,7 @@ namespace Operator
             {
                 Console.WriteLine("Starting...");
                 this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
-                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo)).ToList();
+                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo, info.Semantic, true)).ToList();
 
                 var allReplicas = (new List<IReplica>(otherReplicas));
                 allReplicas.Add(this);
@@ -79,7 +76,6 @@ namespace Operator
                 {
                     this.routingStrategy = new RandomStrategy(allReplicas);
                 }
-                isProcessing = true;
             };
 
             // Start reading from file(s)
@@ -127,7 +123,7 @@ namespace Operator
             //ChannelServices.RegisterChannel(channel, false);
 
             //logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
-            Console.WriteLine($"MasterURL: {MasterURL}");
+            Console.WriteLine($"InitPMLOGGER >>>>>>> MasterURL: {MasterURL}");
             if (logger == null) //debug purposes
             {
                 System.Console.WriteLine("Could not locate server");
@@ -138,7 +134,10 @@ namespace Operator
         {
             var data = tuple.GetFields();
             var resultData = processFunction(data);
+            
             var resultTuple = new CTuple(data.ToList());
+            // debug print 
+            Console.WriteLine($"Received {tuple.ToString()} <<<>>>> AfterProcessing {resultTuple.ToString()}");
             return resultTuple;
         }
 
@@ -146,9 +145,9 @@ namespace Operator
         {
             foreach (var neighbor in destinations)
             {
-               // if (shouldNotify && logger != null)
-                 //   Notify(tuple);
-                neighbor.Send(tuple, semantic);
+                // if (shouldNotify && logger != null)
+                    //   Notify(tuple);
+                neighbor.Send(tuple);
             }
         }
 
@@ -170,12 +169,18 @@ namespace Operator
         {
             
             var result = Process(tuple);
+            Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
             SendToAll(result);
         }
 
         public void Start()
         {
             OnStart.Invoke(this, new EventArgs());
+            /* foreach (NeighbourOperator nop in destinations)
+                nop.Processing = true;
+            
+            foreach (Replica rep in otherReplicas)
+                rep.Start(); */
         }
 
         public void Interval(int mils)
@@ -186,40 +191,43 @@ namespace Operator
         public void Status()
         {
             // print state of the system
-            string status = "[Operator: " + OperatorId + ", Status: " + (isProcessing == true ? "Working ," : "Not Working ,");
+            // string status = "[Operator: " + OperatorId + ", Status: " + (isProcessing == true ? "Working ," : "Not Working ,");
+            Console.WriteLine($"Status was invoked at operator {OperatorId}");
+            string status = $"[Operator: {OperatorId}]";
             int neighboursCnt = 0;
             int repCnt = 0;
-            foreach (NeighbourOperator neighbour in destinations)
-            {
-                try
-                {
-                    var task = Task.Run(() => neighbour.Ping());
-                    if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                        neighboursCnt++;
-                } catch (Exception e)
-                {
-                    // does nothing
-                }
-
-                status += "Neighbours: " + neighboursCnt + "(of " + destinations.Count +"), ";
-
-                foreach (IReplica irep in otherReplicas)
+            if(destinations!= null && destinations.Count >= 0)
+                foreach (NeighbourOperator neighbour in destinations)
                 {
                     try
                     {
-                        var task = Task.Run(() => irep.Ping());
+                        var task = Task.Run(() => neighbour.Ping());
                         if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                            repCnt++;
-                    }
-                    catch (Exception e)
+                            neighboursCnt++;
+                    } catch (Exception e)
                     {
                         // does nothing
                     }
-                }
 
-                status += "Working Replicas: " + repCnt + " (of " + otherReplicas.Count +")]";
-                Console.WriteLine(status);
-            }
+                    status += $"Neighbours: {(neighboursCnt + 1)} (of {(destinations.Count + 1)}), ";
+                    if (otherReplicas != null && otherReplicas.Count != 0)
+                        foreach (IReplica irep in otherReplicas)
+                        {
+                            try
+                            {
+                                var task = Task.Run(() => irep.Ping());
+                                if (task.Wait(TimeSpan.FromMilliseconds(100)))
+                                    repCnt++;
+                            }
+                            catch (Exception e)
+                            {
+                                // does nothing
+                            }
+                        }
+
+                    status += $"Working Replicas: {(repCnt+1)} (of {(otherReplicas.Count + 1)})]";
+                    Console.WriteLine(status);
+                }
         }
 
         public void Ping()

@@ -11,12 +11,16 @@ using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Remoting.Messaging;
 
 namespace PuppetMaster
 { 
 
     public class PuppetMaster
     {
+        public delegate void PuppetMasterAsyncIntDelegate (int i);
+        public delegate void PuppetMasterAsyncVoidDelegate();
+
         public const int PM_SERVICE_PORT = 10001;
         public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger"; // mudar de acordo o necessário
 
@@ -280,13 +284,15 @@ namespace PuppetMaster
         }
         public void CreateAllProcesses(ICollection<OperatorInfo> ops)
         {
-            foreach (var op in ops)
-            {
-                foreach (var addr in op.Addresses)
+            if(ops != null)
+                foreach (var op in ops)
                 {
-                    CreateProcessAt(addr, op);
+                    if(op.Addresses != null)
+                    foreach (var addr in op.Addresses)
+                    {
+                        CreateProcessAt(addr, op);
+                    }
                 }
-            }
         }
         #endregion Initialization
         #region Command Parsing
@@ -339,29 +345,83 @@ namespace PuppetMaster
         }
         #endregion Command Parsing
         #region PuppetMaster's commands
+        public static void PuppetMasterCommandsIntAsyncCallBack(IAsyncResult ar)
+        {
+            PuppetMasterAsyncIntDelegate del = (PuppetMasterAsyncIntDelegate)((AsyncResult)ar).AsyncDelegate;
+            del.EndInvoke(ar);
+            Console.WriteLine("\r\n**SUCCESS**: Result of the remote AsyncCallBack: "); 
+            return;
+        }
+        public static void PuppetMasterCommandsVoidAsyncCallBack(IAsyncResult ar)
+        {
+            PuppetMasterAsyncVoidDelegate del = (PuppetMasterAsyncVoidDelegate)((AsyncResult)ar).AsyncDelegate;
+            del.EndInvoke(ar);
+            Console.WriteLine("\r\n**SUCCESS**: Result of the remote AsyncCallBack: ");
+            return;
+        }
+
         public void Start(string opId)
         {
             try
             {
-                nodes[opId].Start();
+                if(nodes != null && nodes[opId] != null)
+                {
+                    PuppetMasterAsyncVoidDelegate remoteDel = new PuppetMasterAsyncVoidDelegate(nodes[opId].Start);
+                    AsyncCallback puppetCallback = new AsyncCallback(PuppetMasterCommandsVoidAsyncCallBack);
+                    remoteDel.BeginInvoke(puppetCallback, null);
+                }
             } catch (KeyNotFoundException knfe)
             {
                 Console.WriteLine($"Puppet master could not find operator {opId}");
+            } catch (SocketException se)
+            {
+                Console.WriteLine($"Due to connection problems, puppet master couldn't invoke Start on operator {opId} ");
             }
+            
         }
         public void Interval(string opId, int x_mls)
         {
             try
             {
-                nodes[opId].Interval(x_mls);
+                if (nodes != null && nodes[opId] != null)
+                {
+
+                    PuppetMasterAsyncIntDelegate remoteDel = new PuppetMasterAsyncIntDelegate(nodes[opId].Interval);
+                     AsyncCallback puppetCallback = new AsyncCallback(PuppetMasterCommandsIntAsyncCallBack);
+                    remoteDel.BeginInvoke(x_mls, puppetCallback, null);
+
+                }
             } catch (KeyNotFoundException knfe)
             {
                 Console.WriteLine($"Puppet master could not find operator {opId}");
+            } catch (SocketException se)
+            {
+                Console.WriteLine($"Due to connection problems, puppet master couldn't invoke Interval on operator {opId} ");
             }
         }
         public void Status() {
-            foreach(KeyValuePair<string, OperatorNode> pair in nodes)
-                pair.Value.Status();
+            string opId = "";
+            if (nodes != null)
+                foreach (KeyValuePair<string, OperatorNode> pair in nodes)
+                {
+                    try
+                    {
+                        opId = pair.Key;
+                        OperatorNode node = pair.Value;
+                        Console.WriteLine($"Invoking status in {opId}");
+                        PuppetMasterAsyncVoidDelegate remoteDel = new PuppetMasterAsyncVoidDelegate(node.Status);
+                        AsyncCallback puppetCallback = new AsyncCallback(PuppetMasterCommandsVoidAsyncCallBack);
+                        remoteDel.BeginInvoke(puppetCallback, null);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        Console.WriteLine($"Due to unexpected problems puppet master couldn't invoke Status on operator {opId}.");
+                    }
+                    catch (SocketException e)
+                    {
+                        Console.WriteLine($"Due to connection problems puppet master couldn't invoke Status on operator {opId}.");
+                    }
+                }
         }
         #endregion
     }

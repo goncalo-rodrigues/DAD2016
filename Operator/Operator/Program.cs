@@ -48,7 +48,7 @@ namespace Operator
             Replica replica = new Replica(rep);
             Operations.ReplicaInstance = replica;
 
-            loop();
+            //loop();
 
             // get port from address 
             Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/(?<name>\w*))?", RegexOptions.IgnoreCase);
