@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -87,14 +88,34 @@ namespace Operator
 
         public static ProcessDelegate GetCustomOperation(string dll, string className, string method)
         {
+            var dllFile = new FileInfo(dll);
+            dll = dllFile.FullName;
+            Assembly DLL = null;
+            try
+            {
+                DLL = Assembly.LoadFile(dll);
+            }
+            catch (Exception e)
+            {
+                // could not load dll. maybe it is in the same folder?
+            }
+
+            Type theType;
+            if (DLL == null)
+            {
+                theType = Type.GetType($"{className},{dll.Split('.')[0]}");
+            } else
+            {
+                theType = DLL.GetType(className);
+            }
+            
+            //var c = Activator.CreateInstance(theType);
+            var m = theType.GetMethod(method, new[] { typeof(IList<string>) });
+
             return new ProcessDelegate((x) =>
             {
-                var DLL = Assembly.LoadFile(dll);
 
-                var theType = DLL.GetType(className);
-                var c = Activator.CreateInstance(theType);
-                var m = theType.GetMethod(method);
-                return (IList<string>[]) m.Invoke(c, new object[] {x});
+                return (IList<string>[]) m.Invoke(null, new object[] {x});
             });
 
         }

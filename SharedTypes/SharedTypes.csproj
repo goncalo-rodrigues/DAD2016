@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomFunctions.cs" />
     <Compile Include="DataStructures\CTuple.cs" />
     <Compile Include="Interface\ILogger.cs" />
     <Compile Include="DataStructures\Record.cs" />
