@@ -17,6 +17,5 @@ namespace SharedTypes
         void Kill();
         void Freeze();
         void Unfreeze();
-        void Wait();
     }
 }
