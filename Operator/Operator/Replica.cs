@@ -9,6 +9,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Operator
 {
@@ -30,6 +31,7 @@ namespace Operator
         private IList<NeighbourOperator> destinations;
         private IList<IReplica> otherReplicas;
         private List<string> inputFiles;
+
 
         private RoutingStrategy routingStrategy;
 
@@ -189,32 +191,41 @@ namespace Operator
         {
             // print state of the system
             // string status = "[Operator: " + OperatorId + ", Status: " + (isProcessing == true ? "Working ," : "Not Working ,");
-            Console.WriteLine($"Status was invoked at operator {OperatorId}");
-            string status = $"[Operator: {OperatorId}]";
+            
+            string status = $"[Operator: {OperatorId} + {destinations.Count} + {destinations}]";
+            Console.WriteLine($"Status was invoked at operator {status}");
             int neighboursCnt = 0;
             int repCnt = 0;
-            if(destinations!= null && destinations.Count >= 0)
+            if(destinations!= null && destinations.Count > 0)
                 foreach (NeighbourOperator neighbour in destinations)
                 {
                     try
                     {
-                        var task = Task.Run(() => neighbour.Ping());
-                        if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                            neighboursCnt++;
+                        if(neighbour != null)
+                        {
+                            Console.WriteLine("CENAS1: nEIGBOUR NOT NULL");
+                            var task = Task.Run(() => neighbour.Ping());
+                            if (task.Wait(TimeSpan.FromMilliseconds(100)))
+                                neighboursCnt++;
+                        }
                     } catch (Exception e)
                     {
                         // does nothing
                     }
 
                     status += $"Neighbours: {(neighboursCnt + 1)} (of {(destinations.Count + 1)}), ";
-                    if (otherReplicas != null && otherReplicas.Count != 0)
+                    if (otherReplicas != null && otherReplicas.Count >= 0)
                         foreach (IReplica irep in otherReplicas)
                         {
                             try
                             {
-                                var task = Task.Run(() => irep.Ping());
-                                if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                                    repCnt++;
+                                if (irep != null)
+                                {
+                                    Console.WriteLine("CENAS2: REPLICA NOT NULL");
+                                    var task = Task.Run(() => irep.Ping());
+                                    if (task.Wait(TimeSpan.FromMilliseconds(100)))
+                                        repCnt++;
+                                }
                             }
                             catch (Exception e)
                             {
@@ -232,6 +243,27 @@ namespace Operator
             Console.WriteLine($"{OperatorId} was pinged...");
         }
 
-#endregion
+        public void Kill()
+        {
+            Process p = System.Diagnostics.Process.GetCurrentProcess();
+            p.Kill();
+        }
+
+        public void Freeze()
+        {
+            foreach (NeighbourOperator neighbour in destinations)
+                neighbour.FreezeFlag = false;
+
+        }
+
+        public void Unfreeze()
+        {
+            foreach (NeighbourOperator neighbour in destinations)
+                neighbour.FreezeFlag = true;
+        }
+
+    
+
+        #endregion
     }
 }

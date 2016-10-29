@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace PuppetMaster
 {
@@ -51,10 +49,20 @@ namespace PuppetMaster
         }
         public void Status()
         {
-            if( Replicas != null)
+            if(Replicas != null)
             {
                 foreach (IReplica irep in Replicas)
-                    irep.Status();
+                {
+                    if (irep != null)
+                    {
+                        // bug!!!!
+                        irep.Status();
+                    } 
+                    else
+                    {
+                        Console.WriteLine($"Replica from operator {ID} is null");
+                    }
+                }
             }
             else
             {

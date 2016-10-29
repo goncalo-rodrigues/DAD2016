@@ -53,8 +53,6 @@ namespace Operator
                 {
                     return new IList<string>[] { x };
                 }
-                
-
             });
         }
 

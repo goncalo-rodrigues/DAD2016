@@ -15,6 +15,7 @@ namespace Operator
         public RoutingStrategy RoutingStrategy { get; set; }
         private List<CTuple> outBuffer;
         public bool Processing { get; set; } = true;
+        public bool FreezeFlag { get; set; } = false;
         public Semantic Semantic { get; set; }
 
         // This is called after destination receives, processes and send the tuple
@@ -111,7 +112,7 @@ namespace Operator
 
                 // might be src of bug
                 int eventsLeft = outBuffer.Count;
-                if( Processing )
+                if( Processing && !FreezeFlag)
                 {
                     foreach (CTuple s in outBuffer)
                     {
