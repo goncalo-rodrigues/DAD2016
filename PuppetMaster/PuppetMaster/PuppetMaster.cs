@@ -173,6 +173,9 @@ namespace PuppetMaster
             CreateAllProcesses(operators.Values);
 
         }
+
+    
+
         public void InitEventLogging() {
 
           /*  TcpChannel channel = new TcpChannel(PM_SERVICE_PORT);
@@ -462,11 +465,9 @@ namespace PuppetMaster
             rep.Unfreeze();
         }
 
-        public void Wait(string opID, int index)
+        public void Wait(int ms)
         {
-            OperatorNode op = nodes[opID];
-            IReplica rep = op.Replicas[index];
-            rep.Wait();
+            Thread.Sleep(ms);
         }
 
         #endregion

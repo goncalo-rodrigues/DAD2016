@@ -32,6 +32,7 @@ namespace Operator
         private IList<IReplica> otherReplicas;
         private List<string> inputFiles;
 
+
         private RoutingStrategy routingStrategy;
 
         public int totalSeenTuples = 0;
@@ -253,19 +254,18 @@ namespace Operator
 
         public void Freeze()
         {
+            foreach (NeighbourOperator neighbour in destinations)
+                neighbour.FreezeFlag = false;
 
-            
         }
 
         public void Unfreeze()
         {
-            throw new NotImplementedException();
+            foreach (NeighbourOperator neighbour in destinations)
+                neighbour.FreezeFlag = true;
         }
 
-        public void Wait()
-        {
-            throw new NotImplementedException();
-        }
+    
 
         #endregion
     }

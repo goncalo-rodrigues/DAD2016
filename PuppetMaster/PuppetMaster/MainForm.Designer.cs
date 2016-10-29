@@ -219,6 +219,7 @@
             this.ButtonWait.TabIndex = 22;
             this.ButtonWait.Text = "Wait";
             this.ButtonWait.UseVisualStyleBackColor = true;
+            this.ButtonWait.Click += new System.EventHandler(this.ButtonWait_Click);
             // 
             // LabelWait
             // 

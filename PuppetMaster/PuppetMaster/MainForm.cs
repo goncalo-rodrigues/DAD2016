@@ -89,6 +89,12 @@ namespace PuppetMaster
 
         }
 
-       
+        private void ButtonWait_Click(object sender, EventArgs e)
+        {
+            int ms = Convert.ToInt32(TextBoxWait.Text);
+            master.Wait(ms);
+        }
+
+    
     }
 }
