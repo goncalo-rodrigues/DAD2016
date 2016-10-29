@@ -97,6 +97,7 @@ namespace Operator
             {
                 using (var f = new StreamReader(path))
                 {
+                    
                     string line = null;
                     while ((line = f.ReadLine()) != null)
                     {
@@ -105,7 +106,7 @@ namespace Operator
                         {
                             var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                             var ctuple = new CTuple(tupleData);
-                            new Thread(() =>ProcessAndForward(ctuple)).Start();
+                            ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
                         }
                     }
                 }
