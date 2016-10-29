@@ -49,10 +49,20 @@ namespace PuppetMaster
         }
         public void Status()
         {
-            if( Replicas != null)
+            if(Replicas != null)
             {
                 foreach (IReplica irep in Replicas)
-                    irep.Status();
+                {
+                    if (irep != null)
+                    {
+                        // bug!!!!
+                        irep.Status();
+                    } 
+                    else
+                    {
+                        Console.WriteLine($"Replica from operator {ID} is null");
+                    }
+                }
             }
             else
             {
