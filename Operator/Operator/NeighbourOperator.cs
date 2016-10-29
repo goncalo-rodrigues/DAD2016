@@ -112,7 +112,7 @@ namespace Operator
 
                 // might be src of bug
                 int eventsLeft = outBuffer.Count;
-                if( Processing )
+                if( Processing && !FreezeFlag)
                 {
                     foreach (CTuple s in outBuffer)
                     {
