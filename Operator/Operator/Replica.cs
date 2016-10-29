@@ -57,13 +57,10 @@ namespace Operator
             this.OnStart += (sender, args) =>
             {
                 Console.WriteLine("Starting...");
-                this.otherReplicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+                this.otherReplicas = info.Addresses.Select((address) => (selfURL == address? Helper.GetStub<IReplica>(address) : this)).ToList();
                 this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo, info.Semantic, true)).ToList();
 
                 var allReplicas = (new List<IReplica>(otherReplicas));
-                allReplicas.Add(this);
-                // check if it sorts the same way for every remote replica
-                allReplicas.Sort();
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
                     this.routingStrategy = new PrimaryStrategy(allReplicas);

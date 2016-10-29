@@ -46,7 +46,6 @@ namespace Operator
             var info = rep.Operator;
             Console.WriteLine($"Successfully initiated this replica of {info.ID}.");
             string address = rep.Address;
-            info.Addresses.Remove(address);
 
 
             Replica replica = new Replica(rep);
