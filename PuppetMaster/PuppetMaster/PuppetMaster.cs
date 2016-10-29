@@ -11,6 +11,7 @@ using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Diagnostics;
 
 namespace PuppetMaster
 { 
@@ -363,6 +364,34 @@ namespace PuppetMaster
             foreach(KeyValuePair<string, OperatorNode> pair in nodes)
                 pair.Value.Status();
         }
+
+        public void Crash(string opID,  int index ) {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Kill();
+        }
+
+        public void Freeze(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Freeze();
+        }
+
+        public void Unfreeze(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Unfreeze();
+        }
+
+        public void Wait(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Wait();
+        }
+
         #endregion
     }
 }

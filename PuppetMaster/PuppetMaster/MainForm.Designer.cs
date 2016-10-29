@@ -39,19 +39,28 @@
             this.ButtonStatus = new System.Windows.Forms.Button();
             this.LabelTitle1 = new System.Windows.Forms.Label();
             this.LabelTitle2 = new System.Windows.Forms.Label();
-            this.TexBoxCrash = new System.Windows.Forms.TextBox();
             this.ButtonCrash = new System.Windows.Forms.Button();
-            this.LabelCrash = new System.Windows.Forms.Label();
-            this.TextBoxFreeze = new System.Windows.Forms.TextBox();
+            this.LabelCrashOpID = new System.Windows.Forms.Label();
             this.ButtonFreeze = new System.Windows.Forms.Button();
-            this.LabelFreeze = new System.Windows.Forms.Label();
-            this.TextBoxUnfreeze = new System.Windows.Forms.TextBox();
+            this.LabelFreezeOpID = new System.Windows.Forms.Label();
             this.ButtonUnfreeze = new System.Windows.Forms.Button();
-            this.LabelUnfreeze = new System.Windows.Forms.Label();
+            this.LabelUnfreezeOpID = new System.Windows.Forms.Label();
             this.TextBoxWait = new System.Windows.Forms.TextBox();
             this.ButtonWait = new System.Windows.Forms.Button();
             this.LabelWait = new System.Windows.Forms.Label();
             this.LabelStatus = new System.Windows.Forms.Label();
+            this.LabelCrashIndex = new System.Windows.Forms.Label();
+            this.LabelFreezeID = new System.Windows.Forms.Label();
+            this.LabelUnfreezeID = new System.Windows.Forms.Label();
+            this.CrashID = new System.Windows.Forms.NumericUpDown();
+            this.FreezeID = new System.Windows.Forms.NumericUpDown();
+            this.UnfreezeID = new System.Windows.Forms.NumericUpDown();
+            this.CrashOpID = new System.Windows.Forms.ComboBox();
+            this.FreezeOpID = new System.Windows.Forms.ComboBox();
+            this.UnfreezeOpID = new System.Windows.Forms.ComboBox();
+            ((System.ComponentModel.ISupportInitialize)(this.CrashID)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).BeginInit();
             this.SuspendLayout();
             // 
             // LabelOpID_start
@@ -152,13 +161,6 @@
             this.LabelTitle2.TabIndex = 11;
             this.LabelTitle2.Text = "Debugging Commands";
             // 
-            // TexBoxCrash
-            // 
-            this.TexBoxCrash.Location = new System.Drawing.Point(113, 286);
-            this.TexBoxCrash.Name = "TexBoxCrash";
-            this.TexBoxCrash.Size = new System.Drawing.Size(86, 20);
-            this.TexBoxCrash.TabIndex = 14;
-            // 
             // ButtonCrash
             // 
             this.ButtonCrash.Location = new System.Drawing.Point(215, 286);
@@ -167,22 +169,16 @@
             this.ButtonCrash.TabIndex = 13;
             this.ButtonCrash.Text = "Crash";
             this.ButtonCrash.UseVisualStyleBackColor = true;
+            this.ButtonCrash.Click += new System.EventHandler(this.ButtonCrash_Click);
             // 
-            // LabelCrash
+            // LabelCrashOpID
             // 
-            this.LabelCrash.AutoSize = true;
-            this.LabelCrash.Location = new System.Drawing.Point(30, 286);
-            this.LabelCrash.Name = "LabelCrash";
-            this.LabelCrash.Size = new System.Drawing.Size(77, 13);
-            this.LabelCrash.TabIndex = 12;
-            this.LabelCrash.Text = "Process name:";
-            // 
-            // TextBoxFreeze
-            // 
-            this.TextBoxFreeze.Location = new System.Drawing.Point(114, 322);
-            this.TextBoxFreeze.Name = "TextBoxFreeze";
-            this.TextBoxFreeze.Size = new System.Drawing.Size(86, 20);
-            this.TextBoxFreeze.TabIndex = 17;
+            this.LabelCrashOpID.AutoSize = true;
+            this.LabelCrashOpID.Location = new System.Drawing.Point(29, 292);
+            this.LabelCrashOpID.Name = "LabelCrashOpID";
+            this.LabelCrashOpID.Size = new System.Drawing.Size(62, 13);
+            this.LabelCrashOpID.TabIndex = 12;
+            this.LabelCrashOpID.Text = "Operator id:";
             // 
             // ButtonFreeze
             // 
@@ -193,21 +189,14 @@
             this.ButtonFreeze.Text = "Freeze";
             this.ButtonFreeze.UseVisualStyleBackColor = true;
             // 
-            // LabelFreeze
+            // LabelFreezeOpID
             // 
-            this.LabelFreeze.AutoSize = true;
-            this.LabelFreeze.Location = new System.Drawing.Point(31, 322);
-            this.LabelFreeze.Name = "LabelFreeze";
-            this.LabelFreeze.Size = new System.Drawing.Size(77, 13);
-            this.LabelFreeze.TabIndex = 15;
-            this.LabelFreeze.Text = "Process name:";
-            // 
-            // TextBoxUnfreeze
-            // 
-            this.TextBoxUnfreeze.Location = new System.Drawing.Point(113, 358);
-            this.TextBoxUnfreeze.Name = "TextBoxUnfreeze";
-            this.TextBoxUnfreeze.Size = new System.Drawing.Size(86, 20);
-            this.TextBoxUnfreeze.TabIndex = 20;
+            this.LabelFreezeOpID.AutoSize = true;
+            this.LabelFreezeOpID.Location = new System.Drawing.Point(31, 322);
+            this.LabelFreezeOpID.Name = "LabelFreezeOpID";
+            this.LabelFreezeOpID.Size = new System.Drawing.Size(62, 13);
+            this.LabelFreezeOpID.TabIndex = 15;
+            this.LabelFreezeOpID.Text = "Operator id:";
             // 
             // ButtonUnfreeze
             // 
@@ -218,20 +207,20 @@
             this.ButtonUnfreeze.Text = "Unfreeze";
             this.ButtonUnfreeze.UseVisualStyleBackColor = true;
             // 
-            // LabelUnfreeze
+            // LabelUnfreezeOpID
             // 
-            this.LabelUnfreeze.AutoSize = true;
-            this.LabelUnfreeze.Location = new System.Drawing.Point(30, 358);
-            this.LabelUnfreeze.Name = "LabelUnfreeze";
-            this.LabelUnfreeze.Size = new System.Drawing.Size(77, 13);
-            this.LabelUnfreeze.TabIndex = 18;
-            this.LabelUnfreeze.Text = "Process name:";
+            this.LabelUnfreezeOpID.AutoSize = true;
+            this.LabelUnfreezeOpID.Location = new System.Drawing.Point(30, 358);
+            this.LabelUnfreezeOpID.Name = "LabelUnfreezeOpID";
+            this.LabelUnfreezeOpID.Size = new System.Drawing.Size(62, 13);
+            this.LabelUnfreezeOpID.TabIndex = 18;
+            this.LabelUnfreezeOpID.Text = "Operator id:";
             // 
             // TextBoxWait
             // 
-            this.TextBoxWait.Location = new System.Drawing.Point(113, 393);
+            this.TextBoxWait.Location = new System.Drawing.Point(98, 393);
             this.TextBoxWait.Name = "TextBoxWait";
-            this.TextBoxWait.Size = new System.Drawing.Size(86, 20);
+            this.TextBoxWait.Size = new System.Drawing.Size(100, 20);
             this.TextBoxWait.TabIndex = 23;
             // 
             // ButtonWait
@@ -261,24 +250,103 @@
             this.LabelStatus.TabIndex = 24;
             this.LabelStatus.Text = "All nodes print their current status:";
             // 
+            // LabelCrashIndex
+            // 
+            this.LabelCrashIndex.AutoSize = true;
+            this.LabelCrashIndex.Location = new System.Drawing.Point(147, 289);
+            this.LabelCrashIndex.Name = "LabelCrashIndex";
+            this.LabelCrashIndex.Size = new System.Drawing.Size(19, 13);
+            this.LabelCrashIndex.TabIndex = 25;
+            this.LabelCrashIndex.Text = "Id:";
+            // 
+            // LabelFreezeID
+            // 
+            this.LabelFreezeID.AutoSize = true;
+            this.LabelFreezeID.Location = new System.Drawing.Point(147, 327);
+            this.LabelFreezeID.Name = "LabelFreezeID";
+            this.LabelFreezeID.Size = new System.Drawing.Size(19, 13);
+            this.LabelFreezeID.TabIndex = 27;
+            this.LabelFreezeID.Text = "Id:";
+            this.LabelFreezeID.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // LabelUnfreezeID
+            // 
+            this.LabelUnfreezeID.AutoSize = true;
+            this.LabelUnfreezeID.Location = new System.Drawing.Point(147, 364);
+            this.LabelUnfreezeID.Name = "LabelUnfreezeID";
+            this.LabelUnfreezeID.Size = new System.Drawing.Size(19, 13);
+            this.LabelUnfreezeID.TabIndex = 29;
+            this.LabelUnfreezeID.Text = "Id:";
+            // 
+            // CrashID
+            // 
+            this.CrashID.Location = new System.Drawing.Point(172, 289);
+            this.CrashID.Name = "CrashID";
+            this.CrashID.Size = new System.Drawing.Size(37, 20);
+            this.CrashID.TabIndex = 31;
+            // 
+            // FreezeID
+            // 
+            this.FreezeID.Location = new System.Drawing.Point(173, 325);
+            this.FreezeID.Name = "FreezeID";
+            this.FreezeID.Size = new System.Drawing.Size(37, 20);
+            this.FreezeID.TabIndex = 32;
+            // 
+            // UnfreezeID
+            // 
+            this.UnfreezeID.Location = new System.Drawing.Point(173, 359);
+            this.UnfreezeID.Name = "UnfreezeID";
+            this.UnfreezeID.Size = new System.Drawing.Size(37, 20);
+            this.UnfreezeID.TabIndex = 33;
+            // 
+            // CrashOpID
+            // 
+            this.CrashOpID.FormattingEnabled = true;
+            this.CrashOpID.Location = new System.Drawing.Point(98, 289);
+            this.CrashOpID.Name = "CrashOpID";
+            this.CrashOpID.Size = new System.Drawing.Size(43, 21);
+            this.CrashOpID.TabIndex = 34;
+            // 
+            // FreezeOpID
+            // 
+            this.FreezeOpID.FormattingEnabled = true;
+            this.FreezeOpID.Location = new System.Drawing.Point(98, 322);
+            this.FreezeOpID.Name = "FreezeOpID";
+            this.FreezeOpID.Size = new System.Drawing.Size(43, 21);
+            this.FreezeOpID.TabIndex = 35;
+            // 
+            // UnfreezeOpID
+            // 
+            this.UnfreezeOpID.FormattingEnabled = true;
+            this.UnfreezeOpID.Location = new System.Drawing.Point(98, 358);
+            this.UnfreezeOpID.Name = "UnfreezeOpID";
+            this.UnfreezeOpID.Size = new System.Drawing.Size(43, 21);
+            this.UnfreezeOpID.TabIndex = 36;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(317, 437);
+            this.ClientSize = new System.Drawing.Size(407, 437);
+            this.Controls.Add(this.UnfreezeOpID);
+            this.Controls.Add(this.FreezeOpID);
+            this.Controls.Add(this.CrashOpID);
+            this.Controls.Add(this.UnfreezeID);
+            this.Controls.Add(this.FreezeID);
+            this.Controls.Add(this.CrashID);
+            this.Controls.Add(this.LabelUnfreezeID);
+            this.Controls.Add(this.LabelFreezeID);
+            this.Controls.Add(this.LabelCrashIndex);
             this.Controls.Add(this.LabelStatus);
             this.Controls.Add(this.TextBoxWait);
             this.Controls.Add(this.ButtonWait);
             this.Controls.Add(this.LabelWait);
-            this.Controls.Add(this.TextBoxUnfreeze);
             this.Controls.Add(this.ButtonUnfreeze);
-            this.Controls.Add(this.LabelUnfreeze);
-            this.Controls.Add(this.TextBoxFreeze);
+            this.Controls.Add(this.LabelUnfreezeOpID);
             this.Controls.Add(this.ButtonFreeze);
-            this.Controls.Add(this.LabelFreeze);
-            this.Controls.Add(this.TexBoxCrash);
+            this.Controls.Add(this.LabelFreezeOpID);
             this.Controls.Add(this.ButtonCrash);
-            this.Controls.Add(this.LabelCrash);
+            this.Controls.Add(this.LabelCrashOpID);
             this.Controls.Add(this.LabelTitle2);
             this.Controls.Add(this.LabelTitle1);
             this.Controls.Add(this.ButtonStatus);
@@ -293,6 +361,9 @@
             this.Name = "MainForm";
             this.Text = "Puppet Master";
             this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.CrashID)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -311,19 +382,25 @@
         private System.Windows.Forms.Button ButtonStatus;
         private System.Windows.Forms.Label LabelTitle1;
         private System.Windows.Forms.Label LabelTitle2;
-        private System.Windows.Forms.TextBox TexBoxCrash;
         private System.Windows.Forms.Button ButtonCrash;
-        private System.Windows.Forms.Label LabelCrash;
-        private System.Windows.Forms.TextBox TextBoxFreeze;
+        private System.Windows.Forms.Label LabelCrashOpID;
         private System.Windows.Forms.Button ButtonFreeze;
-        private System.Windows.Forms.Label LabelFreeze;
-        private System.Windows.Forms.TextBox TextBoxUnfreeze;
+        private System.Windows.Forms.Label LabelFreezeOpID;
         private System.Windows.Forms.Button ButtonUnfreeze;
-        private System.Windows.Forms.Label LabelUnfreeze;
+        private System.Windows.Forms.Label LabelUnfreezeOpID;
         private System.Windows.Forms.TextBox TextBoxWait;
         private System.Windows.Forms.Button ButtonWait;
         private System.Windows.Forms.Label LabelWait;
         private System.Windows.Forms.Label LabelStatus;
+        private System.Windows.Forms.Label LabelCrashIndex;
+        private System.Windows.Forms.Label LabelFreezeID;
+        private System.Windows.Forms.Label LabelUnfreezeID;
+        private System.Windows.Forms.NumericUpDown CrashID;
+        private System.Windows.Forms.NumericUpDown FreezeID;
+        private System.Windows.Forms.NumericUpDown UnfreezeID;
+        private System.Windows.Forms.ComboBox CrashOpID;
+        private System.Windows.Forms.ComboBox FreezeOpID;
+        private System.Windows.Forms.ComboBox UnfreezeOpID;
     }
 }
 

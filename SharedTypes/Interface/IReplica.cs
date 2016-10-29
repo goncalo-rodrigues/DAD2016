@@ -14,5 +14,9 @@ namespace SharedTypes
         void Interval(int mils);
         void Status();
         void Ping();
+        void Kill();
+        void Freeze();
+        void Unfreeze();
+        void Wait();
     }
 }

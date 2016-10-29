@@ -52,5 +52,15 @@ namespace PuppetMaster
             //startCmd = new StartCommand(master);
             //intervalCmd = new IntervalCommand(master);
         }
+
+        private void ButtonCrash_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
