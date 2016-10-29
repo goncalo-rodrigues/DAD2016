@@ -17,14 +17,14 @@ namespace PuppetMaster
         private void ButtonStart_Click(object sender, EventArgs e)
         {
             string opID = TextBoxOpID_start.Text;
-            master.Start(opID);
+            master.Start(opID.ToUpper()); // este start apenas tem como proposito começar a processar.. a inicializaçao da estrutura deve ocorrer assim que se inicia o executavel do processo
         }
 
         private void ButtonInterval_Click(object sender, EventArgs e)
         {
             string opID = TextBoxOpID_interval.Text;
             int millisecons = Convert.ToInt32(TextBoxMilliseconds_interval.Text);
-            master.Interval(opID, millisecons);
+            master.Interval(opID.ToUpper(), millisecons);
         }
 
         private void ButtonStatus_Click(object sender, EventArgs e)

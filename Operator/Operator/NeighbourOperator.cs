@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Operator
@@ -12,6 +13,9 @@ namespace Operator
     {
         public List<IReplica> replicas;
         public RoutingStrategy RoutingStrategy { get; set; }
+        private List<CTuple> outBuffer;
+        public bool Processing { get; set; } = true;
+        public Semantic Semantic { get; set; }
 
         // This is called after destination receives, processes and send the tuple
         [OneWayAttribute]
@@ -23,35 +27,102 @@ namespace Operator
             return;
         }
 
-        public NeighbourOperator(DestinationInfo info)
+        public NeighbourOperator(DestinationInfo info, Semantic semantic, bool startProcessing)
         {
             replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
+            outBuffer = new List<CTuple>();
+            
+            // could be refactorized - check whether the sorting algorithm is the same
+            replicas.Sort(); 
+            if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
+            {
+                RoutingStrategy = new PrimaryStrategy(replicas);
+            }
+            else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
+            {
+                RoutingStrategy = new HashingStrategy(replicas, info.HashingArg);
+            }
+            else
+            {
+                RoutingStrategy = new RandomStrategy(replicas);
+            }
+            Semantic = semantic;
+            Thread t = new Thread(FlushEventBuffer);
+            t.Start();
+            Processing = startProcessing;
         }
 
-        public void Send(CTuple tuple, Semantic semantic)
+        public void Deliver(CTuple tuple)
         {
             var rep = RoutingStrategy.ChooseReplica();
-            RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
-            IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
-            
+            Console.WriteLine($"Delivering Tuple {tuple.ToString()}.");
+            switch (Semantic)
+            {
+                case Semantic.AtLeastOnce:
+                    Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    break;
+                case Semantic.AtMostOnce:
+                    RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
+                    IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
+                    break;
+                case Semantic.ExactlyOnce:
+                    Console.WriteLine($"The semantic exaclty-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    break;
+                default:
+                    Console.WriteLine($"The specified semantic ({Semantic}) is not supported within our system");
+                    return;
+            }
         }
 
+        public void Send(CTuple tuple)
+        {
+            lock (this)
+            {
+                outBuffer.Add(tuple);
+                Monitor.Pulse(this);
+            }
+        }
         public void Ping()
         {
             // Just need to ensure that one replica is alive
-            foreach (IReplica rep in replicas)
-            {
-                try {
-                    var task = Task.Run(() => rep.Ping());
-                    if (task.Wait(TimeSpan.FromMilliseconds(10)))
-                        return;
-                } catch (Exception e)
+            if(replicas!=null && replicas.Count > 0)
+                foreach (IReplica rep in replicas)
                 {
-                    // does nothing, there might be a working replica
+                    try
+                    {
+                        var task = Task.Run(() => rep.Ping());
+                        if (task.Wait(TimeSpan.FromMilliseconds(10)))
+                            return;
+                    }
+                    catch (Exception e)
+                    {
+                        // does nothing, there might be a working replica
+                    }
                 }
-            }
             // there are no more replicas 
             throw new NeighbourOperatorIsDeadException("Neighbour Operator has no working replicas.");
+        }
+        private void FlushEventBuffer()
+        {
+            lock (this)
+            {
+                while (outBuffer.Count == 0)
+                    Monitor.Wait(this);
+
+                // might be src of bug
+                int eventsLeft = outBuffer.Count;
+                if( Processing )
+                {
+                    foreach (CTuple s in outBuffer)
+                    {
+                        Deliver(s);
+                    }
+                    outBuffer.Clear();
+                }
+                Monitor.Pulse(this);
+            }
+            Thread.Sleep(10);
+            FlushEventBuffer();
         }
     }
 }

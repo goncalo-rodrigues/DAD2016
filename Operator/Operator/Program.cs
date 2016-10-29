@@ -17,6 +17,10 @@ namespace Operator
     {
         static void Main(string[] args)
         {
+            //var a = Operations.GetCustomOperation(@"SharedTypes.dll", "SharedTypes.CustomFunctions", "reverse");
+            // var b = Operations.GetCustomOperation(@"C:\Users\Goncalo\Source\Repos\DAD2016\Operator\Operator\bin\Debug\SharedTypes.dll", "SharedTypes.CustomFunctions", "dup");
+            //var c = a(new List<string> { "a", "b" });
+            // var d = b(new List<string> { "a", "b" });
             if (args.Length < 1)
             {
                 Console.WriteLine("Missing creation info argument.");
@@ -48,7 +52,7 @@ namespace Operator
             Replica replica = new Replica(rep);
             Operations.ReplicaInstance = replica;
 
-            loop();
+            //loop();
 
             // get port from address 
             Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/(?<name>\w*))?", RegexOptions.IgnoreCase);

@@ -9,7 +9,7 @@ namespace SharedTypes
     public class DestinationInfo
     {
         public string ID { get; set; }
-        public int field_id { get; set; }
+        public int HashingArg { get; set; }
         public int ReplicationFactor { get; set; }
         public RoutingStrategy RtStrategy { get; set; }
         public List<string> Addresses { get; set; }

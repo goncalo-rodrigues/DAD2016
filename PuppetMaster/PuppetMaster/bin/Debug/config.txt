@@ -4,7 +4,7 @@ LoggingLevel full
 OP1 input ops tweeters.data
 rep fact 1 routing primary
 address tcp://localhost:12000/op
-operator spec UNIQ 0
+operator spec DUP
 OP2 input ops OP1
 rep fact 1 routing primary
 address tcp://localhost:12001/op
