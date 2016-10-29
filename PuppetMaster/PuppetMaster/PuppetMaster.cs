@@ -12,12 +12,21 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Messaging;
+using System.Runtime.InteropServices;
 
 namespace PuppetMaster
 { 
 
     public class PuppetMaster
     {
+        const int SWP_NOZORDER = 0x4;
+        const int SWP_NOACTIVATE = 0x10;
+        [DllImport("kernel32")]
+        static extern IntPtr GetConsoleWindow();
+        [DllImport("user32")]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+            int x, int y, int cx, int cy, int flags);
+
         public delegate void PuppetMasterAsyncIntDelegate (int i);
         public delegate void PuppetMasterAsyncVoidDelegate();
 
@@ -29,7 +38,7 @@ namespace PuppetMaster
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
-        
+       
         public PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
@@ -38,6 +47,15 @@ namespace PuppetMaster
                 { "interval", new IntervalCommand(this) },
                 { "status", new StatusCommand(this) }
             };
+
+            //Configure windows position
+            Console.Title = "PuppetMaster";
+            var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+            var width = screen.Width;
+            var height = screen.Height;
+            SetWindowPosition(0, 0, width/2, height/5);
+
+
             InitEventLogging();
         }
 
@@ -285,14 +303,14 @@ namespace PuppetMaster
         public void CreateAllProcesses(ICollection<OperatorInfo> ops)
         {
             if(ops != null)
-                foreach (var op in ops)
-                {
+            foreach (var op in ops)
+            {
                     if(op.Addresses != null)
-                    foreach (var addr in op.Addresses)
-                    {
-                        CreateProcessAt(addr, op);
-                    }
+                foreach (var addr in op.Addresses)
+                {
+                    CreateProcessAt(addr, op);
                 }
+            }
         }
         #endregion Initialization
         #region Command Parsing
@@ -423,6 +441,50 @@ namespace PuppetMaster
                     }
                 }
         }
+
+        public void Crash(string opID,  int index ) {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Kill();
+        }
+
+        public void Freeze(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Freeze();
+        }
+
+        public void Unfreeze(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Unfreeze();
+        }
+
+        public void Wait(string opID, int index)
+        {
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Wait();
+        }
+
         #endregion
+
+
+        /*Just to configure windows position*/
+        public static void SetWindowPosition(int x, int y, int width, int height)
+        {
+            SetWindowPos(Handle, IntPtr.Zero, x, y, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        public static IntPtr Handle
+        {
+            get
+            {
+                //Initialize();
+                return GetConsoleWindow();
+            }
+        }
+        /*Just to configure windows position - END*/
     }
 }
