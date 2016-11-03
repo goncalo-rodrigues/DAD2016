@@ -60,7 +60,7 @@ namespace Operator
             {
                 Console.WriteLine("Starting...");
                 this.otherReplicas = info.Addresses.Select((address) => (selfURL == address? Helper.GetStub<IReplica>(address) : this)).ToList();
-                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(dstInfo, info.Semantic, true)).ToList();
+                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
 
                 var allReplicas = (new List<IReplica>(otherReplicas));
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
@@ -193,7 +193,7 @@ namespace Operator
             // print state of the system
             // string status = "[Operator: " + OperatorId + ", Status: " + (isProcessing == true ? "Working ," : "Not Working ,");
             
-            string status = $"[Operator: {OperatorId} + {destinations.Count} + {destinations}]";
+            string status = $"[Operator: {OperatorId} + {destinations?.Count} + {destinations}]";
             Console.WriteLine($"Status was invoked at operator {status}");
             int neighboursCnt = 0;
             int repCnt = 0;
