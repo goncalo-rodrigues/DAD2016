@@ -30,26 +30,29 @@ namespace Operator
 
         public NeighbourOperator(Replica parent, DestinationInfo info, Semantic semantic)
         {
+           
+            var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
+            var initTask = Task.Run(async () =>
+            {
+                this.replicas = (await replicasTask).ToList();
+
+                if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
+                {
+                    RoutingStrategy = new PrimaryStrategy(replicas);
+                }
+                else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
+                {
+                    RoutingStrategy = new HashingStrategy(replicas, info.HashingArg);
+                }
+                else
+                {
+                    RoutingStrategy = new RandomStrategy(replicas);
+                }
+                
+            });
+
             parent.OnStart += (sender, args) =>
             {
-                // Initialize replica stubs
-                if (replicas == null)
-                {
-                    replicas = info.Addresses.Select((address) => Helper.GetStub<IReplica>(address)).ToList();
-                    if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
-                    {
-                        RoutingStrategy = new PrimaryStrategy(replicas);
-                    }
-                    else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
-                    {
-                        RoutingStrategy = new HashingStrategy(replicas, info.HashingArg);
-                    }
-                    else
-                    {
-                        RoutingStrategy = new RandomStrategy(replicas);
-                    }
-                }
-
                 Processing = true;
             };
 

@@ -62,8 +62,15 @@ namespace Operator
             }
             var port = Int32.Parse(match.Groups["port"].Value);
             var name = match.Groups["name"].Value;
-            TcpChannel channel = new TcpChannel(port);
-            ChannelServices.RegisterChannel(channel, false);
+            try
+            {
+                TcpChannel channel = new TcpChannel(port);
+                ChannelServices.RegisterChannel(channel, false);
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
             RemotingServices.Marshal(replica, name, typeof(Replica));
             Console.WriteLine($"Listening at {address}. Press Enter to exit.");
             Console.ReadLine();

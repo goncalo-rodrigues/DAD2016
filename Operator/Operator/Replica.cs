@@ -55,13 +55,14 @@ namespace Operator
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
 
-            // Get Stubs
-            this.OnStart += (sender, args) =>
+            this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
+            var initTask = Task.Run(async () =>
             {
-                Console.WriteLine("Starting...");
-                this.otherReplicas = info.Addresses.Select((address) => (selfURL == address? Helper.GetStub<IReplica>(address) : this)).ToList();
-                this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
-
+                this.otherReplicas =
+                (await Helper.GetAllStubs<IReplica>(
+                    // hack to not get his own stub
+                    info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
+                    .ToList();
                 var allReplicas = (new List<IReplica>(otherReplicas));
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
@@ -75,11 +76,13 @@ namespace Operator
                 {
                     this.routingStrategy = new RandomStrategy(allReplicas);
                 }
-            };
+            });
+
 
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
+                Console.WriteLine("Starting...");
                 foreach (var path in inputFiles)
                 {
                     Task.Run(() => StartProcessingFromFile(path));
@@ -204,17 +207,16 @@ namespace Operator
                     {
                         if(neighbour != null)
                         {
-                            Console.WriteLine("CENAS1: nEIGBOUR NOT NULL");
                             var task = Task.Run(() => neighbour.Ping());
                             if (task.Wait(TimeSpan.FromMilliseconds(100)))
                                 neighboursCnt++;
                         }
-                    } catch (Exception e)
+                    } catch (NeighbourOperatorIsDeadException e)
                     {
                         // does nothing
                     }
 
-                    status += $"Neighbours: {(neighboursCnt + 1)} (of {(destinations.Count + 1)}), ";
+                    status += $"Neighbours: {(neighboursCnt)} (of {(destinations.Count)}), ";
                     if (otherReplicas != null && otherReplicas.Count >= 0)
                         foreach (IReplica irep in otherReplicas)
                         {
@@ -222,7 +224,6 @@ namespace Operator
                             {
                                 if (irep != null)
                                 {
-                                    Console.WriteLine("CENAS2: REPLICA NOT NULL");
                                     var task = Task.Run(() => irep.Ping());
                                     if (task.Wait(TimeSpan.FromMilliseconds(100)))
                                         repCnt++;
