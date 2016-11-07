@@ -12,18 +12,13 @@ namespace Operator
     **/
     class HashingStrategy : RoutingStrategy
     {
-
+        private int id { get; set; }
         public HashingStrategy(List<IReplica> replicas, int id) : base(replicas)
         {
 
         }
 
-        public override IReplica ChooseReplica()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReplica ChooseReplica(int id, CTuple tuple) {
+        public override IReplica ChooseReplica(CTuple tuple) {
 
             String s = tuple.GetFieldByIndex(id);
 

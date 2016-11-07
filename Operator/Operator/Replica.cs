@@ -106,10 +106,10 @@ namespace Operator
                     while ((line = f.ReadLine()) != null)
                     {
                         if (line.StartsWith("%")) continue;
-                        if (routingStrategy.ChooseReplica() == this)
+                        var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
+                        var ctuple = new CTuple(tupleData);
+                        if (routingStrategy.ChooseReplica(ctuple) == this)
                         {
-                            var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                            var ctuple = new CTuple(tupleData);
                             ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
                         }
                     }
