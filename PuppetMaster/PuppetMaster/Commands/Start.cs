@@ -13,7 +13,7 @@ namespace PuppetMaster
                 Console.WriteLine("Usage: " +  name + "<operator_id>");
                 return; // TODO - Throw Exception ?
             }
-            master.Start(args[1]);
+            master.Start(args[0]);
         }
     }
 }

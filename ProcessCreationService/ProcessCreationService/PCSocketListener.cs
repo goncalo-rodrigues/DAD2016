@@ -43,7 +43,7 @@ namespace ProcessCreationService
                 try
                 {
                     size = clientSocket.Receive(byteBuffer, byteBuffer.Length - 1, SocketFlags.None);
-                    if (size == 0 || byteBuffer[size-1] == (byte) '\0')
+                    if (byteBuffer[size-1] == (byte) '\0')
                         done = true;
                     byteBuffer[size] = (byte)'\0';
                     result += System.Text.Encoding.ASCII.GetString(byteBuffer);

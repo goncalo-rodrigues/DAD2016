@@ -39,7 +39,8 @@ namespace PuppetMaster
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
-       
+        public string commandsToBeExecuted = null;
+
         public PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
@@ -177,6 +178,9 @@ namespace PuppetMaster
             // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
 
+
+            commandsToBeExecuted = config;
+           
         }
 
     
@@ -331,8 +335,8 @@ namespace PuppetMaster
         {
             var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
             var success = false;
-            var line = reader.ReadLine();
             var done = false;
+            string line = null;
             while (!done && (line = reader.ReadLine()) != null)
             {
                 var match = commandRegex.Match(line);
@@ -354,7 +358,7 @@ namespace PuppetMaster
                 }
                 Console.WriteLine("Executing: " + match.Value);
 
-                pmLogger.Notify((new Record(match.Value, DateTime.Now)));
+                //pmLogger.Notify((new Record(match.Value, DateTime.Now)));
                 await Task.Run(() => allCommands[command].execute(args));
                 done = true;
             }
@@ -362,8 +366,10 @@ namespace PuppetMaster
         }
 
         // Executes all commands sequentially
-        public async void ExecuteCommands(string commands)
+        public async void ExecuteCommands(string commands = null)
         {
+            if (commands == null)
+                commands = commandsToBeExecuted;
             using (var reader = new StringReader(commands))
             {
                 while (reader.Peek() != -1) await ExecuteNextCommand(reader);

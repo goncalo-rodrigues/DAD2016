@@ -10,7 +10,7 @@
         public ACommand(PuppetMaster master, string name) : this(master, name, "<no help>") { }
         public ACommand(PuppetMaster master, string name, string help)
         {
-            this.name = name; this.help = help;
+            this.master = master;  this.name = name; this.help = help;
         }
         public abstract void execute(string[] args);
 

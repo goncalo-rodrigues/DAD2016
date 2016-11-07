@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.IO;
 using System.Windows.Forms;
 
 namespace PuppetMaster
@@ -9,6 +9,7 @@ namespace PuppetMaster
        
 
         PuppetMaster master = null;
+        TextReader commandReader = null;
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
@@ -54,6 +55,8 @@ namespace PuppetMaster
             var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
             var width = screen.Width;
             var height = screen.Height;
+
+            commandReader = new StringReader(master.commandsToBeExecuted);
 
         }
 
@@ -114,7 +117,12 @@ namespace PuppetMaster
 
         private void RunAllCmdsButton_Click(object sender, EventArgs e)
         {
+            master.ExecuteCommands();
+        }
 
+        private async void NextCmdButton_Click(object sender, EventArgs e)
+        {
+            var success = await master.ExecuteNextCommand(commandReader);
         }
     }
 }
