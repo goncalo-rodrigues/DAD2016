@@ -41,12 +41,12 @@ namespace PuppetMaster
          
             InitializeComponent();
 
-            foreach (var i in this.master.nodes){
-                StartOpID.Items.Add(i.Key);
-                IntervalOpID.Items.Add(i.Key);
-                CrashOpID.Items.Add(i.Key);
-                FreezeOpID.Items.Add(i.Key);
-                UnfreezeOpID.Items.Add(i.Key);
+            foreach (var node in this.master.nodes){
+                StartOpID.Items.Add(node.Key);
+                IntervalOpID.Items.Add(node.Key);
+                CrashOpID.Items.Add(node.Key);
+                FreezeOpID.Items.Add(node.Key);
+                UnfreezeOpID.Items.Add(node.Key);
             }
 
             //Configure windows position
@@ -65,6 +65,20 @@ namespace PuppetMaster
             //startCmd = new StartCommand(master);
             //intervalCmd = new IntervalCommand(master);
         }
+
+        private void Form1_Closing(object sender, EventArgs e)
+        {
+
+            foreach (var node in this.master.nodes)
+            {
+                for (int i = 0; i < node.Value.Replicas.Count; i++)
+                {
+                    master.Crash(node.Key, i);
+                }
+            }
+
+        }
+
 
         private void ButtonCrash_Click(object sender, EventArgs e)
         {

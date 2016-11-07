@@ -10,6 +10,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Runtime.Remoting.Messaging;
 
 namespace Operator
 {
@@ -255,9 +256,11 @@ namespace Operator
             Console.WriteLine($"{OperatorId} was pinged...");
         }
 
+        [OneWayAttribute()] // call method without answer
         public void Kill()
         {
             Process p = System.Diagnostics.Process.GetCurrentProcess();
+            //Task.Run(()=>p.Kill());
             p.Kill();
         }
 
