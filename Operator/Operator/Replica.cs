@@ -42,6 +42,7 @@ namespace Operator
         public int totalSeenTuples = 0;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
+        private bool processingState = false;
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
@@ -86,16 +87,17 @@ namespace Operator
 
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
-            {
-                Console.WriteLine("Starting...");
-                foreach (var path in inputFiles)
                 {
-                    Task.Run(() => StartProcessingFromFile(path));
-                }
-                Console.WriteLine("Started");
-               
-            };
-
+                    if (!processingState)
+                    {
+                        Console.WriteLine("Starting...");
+                        foreach (var path in inputFiles)
+                        {
+                            Task.Run(() => StartProcessingFromFile(path));
+                        }
+                        Console.WriteLine("Started");
+                    }
+                };
             if (shouldNotify)
                 InitPMLogService();
         }
@@ -114,29 +116,21 @@ namespace Operator
 
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         var ctuple = new CTuple(tupleData);
-                        Console.WriteLine($"Reading {ctuple} from file.");
+                        //Console.WriteLine($"Reading {ctuple} from file.");
                         ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
-                        
                     }
                 }
             } catch (Exception e)
             {
                 Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
             }
-
         }
 
         public void InitPMLogService()
         {
-            //TcpChannel channel = new TcpChannel();
-            //ChannelServices.RegisterChannel(channel, false);
-
-            //logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
-            Console.WriteLine($"InitPMLOGGER >>>>>>> MasterURL: {MasterURL}");
-            if (logger == null) //debug purposes
-            {
-                System.Console.WriteLine("Could not locate server");
-            }
+            TcpChannel channel = new TcpChannel();
+            ChannelServices.RegisterChannel(channel, false);
+            logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
         }
  
         private IEnumerable<CTuple> Process(CTuple tuple)
@@ -146,8 +140,6 @@ namespace Operator
             var resultData = processFunction(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
             
-
-            // debug print 
             Console.WriteLine($"Received {tuple.ToString()}");
             return resultTuples;
         }
@@ -156,8 +148,8 @@ namespace Operator
         {
             foreach (var neighbor in destinations)
             {
-                // if (shouldNotify && logger != null)
-                    //   Notify(tuple);
+                 if (shouldNotify)
+                       Notify(tuple);
                 neighbor.Send(tuple);
             }
         }
@@ -166,11 +158,12 @@ namespace Operator
             try
             {
                 String content = $"tuple {selfURL}, {tuple.ToString()}";
-              //  if(logger!=null)
-                //    logger.Notify(new Record(content, DateTime.Now));
+                if(logger!=null)
+                    logger.Notify(new Record(content, DateTime.Now));
             }
-            catch (SocketException) // Neste caso queremos voltar a tentar ligaçao? -- modelo de faltas...
+            catch (SocketException)
             {
+                
                 System.Console.WriteLine("Could not locate server");
             }
         }
@@ -178,86 +171,95 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            
             var result = Process(tuple);
-            Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
+            //Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
             foreach (var tup in result)
             {
-                Console.WriteLine($"Sending {tup}");
                 SendToAll(tup);
             }
-            
         }
 
         public void Start()
         {
             OnStart.Invoke(this, new EventArgs());
-            /* foreach (NeighbourOperator nop in destinations)
-                nop.Processing = true;
-            
-            foreach (Replica rep in otherReplicas)
-                rep.Start(); */
+            if(destinations != null)
+            {
+                foreach (NeighbourOperator nop in destinations)
+                    nop.Processing = true;
+            }
+            processingState = true;
         }
 
         public void Interval(int mils)
         {
-            Thread.Sleep(mils);
+            if(destinations != null)
+            {
+                foreach (NeighbourOperator nop in destinations)
+                    nop.SetTimeOut(mils);
+            }
         }
-
         public void Status()
         {
             // print state of the system
-            // string status = "[Operator: " + OperatorId + ", Status: " + (isProcessing == true ? "Working ," : "Not Working ,");
-            
-            string status = $"[Operator: {OperatorId} + {destinations?.Count} + {destinations}]";
-            Console.WriteLine($"Status was invoked at operator {status}");
+            string status = "[Operator: " + OperatorId + ", Status: " + (processingState == true ? "Processing" : "Not Processing");
+           
             int neighboursCnt = 0;
             int repCnt = 0;
-            if(destinations!= null && destinations.Count > 0)
+            if (destinations != null && destinations.Count > 0)
+            {
                 foreach (NeighbourOperator neighbour in destinations)
                 {
                     try
                     {
-                        if(neighbour != null)
+                        if (neighbour != null)
                         {
                             var task = Task.Run(() => neighbour.Ping());
                             if (task.Wait(TimeSpan.FromMilliseconds(100)))
                                 neighboursCnt++;
                         }
-                    } catch (NeighbourOperatorIsDeadException e)
+                    }
+                    catch (AggregateException e)
                     {
                         // does nothing
                     }
-
-                    status += $"Neighbours: {(neighboursCnt)} (of {(destinations.Count)}), ";
-                    if (otherReplicas != null && otherReplicas.Count >= 0)
-                        foreach (IReplica irep in otherReplicas)
-                        {
-                            try
-                            {
-                                if (irep != null)
-                                {
-                                    var task = Task.Run(() => irep.Ping());
-                                    if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                                        repCnt++;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                // does nothing
-                            }
-                        }
-
-                    status += $"Working Replicas: {(repCnt+1)} (of {(otherReplicas.Count + 1)})]";
-                    Console.WriteLine(status);
+                    status += $", Neighbours: {(neighboursCnt)} (of {(destinations.Count)})";
                 }
+            }
+            else
+            {
+                status += $", Neighbours: 0 (of 0)";
+            }
+              
+            if (otherReplicas != null && otherReplicas.Count >= 0)
+            {
+                foreach (IReplica irep in otherReplicas)
+                {
+                    try
+                    {
+                        if (irep != null)
+                        {
+                            var task = Task.Run(() => irep.Ping());
+                            if (task.Wait(TimeSpan.FromMilliseconds(100)))
+                                repCnt++;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // does nothing
+                    }
+                }
+                status += $", Working Replicas: {(repCnt)} (of {(otherReplicas?.Count)})";
+            } 
+            else
+            {
+                status += $", Working Replicas: 0 (of 0)";
+            }
+            Console.WriteLine(status);
         }
-
         public void Ping()
         {
-            Console.WriteLine($"{OperatorId} was pinged...");
+           // Console.WriteLine($"{OperatorId} was pinged...");
         }
-
         [OneWayAttribute()] // call method without answer
         public void Kill()
         {
@@ -265,27 +267,21 @@ namespace Operator
             //Task.Run(()=>p.Kill());
             p.Kill();
         }
-
         public void Freeze()
         {
             foreach (NeighbourOperator neighbour in destinations)
                 neighbour.FreezeFlag = false;
 
         }
-
         public void Unfreeze()
         {
             foreach (NeighbourOperator neighbour in destinations)
                 neighbour.FreezeFlag = true;
         }
-
         public int IncrementCount()
         {
             return Interlocked.Increment(ref totalSeenTuples);
         }
-
-
-
         #endregion
     }
 }

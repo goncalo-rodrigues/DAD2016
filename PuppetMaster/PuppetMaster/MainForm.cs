@@ -13,20 +13,19 @@ namespace PuppetMaster
         private void ButtonStart_Click(object sender, EventArgs e)
         {
             string opID = StartOpID.Text;
-            master.Start(opID); // este start apenas tem como proposito começar a processar.. a inicializaçao da estrutura deve ocorrer assim que se inicia o executavel do processo
-
+            String[] args = { opID };
+            master.ExecuteCommand("start", args);
         }
 
         private void ButtonInterval_Click(object sender, EventArgs e)
         {
-            string opID = IntervalOpID.Text;
-            int millisecons = Convert.ToInt32(TextBoxMilliseconds_interval.Text);
-            master.Interval(opID, millisecons);
+            String[] args = { IntervalOpID.Text, TextBoxMilliseconds_interval.Text };
+            master.ExecuteCommand("interval", args);
         }
 
         private void ButtonStatus_Click(object sender, EventArgs e)
         {
-            master.Status();
+            master.ExecuteCommand("status");
         }
 
         public MainForm()
@@ -60,10 +59,6 @@ namespace PuppetMaster
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // init puppetMaster
-            //statusCmd = new StatusCommand(master);
-            //startCmd = new StartCommand(master);
-            //intervalCmd = new IntervalCommand(master);
         }
 
         private void Form1_Closing(object sender, EventArgs e)

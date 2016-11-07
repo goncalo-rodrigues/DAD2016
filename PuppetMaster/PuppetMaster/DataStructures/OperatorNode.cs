@@ -39,7 +39,12 @@ namespace PuppetMaster
         {
             if (Replicas != null)
                 foreach (IReplica irep in Replicas)
-                    irep.Start();
+                {
+                    if(irep != null)
+                    {
+                        irep.Start();
+                    }
+                }
         }
         public void Interval(int mills)
         {
@@ -49,24 +54,25 @@ namespace PuppetMaster
         }
         public void Status()
         {
-            if(Replicas != null)
+            try
             {
-                foreach (IReplica irep in Replicas)
+                if (Replicas != null)
                 {
-                    if (irep != null)
+                    foreach (IReplica irep in Replicas)
                     {
-                        // bug!!!!
-                        irep.Status();
-                    } 
-                    else
-                    {
-                        Console.WriteLine($"Replica from operator {ID} is null");
+                        if (irep != null)
+                        {
+                            irep.Status();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Replica from operator {ID} is null");
+                        }
                     }
                 }
-            }
-            else
+            } catch (NeighbourOperatorIsDeadException noide)
             {
-                Console.WriteLine("Status ain't doin' shit");
+                Console.WriteLine("Caught NeighbourOperatorIsDeadException");
             }
         }
         #endregion

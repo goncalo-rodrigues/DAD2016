@@ -14,6 +14,7 @@ namespace Operator
         public List<IReplica> replicas;
         public RoutingStrategy RoutingStrategy { get; set; }
         private List<CTuple> outBuffer;
+        public int Interval { get; set; } = -1;
         public bool Processing { get; set; } = true;
         public bool FreezeFlag { get; set; } = false;
         public Semantic Semantic { get; set; }
@@ -30,7 +31,6 @@ namespace Operator
 
         public NeighbourOperator(Replica parent, DestinationInfo info, Semantic semantic)
         {
-           
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
             {
@@ -61,8 +61,6 @@ namespace Operator
             Semantic = semantic;
             Thread t = new Thread(FlushEventBuffer);
             t.Start();
-            
-            
         }
 
         public void Deliver(CTuple tuple)
@@ -86,7 +84,6 @@ namespace Operator
                     return;
             }
         }
-
         public void Send(CTuple tuple)
         {
             lock (this)
@@ -121,14 +118,17 @@ namespace Operator
             {
                 while (outBuffer.Count == 0)
                     Monitor.Wait(this);
-
-                // might be src of bug
+                
                 int eventsLeft = outBuffer.Count;
                 if( Processing && !FreezeFlag)
                 {
                     foreach (CTuple s in outBuffer)
                     {
                         Deliver(s);
+                        if (Interval != -1)
+                        {
+                            Thread.Sleep(Interval);
+                        }
                     }
                     outBuffer.Clear();
                 }
@@ -136,6 +136,11 @@ namespace Operator
             }
             Thread.Sleep(10);
             FlushEventBuffer();
+        }
+
+        public void SetTimeOut(int mils)
+        {
+            Interval = mils;
         }
     }
 }
