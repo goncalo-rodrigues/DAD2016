@@ -109,5 +109,10 @@ namespace PuppetMaster
         {
             TextBoxCommands.Text = master.commandList;
         }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

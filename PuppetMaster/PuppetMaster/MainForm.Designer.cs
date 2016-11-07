@@ -61,8 +61,8 @@
             this.TextBoxEventLog = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.TextBoxCommands = new System.Windows.Forms.TextBox();
-            this.NextButton = new System.Windows.Forms.Button();
+            this.RunAllCmdsButton = new System.Windows.Forms.Button();
+            this.NextCmdButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.CrashID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).BeginInit();
@@ -135,20 +135,20 @@
             // LabelTitle1
             // 
             this.LabelTitle1.AutoSize = true;
-            this.LabelTitle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LabelTitle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LabelTitle1.Location = new System.Drawing.Point(29, 21);
             this.LabelTitle1.Name = "LabelTitle1";
-            this.LabelTitle1.Size = new System.Drawing.Size(166, 24);
+            this.LabelTitle1.Size = new System.Drawing.Size(141, 20);
             this.LabelTitle1.TabIndex = 10;
             this.LabelTitle1.Text = "Main Commands";
             // 
             // LabelTitle2
             // 
             this.LabelTitle2.AutoSize = true;
-            this.LabelTitle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LabelTitle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LabelTitle2.Location = new System.Drawing.Point(29, 213);
             this.LabelTitle2.Name = "LabelTitle2";
-            this.LabelTitle2.Size = new System.Drawing.Size(224, 24);
+            this.LabelTitle2.Size = new System.Drawing.Size(190, 20);
             this.LabelTitle2.TabIndex = 11;
             this.LabelTitle2.Text = "Debugging Commands";
             // 
@@ -339,56 +339,56 @@
             this.TextBoxEventLog.Location = new System.Drawing.Point(324, 59);
             this.TextBoxEventLog.Multiline = true;
             this.TextBoxEventLog.Name = "TextBoxEventLog";
-            this.TextBoxEventLog.Size = new System.Drawing.Size(257, 135);
+            this.TextBoxEventLog.Size = new System.Drawing.Size(257, 212);
             this.TextBoxEventLog.TabIndex = 39;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(320, 21);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(110, 24);
+            this.label1.Size = new System.Drawing.Size(95, 20);
             this.label1.TabIndex = 40;
             this.label1.Text = "Event Log:";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(320, 213);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(320, 288);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(148, 24);
+            this.label2.Size = new System.Drawing.Size(243, 20);
             this.label2.TabIndex = 41;
-            this.label2.Text = "Command List:";
+            this.label2.Text = "Execute Commands from file:";
+            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
-            // TextBoxCommands
+            // RunAllCmdsButton
             // 
-            this.TextBoxCommands.BackColor = System.Drawing.SystemColors.MenuText;
-            this.TextBoxCommands.ForeColor = System.Drawing.SystemColors.MenuBar;
-            this.TextBoxCommands.Location = new System.Drawing.Point(324, 249);
-            this.TextBoxCommands.Multiline = true;
-            this.TextBoxCommands.Name = "TextBoxCommands";
-            this.TextBoxCommands.Size = new System.Drawing.Size(257, 135);
-            this.TextBoxCommands.TabIndex = 42;
+            this.RunAllCmdsButton.Location = new System.Drawing.Point(324, 320);
+            this.RunAllCmdsButton.Name = "RunAllCmdsButton";
+            this.RunAllCmdsButton.Size = new System.Drawing.Size(144, 23);
+            this.RunAllCmdsButton.TabIndex = 43;
+            this.RunAllCmdsButton.Text = "Run all commands";
+            this.RunAllCmdsButton.UseVisualStyleBackColor = true;
+            this.RunAllCmdsButton.Click += new System.EventHandler(this.NextButton_Click);
             // 
-            // NextButton
+            // NextCmdButton
             // 
-            this.NextButton.Location = new System.Drawing.Point(553, 216);
-            this.NextButton.Name = "NextButton";
-            this.NextButton.Size = new System.Drawing.Size(28, 23);
-            this.NextButton.TabIndex = 43;
-            this.NextButton.Text = ">>";
-            this.NextButton.UseVisualStyleBackColor = true;
-            this.NextButton.Click += new System.EventHandler(this.NextButton_Click);
+            this.NextCmdButton.Location = new System.Drawing.Point(324, 349);
+            this.NextCmdButton.Name = "NextCmdButton";
+            this.NextCmdButton.Size = new System.Drawing.Size(144, 23);
+            this.NextCmdButton.TabIndex = 44;
+            this.NextCmdButton.Text = "Next Command";
+            this.NextCmdButton.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(593, 396);
-            this.Controls.Add(this.NextButton);
-            this.Controls.Add(this.TextBoxCommands);
+            this.Controls.Add(this.NextCmdButton);
+            this.Controls.Add(this.RunAllCmdsButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.TextBoxEventLog);
@@ -468,8 +468,8 @@
         private System.Windows.Forms.TextBox TextBoxEventLog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox TextBoxCommands;
-        private System.Windows.Forms.Button NextButton;
+        private System.Windows.Forms.Button RunAllCmdsButton;
+        private System.Windows.Forms.Button NextCmdButton;
     }
 }
 
