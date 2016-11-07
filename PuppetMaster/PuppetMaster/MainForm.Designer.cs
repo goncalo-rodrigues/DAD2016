@@ -371,7 +371,7 @@
             this.RunAllCmdsButton.TabIndex = 43;
             this.RunAllCmdsButton.Text = "Run all commands";
             this.RunAllCmdsButton.UseVisualStyleBackColor = true;
-            this.RunAllCmdsButton.Click += new System.EventHandler(this.NextButton_Click);
+            this.RunAllCmdsButton.Click += new System.EventHandler(this.RunAllCmdsButton_Click);
             // 
             // NextCmdButton
             // 
