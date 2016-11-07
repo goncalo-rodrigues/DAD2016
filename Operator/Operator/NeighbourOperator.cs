@@ -67,7 +67,7 @@ namespace Operator
 
         public void Deliver(CTuple tuple)
         {
-            var rep = RoutingStrategy.ChooseReplica();
+            var rep = RoutingStrategy.ChooseReplica(tuple);
             Console.WriteLine($"Delivering Tuple {tuple.ToString()}.");
             switch (Semantic)
             {

@@ -20,7 +20,9 @@ namespace Operator
          
         }
 
-        abstract public IReplica ChooseReplica();
+        abstract public IReplica ChooseReplica(CTuple tuple);
+
+     
     }
 }
 

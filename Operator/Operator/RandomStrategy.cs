@@ -16,7 +16,7 @@ namespace Operator
 
         }
 
-        public override IReplica ChooseReplica()
+        public override IReplica ChooseReplica(CTuple tuple)
         {
             Random rnd = new Random();
             int number = rnd.Next(0, this.list.Count);

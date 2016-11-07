@@ -364,6 +364,7 @@
             this.Controls.Add(this.LabelOpID_start);
             this.Name = "MainForm";
             this.Text = "Puppet Master";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.CrashID)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).EndInit();
