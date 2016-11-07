@@ -445,6 +445,7 @@ namespace PuppetMaster
                 }
         }
 
+        
         public void Crash(string opID,  int index ) {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
