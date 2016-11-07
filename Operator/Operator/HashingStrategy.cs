@@ -15,16 +15,17 @@ namespace Operator
         private int id { get; set; }
         public HashingStrategy(List<IReplica> replicas, int id) : base(replicas)
         {
+            this.id = id;
 
         }
 
         public override IReplica ChooseReplica(CTuple tuple) {
 
             String s = tuple.GetFieldByIndex(id);
-
+          
             int i = s.GetHashCode();
-
-            return (this.list[i%list.Count]);
+           
+            return (this.list[Math.Abs(i) %list.Count]);
 
 
         }
