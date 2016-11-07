@@ -30,6 +30,7 @@ namespace PuppetMaster
         public delegate void PuppetMasterAsyncIntDelegate (int i);
         public delegate void PuppetMasterAsyncVoidDelegate();
 
+        public String commandList;
         public const int PM_SERVICE_PORT = 10001;
         public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger"; // mudar de acordo o necessário
 
@@ -45,7 +46,11 @@ namespace PuppetMaster
             {
                 { "start" , new StartCommand(this) },
                 { "interval", new IntervalCommand(this) },
-                { "status", new StatusCommand(this) }
+                { "status", new StatusCommand(this) },
+                { "crash", new StatusCommand(this) },
+                { "freeze", new StatusCommand(this) },
+                { "unfreeze", new StatusCommand(this) },
+                { "wait", new StatusCommand(this) }
             };
 
             //Configure windows position

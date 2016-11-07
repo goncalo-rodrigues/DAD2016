@@ -51,6 +51,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ACommand.cs" />
+    <Compile Include="Commands\Crash.cs" />
+    <Compile Include="Commands\Freeze.cs" />
+    <Compile Include="Commands\Unfreeze.cs" />
+    <Compile Include="Commands\Wait.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

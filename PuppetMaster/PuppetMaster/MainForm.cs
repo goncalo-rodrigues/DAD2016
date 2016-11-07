@@ -58,10 +58,7 @@ namespace PuppetMaster
         }
 
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-           
-        }
+ 
 
         private void ButtonCrash_Click(object sender, EventArgs e)
         {
@@ -102,6 +99,15 @@ namespace PuppetMaster
                 }
             }
 
+        }
+
+        public void LogEvent(String s) {
+            TextBoxEventLog.Text = TextBoxEventLog.Text + "\n\r" + s; 
+        }
+
+        private void NextButton_Click(object sender, EventArgs e)
+        {
+            TextBoxCommands.Text = master.commandList;
         }
     }
 }
