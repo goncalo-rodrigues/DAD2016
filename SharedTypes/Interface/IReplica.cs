@@ -6,6 +6,7 @@ namespace SharedTypes
     public interface IReplica
     {
         void ProcessAndForward(CTuple tuple);
+        int IncrementCount();
 
         void Start();
         void Interval(int mils);

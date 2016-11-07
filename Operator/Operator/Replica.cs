@@ -20,17 +20,20 @@ namespace Operator
     // A delegate type for handling events from PuppetMaster
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
     
+
     class Replica : MarshalByRefObject, IReplica
     {
+        public bool IsPrimary { get; }
         public string OperatorId { get; }
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
+        public string FunctionString { get; }
 
         private ILogger logger;
 
         private readonly ProcessDelegate processFunction;
         private IList<NeighbourOperator> destinations;
-        private IList<IReplica> otherReplicas;
+        public IList<IReplica> otherReplicas;
         private List<string> inputFiles;
 
 
@@ -49,10 +52,11 @@ namespace Operator
             this.OperatorId = info.ID;
             this.MasterURL = info.MasterURL;
             this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
+            this.FunctionString = info.OperatorFunction;
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
-           
-
+            // primary is the first one in the array
+            this.IsPrimary = rep.Address == info.Addresses[0];
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
 
@@ -88,6 +92,7 @@ namespace Operator
                 {
                     Task.Run(() => StartProcessingFromFile(path));
                 }
+                Console.WriteLine("Started");
                
             };
 
@@ -106,14 +111,14 @@ namespace Operator
                     while ((line = f.ReadLine()) != null)
                     {
                         if (line.StartsWith("%")) continue;
-                        var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                        var ctuple = new CTuple(tupleData);
+                            var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
+                            var ctuple = new CTuple(tupleData);
                         if (routingStrategy.ChooseReplica(ctuple) == this)
                         {
                             ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
+                        
                         }
                     }
-                }
             } catch (Exception e)
             {
                 Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
@@ -134,15 +139,17 @@ namespace Operator
             }
         }
  
-        private CTuple Process(CTuple tuple)
+        private IEnumerable<CTuple> Process(CTuple tuple)
         {
+            IEnumerable<CTuple> resultTuples = null;
             var data = tuple.GetFields();
             var resultData = processFunction(data);
+            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
             
-            var resultTuple = new CTuple(data.ToList());
+            
             // debug print 
-            Console.WriteLine($"Received {tuple.ToString()} <<<>>>> AfterProcessing {resultTuple.ToString()}");
-            return resultTuple;
+            Console.WriteLine($"Received {tuple.ToString()}");
+            return resultTuples;
         }
 
         private void SendToAll(CTuple tuple)
@@ -174,7 +181,12 @@ namespace Operator
             
             var result = Process(tuple);
             Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
-            SendToAll(result);
+            foreach (var tup in result)
+            {
+                Console.WriteLine($"Sending {tup}");
+                SendToAll(tup);
+            }
+            
         }
 
         public void Start()
@@ -265,6 +277,11 @@ namespace Operator
         {
             foreach (NeighbourOperator neighbour in destinations)
                 neighbour.FreezeFlag = true;
+        }
+
+        public int IncrementCount()
+        {
+            return Interlocked.Increment(ref totalSeenTuples);
         }
 
     

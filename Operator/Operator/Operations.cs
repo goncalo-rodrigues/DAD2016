@@ -61,9 +61,20 @@ namespace Operator
 
             return new ProcessDelegate((x) =>
             {
-                // thread-safe
-                int count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
+                int count = -2;
+                // if is primary
+                if (ReplicaInstance.IsPrimary)
+                {
+                    // thread-safe
+                    count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
+                } else
+                // send to primary
+                {
+                    count = ReplicaInstance.otherReplicas[0].IncrementCount();
+                }
+
                 return new IList<string>[] { new List<string> { count.ToString() } };
+
             });
         }
 
