@@ -54,6 +54,7 @@ namespace Operator
             parent.OnStart += (sender, args) =>
             {
                 Processing = true;
+                Console.WriteLine("Proccessing = True");
             };
 
             outBuffer = new List<CTuple>();

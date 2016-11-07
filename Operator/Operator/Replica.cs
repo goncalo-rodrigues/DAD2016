@@ -92,6 +92,7 @@ namespace Operator
                 {
                     Task.Run(() => StartProcessingFromFile(path));
                 }
+                Console.WriteLine("Started");
                
             };
 
@@ -110,12 +111,12 @@ namespace Operator
                     while ((line = f.ReadLine()) != null)
                     {
                         if (line.StartsWith("%")) continue;
-                        if (routingStrategy.ChooseReplica() == this)
-                        {
-                            var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                            var ctuple = new CTuple(tupleData);
-                            ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
-                        }
+
+                        var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
+                        var ctuple = new CTuple(tupleData);
+                        Console.WriteLine($"Reading {ctuple} from file.");
+                        ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
+                        
                     }
                 }
             } catch (Exception e)
@@ -182,6 +183,7 @@ namespace Operator
             Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
             foreach (var tup in result)
             {
+                Console.WriteLine($"Sending {tup}");
                 SendToAll(tup);
             }
             
