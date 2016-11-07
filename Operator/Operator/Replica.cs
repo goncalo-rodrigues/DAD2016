@@ -264,7 +264,7 @@ namespace Operator
         public void Kill()
         {
             Process p = System.Diagnostics.Process.GetCurrentProcess();
-            //Task.Run(()=>p.Kill());
+           
             p.Kill();
         }
 

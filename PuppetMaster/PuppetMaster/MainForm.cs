@@ -60,25 +60,8 @@ namespace PuppetMaster
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // init puppetMaster
-            //statusCmd = new StatusCommand(master);
-            //startCmd = new StartCommand(master);
-            //intervalCmd = new IntervalCommand(master);
+           
         }
-
-        private void Form1_Closing(object sender, EventArgs e)
-        {
-
-            foreach (var node in this.master.nodes)
-            {
-                for (int i = 0; i < node.Value.Replicas.Count; i++)
-                {
-                    master.Crash(node.Key, i);
-                }
-            }
-
-        }
-
 
         private void ButtonCrash_Click(object sender, EventArgs e)
         {
@@ -109,6 +92,16 @@ namespace PuppetMaster
             master.Wait(ms);
         }
 
-    
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            foreach (var node in this.master.nodes)
+            {
+                for (int i = 0; i < node.Value.Replicas.Count; i++)
+                {
+                    master.Crash(node.Key, i);
+                }
+            }
+
+        }
     }
 }
