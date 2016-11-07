@@ -381,6 +381,7 @@
             this.NextCmdButton.TabIndex = 44;
             this.NextCmdButton.Text = "Next Command";
             this.NextCmdButton.UseVisualStyleBackColor = true;
+            this.NextCmdButton.Click += new System.EventHandler(this.NextCmdButton_Click);
             // 
             // MainForm
             // 

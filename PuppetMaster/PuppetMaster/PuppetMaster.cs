@@ -13,6 +13,8 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.InteropServices;
+using System.Collections;
+using System.Runtime.Serialization.Formatters;
 
 namespace PuppetMaster
 { 
@@ -27,18 +29,28 @@ namespace PuppetMaster
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
             int x, int y, int cx, int cy, int flags);
 
-        public delegate void PuppetMasterAsyncIntDelegate (int i);
+        public delegate void PuppetMasterAsyncIntDelegate(int i);
+
+        internal void ExecuteCommand(string command, string[] args = null)
+        {
+            if (!String.IsNullOrEmpty(command))
+            {
+                allCommands[command].Execute(args);
+            }
+        }
+
         public delegate void PuppetMasterAsyncVoidDelegate();
 
         public String commandList;
         public const int PM_SERVICE_PORT = 10001;
-        public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger"; // mudar de acordo o necessário
+        public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger";
 
         private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
+        public string commandsToBeExecuted = null;
        
         public PuppetMaster()
         {
@@ -52,8 +64,7 @@ namespace PuppetMaster
                 { "unfreeze", new StatusCommand(this) },
                 { "wait", new StatusCommand(this) }
             };
-
-            //Configure windows position
+            // Configure windows position
             Console.Title = "PuppetMaster";
             var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
             var width = screen.Width;
@@ -63,6 +74,8 @@ namespace PuppetMaster
 
             InitEventLogging();
         }
+
+        public ILogger getLogger() { return pmLogger; }
 
         #region Initialization
         public void ReadAndInitializeSystem(string config)
@@ -177,16 +190,21 @@ namespace PuppetMaster
             // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
 
+
+            commandsToBeExecuted = config;
+    
         }
 
-    
-
         public void InitEventLogging() {
+            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            provider.TypeFilterLevel = TypeFilterLevel.Full;
+            IDictionary props = new Hashtable();
+            props["PMLoggerPort"] = PM_SERVICE_PORT;
+            TcpChannel channel = new TcpChannel(props, null, provider);
 
-          /*  TcpChannel channel = new TcpChannel(PM_SERVICE_PORT);
             ChannelServices.RegisterChannel(channel, false);
             pmLogger = new PMLoggerService();
-            RemotingServices.Marshal(pmLogger, "PMLogger");*/
+            RemotingServices.Marshal(pmLogger, "PMLogger");
         }
 
      
@@ -331,8 +349,8 @@ namespace PuppetMaster
         {
             var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
             var success = false;
-            var line = reader.ReadLine();
             var done = false;
+            string line = null;
             while (!done && (line = reader.ReadLine()) != null)
             {
                 var match = commandRegex.Match(line);
@@ -354,16 +372,17 @@ namespace PuppetMaster
                 }
                 Console.WriteLine("Executing: " + match.Value);
 
-                pmLogger.Notify((new Record(match.Value, DateTime.Now)));
-                await Task.Run(() => allCommands[command].execute(args));
+                await Task.Run(() => allCommands[command].Execute(args));
                 done = true;
             }
             return success;
         }
 
         // Executes all commands sequentially
-        public async void ExecuteCommands(string commands)
+        public async void ExecuteCommands(string commands = null)
         {
+            if (commands == null)
+                commands = commandsToBeExecuted;
             using (var reader = new StringReader(commands))
             {
                 while (reader.Peek() != -1) await ExecuteNextCommand(reader);
@@ -375,14 +394,12 @@ namespace PuppetMaster
         {
             PuppetMasterAsyncIntDelegate del = (PuppetMasterAsyncIntDelegate)((AsyncResult)ar).AsyncDelegate;
             del.EndInvoke(ar);
-            Console.WriteLine("\r\n**SUCCESS**: Result of the remote AsyncCallBack: "); 
             return;
         }
         public static void PuppetMasterCommandsVoidAsyncCallBack(IAsyncResult ar)
         {
             PuppetMasterAsyncVoidDelegate del = (PuppetMasterAsyncVoidDelegate)((AsyncResult)ar).AsyncDelegate;
             del.EndInvoke(ar);
-            Console.WriteLine("\r\n**SUCCESS**: Result of the remote AsyncCallBack: ");
             return;
         }
 
@@ -403,7 +420,6 @@ namespace PuppetMaster
             {
                 Console.WriteLine($"Due to connection problems, puppet master couldn't invoke Start on operator {opId} ");
             }
-            
         }
         public void Interval(string opId, int x_mls)
         {
@@ -411,11 +427,9 @@ namespace PuppetMaster
             {
                 if (nodes != null && nodes[opId] != null)
                 {
-
                     PuppetMasterAsyncIntDelegate remoteDel = new PuppetMasterAsyncIntDelegate(nodes[opId].Interval);
                      AsyncCallback puppetCallback = new AsyncCallback(PuppetMasterCommandsIntAsyncCallBack);
                     remoteDel.BeginInvoke(x_mls, puppetCallback, null);
-
                 }
             } catch (KeyNotFoundException knfe)
             {
@@ -434,7 +448,6 @@ namespace PuppetMaster
                     {
                         opId = pair.Key;
                         OperatorNode node = pair.Value;
-                        Console.WriteLine($"Invoking status in {opId}");
                         PuppetMasterAsyncVoidDelegate remoteDel = new PuppetMasterAsyncVoidDelegate(node.Status);
                         AsyncCallback puppetCallback = new AsyncCallback(PuppetMasterCommandsVoidAsyncCallBack);
                         remoteDel.BeginInvoke(puppetCallback, null);
@@ -450,28 +463,33 @@ namespace PuppetMaster
                 }
         }
 
-        
         public void Crash(string opID,  int index ) {
+            if (opID != null && index != null)
+            {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
             rep.Kill();
         }
-
+        }
         public void Freeze(string opID, int index)
         {
+            if (opID != null && index != null)
+            {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
             rep.Freeze();
         }
-
+        }
         public void Unfreeze(string opID, int index)
         {
+            if (opID != null && index != null)
+            {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
 
             rep.Unfreeze();
         }
-
+        }
         public void Wait(int ms)
         {
             Thread.Sleep(ms);
@@ -489,7 +507,6 @@ namespace PuppetMaster
         {
             get
             {
-                //Initialize();
                 return GetConsoleWindow();
             }
         }

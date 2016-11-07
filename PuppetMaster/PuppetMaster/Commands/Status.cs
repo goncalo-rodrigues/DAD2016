@@ -7,14 +7,15 @@ namespace PuppetMaster
     {
         public StatusCommand(PuppetMaster master) : base(master, "Status", "Tells all operators to print their current status.") { }
 
-        public override void execute(string[] args)
+        public override void Execute(string[] args)
         {
-            if (args.Length > 1)
+            if (args != null)
             {
                 Console.WriteLine("Usage: " + name);
                 return; // TODO - Throw Exception ?
             }
             master.Status();
+            Notify(args);
         }
     }
 }

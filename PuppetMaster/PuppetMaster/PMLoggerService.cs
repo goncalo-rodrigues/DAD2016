@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace PuppetMaster
 {   
-    // REFACTOR - OPERATOR WILL HAVE SOMETHING SIMILAR
     class PMLoggerService : MarshalByRefObject, ILogger
     {
         private List<Record> eventsBuffer = new List<Record>();

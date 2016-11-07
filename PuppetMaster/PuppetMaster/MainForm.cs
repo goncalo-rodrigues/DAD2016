@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.IO;
 using System.Windows.Forms;
 
 namespace PuppetMaster
@@ -9,24 +9,24 @@ namespace PuppetMaster
        
 
         PuppetMaster master = null;
+        TextReader commandReader = null;
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
             string opID = StartOpID.Text;
-            master.Start(opID); // este start apenas tem como proposito começar a processar.. a inicializaçao da estrutura deve ocorrer assim que se inicia o executavel do processo
-
+            String[] args = { opID };
+            master.ExecuteCommand("start", args);
         }
 
         private void ButtonInterval_Click(object sender, EventArgs e)
         {
-            string opID = IntervalOpID.Text;
-            int millisecons = Convert.ToInt32(TextBoxMilliseconds_interval.Text);
-            master.Interval(opID, millisecons);
+            String[] args = { IntervalOpID.Text, TextBoxMilliseconds_interval.Text };
+            master.ExecuteCommand("interval", args);
         }
 
         private void ButtonStatus_Click(object sender, EventArgs e)
         {
-            master.Status();
+            master.ExecuteCommand("status");
         }
 
         public MainForm()
@@ -55,6 +55,11 @@ namespace PuppetMaster
             var width = screen.Width;
             var height = screen.Height;
 
+            commandReader = new StringReader(master.commandsToBeExecuted);
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
         }
 
 
@@ -114,7 +119,12 @@ namespace PuppetMaster
 
         private void RunAllCmdsButton_Click(object sender, EventArgs e)
         {
+            master.ExecuteCommands();
+        }
 
+        private async void NextCmdButton_Click(object sender, EventArgs e)
+        {
+            var success = await master.ExecuteNextCommand(commandReader);
         }
     }
 }
