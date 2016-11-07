@@ -12,14 +12,16 @@ namespace Operator
     **/
     class RandomStrategy : RoutingStrategy
     {
-        public RandomStrategy(List<IReplica> replicas):base(replicas){
+        public Random random { get; }
+        public RandomStrategy(List<IReplica> replicas, int? seed = null):base(replicas)
+        {
+           random = seed == null ? new Random() : new Random(seed ?? 0);
 
         }
 
         public override IReplica ChooseReplica(CTuple tuple)
         {
-            Random rnd = new Random();
-            int number = rnd.Next(0, this.list.Count);
+            int number = random.Next(0, this.list.Count);
 
             //TODO: verify if "crash flag" is on - after checkpoint
             return this.list[number];

@@ -80,7 +80,7 @@ namespace Operator
                 }
                 else
                 {
-                    this.routingStrategy = new RandomStrategy(allReplicas);
+                    this.routingStrategy = new RandomStrategy(allReplicas, OperatorId.GetHashCode());
                 }
             });
 
@@ -144,13 +144,15 @@ namespace Operator
         private IEnumerable<CTuple> Process(CTuple tuple)
         {
             IEnumerable<CTuple> resultTuples = null;
+            // debug print 
+            Console.WriteLine($"Received {tuple.ToString()}");
+
             var data = tuple.GetFields();
             var resultData = processFunction(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
             
             
-            // debug print 
-            Console.WriteLine($"Received {tuple.ToString()}");
+
             return resultTuples;
         }
 
@@ -185,7 +187,6 @@ namespace Operator
             Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
             foreach (var tup in result)
             {
-                Console.WriteLine($"Sending {tup}");
                 SendToAll(tup);
             }
             
@@ -286,7 +287,12 @@ namespace Operator
             return Interlocked.Increment(ref totalSeenTuples);
         }
 
-    
+        public bool TryAddSeenField(string fieldval)
+        {
+            return SeenTupleFieldValues.TryAdd(fieldval, true);
+        }
+
+
 
         #endregion
     }
