@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.IO;
 using System.Windows.Forms;
 
 namespace PuppetMaster
@@ -9,6 +9,7 @@ namespace PuppetMaster
        
 
         PuppetMaster master = null;
+        TextReader commandReader = null;
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
@@ -54,26 +55,15 @@ namespace PuppetMaster
             var width = screen.Width;
             var height = screen.Height;
 
-        }
+            commandReader = new StringReader(master.commandsToBeExecuted);
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
         }
 
-        private void Form1_Closing(object sender, EventArgs e)
-        {
 
-            foreach (var node in this.master.nodes)
-            {
-                for (int i = 0; i < node.Value.Replicas.Count; i++)
-                {
-                    master.Crash(node.Key, i);
-                }
-            }
-
-        }
-
+ 
 
         private void ButtonCrash_Click(object sender, EventArgs e)
         {
@@ -104,6 +94,37 @@ namespace PuppetMaster
             master.Wait(ms);
         }
 
-    
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            foreach (var node in this.master.nodes)
+            {
+                for (int i = 0; i < node.Value.Replicas.Count; i++)
+                {
+                    master.Crash(node.Key, i);
+                }
+            }
+
+        }
+
+        public void LogEvent(String s) {
+            TextBoxEventLog.Text = TextBoxEventLog.Text + "\n\r" + s; 
+        }
+
+      
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RunAllCmdsButton_Click(object sender, EventArgs e)
+        {
+            master.ExecuteCommands();
+        }
+
+        private async void NextCmdButton_Click(object sender, EventArgs e)
+        {
+            var success = await master.ExecuteNextCommand(commandReader);
+        }
     }
 }

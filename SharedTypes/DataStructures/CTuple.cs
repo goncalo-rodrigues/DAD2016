@@ -21,7 +21,7 @@ namespace SharedTypes
 
         public string GetFieldByIndex(int index)
         {
-            if (index > 0 && index < fields.Count)
+            if (index >= 0 && index < fields.Count)
                 return fields[index];
             else
                 throw new System.IndexOutOfRangeException();

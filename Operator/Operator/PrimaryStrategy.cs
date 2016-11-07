@@ -18,7 +18,7 @@ namespace Operator
         }
 
 
-        public override IReplica ChooseReplica()
+        public override IReplica ChooseReplica(CTuple tuple)
         {
             //TODO: verify if "crash flag" is on - after checkpoint
             //      verify that it exists at least one element in the list

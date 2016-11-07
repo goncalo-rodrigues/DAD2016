@@ -53,6 +53,7 @@ namespace SharedTypes
                     }
                     return obj;
                 });
+                current++;
             }
             var results = await Task.WhenAll(tasks);
             return results;

@@ -70,6 +70,7 @@ namespace Operator
                     info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
                     .ToList();
                 var allReplicas = (new List<IReplica>(otherReplicas));
+                Console.WriteLine("initialize routing");
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
                     this.routingStrategy = new PrimaryStrategy(allReplicas);
@@ -80,7 +81,7 @@ namespace Operator
                 }
                 else
                 {
-                    this.routingStrategy = new RandomStrategy(allReplicas);
+                    this.routingStrategy = new RandomStrategy(allReplicas, OperatorId.GetHashCode());
                 }
             });
 
@@ -108,16 +109,18 @@ namespace Operator
             {
                 using (var f = new StreamReader(path))
                 {
-                    
+
                     string line = null;
                     while ((line = f.ReadLine()) != null)
                     {
+                        
                         if (line.StartsWith("%")) continue;
-
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         var ctuple = new CTuple(tupleData);
-                        //Console.WriteLine($"Reading {ctuple} from file.");
-                        ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
+                        if (routingStrategy.ChooseReplica(ctuple) == null)
+                        {
+                            ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
+                        }   
                     }
                 }
             } catch (Exception e)
@@ -136,6 +139,9 @@ namespace Operator
         private IEnumerable<CTuple> Process(CTuple tuple)
         {
             IEnumerable<CTuple> resultTuples = null;
+            // debug print 
+            Console.WriteLine($"Received {tuple.ToString()}");
+
             var data = tuple.GetFields();
             var resultData = processFunction(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
@@ -264,7 +270,7 @@ namespace Operator
         public void Kill()
         {
             Process p = System.Diagnostics.Process.GetCurrentProcess();
-            //Task.Run(()=>p.Kill());
+           
             p.Kill();
         }
         public void Freeze()
@@ -282,6 +288,14 @@ namespace Operator
         {
             return Interlocked.Increment(ref totalSeenTuples);
         }
+
+        public bool TryAddSeenField(string fieldval)
+        {
+            return SeenTupleFieldValues.TryAdd(fieldval, true);
+        }
+
+
+
         #endregion
     }
 }

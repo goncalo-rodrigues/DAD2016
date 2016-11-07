@@ -41,6 +41,7 @@ namespace PuppetMaster
 
         public delegate void PuppetMasterAsyncVoidDelegate();
 
+        public String commandList;
         public const int PM_SERVICE_PORT = 10001;
         public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger";
 
@@ -49,14 +50,19 @@ namespace PuppetMaster
         public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
         public bool fullLogging = false;
         public Semantic semantic;
-       
+        public string commandsToBeExecuted = null;
+
         public PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
             {
                 { "start" , new StartCommand(this) },
                 { "interval", new IntervalCommand(this) },
-                { "status", new StatusCommand(this) }
+                { "status", new StatusCommand(this) },
+                { "crash", new StatusCommand(this) },
+                { "freeze", new StatusCommand(this) },
+                { "unfreeze", new StatusCommand(this) },
+                { "wait", new StatusCommand(this) }
             };
             // Configure windows position
             Console.Title = "PuppetMaster";
@@ -183,6 +189,10 @@ namespace PuppetMaster
 
             // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
+
+
+            commandsToBeExecuted = config;
+           
         }
 
         public void InitEventLogging() {
@@ -339,8 +349,8 @@ namespace PuppetMaster
         {
             var commandRegex = new Regex(@"^[ \t]*(?<command>\w+)(?<args>([ \t]+\w+)*)\s*$", RegexOptions.IgnoreCase);
             var success = false;
-            var line = reader.ReadLine();
             var done = false;
+            string line = null;
             while (!done && (line = reader.ReadLine()) != null)
             {
                 var match = commandRegex.Match(line);
@@ -369,8 +379,10 @@ namespace PuppetMaster
         }
 
         // Executes all commands sequentially
-        public async void ExecuteCommands(string commands)
+        public async void ExecuteCommands(string commands = null)
         {
+            if (commands == null)
+                commands = commandsToBeExecuted;
             using (var reader = new StringReader(commands))
             {
                 while (reader.Peek() != -1) await ExecuteNextCommand(reader);
