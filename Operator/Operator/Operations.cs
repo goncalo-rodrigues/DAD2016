@@ -48,10 +48,20 @@ namespace Operator
                 var isUnique = seenTuples.TryAdd(x[fieldNumber], true);
                 if (isUnique)
                 {
-                    return new IList<string>[0];
+                    if (!ReplicaInstance.IsPrimary)
+                    {
+                        // send to primary replica the seen field and check if it is actually unique
+                        isUnique = ReplicaInstance.otherReplicas[0].TryAddSeenField(x[fieldNumber]);
+                        if (!isUnique)
+                        {
+                            return new IList<string>[0];
+                        }
+                    }
+                    return new IList<string>[] { x };
                 } else
                 {
-                    return new IList<string>[] { x };
+                    return new IList<string>[0];
+                    
                 }
             });
         }

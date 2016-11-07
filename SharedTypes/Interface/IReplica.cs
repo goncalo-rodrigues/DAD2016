@@ -6,7 +6,7 @@ namespace SharedTypes
     public interface IReplica
     {
         void ProcessAndForward(CTuple tuple);
-        int IncrementCount();
+        
 
         void Start();
         void Interval(int mils);
@@ -16,5 +16,9 @@ namespace SharedTypes
         void Kill();
         void Freeze();
         void Unfreeze();
+
+        // State cooperation
+        int IncrementCount();
+        bool TryAddSeenField(string filter);
     }
 }

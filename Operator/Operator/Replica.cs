@@ -183,7 +183,6 @@ namespace Operator
             Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
             foreach (var tup in result)
             {
-                Console.WriteLine($"Sending {tup}");
                 SendToAll(tup);
             }
             
@@ -282,6 +281,11 @@ namespace Operator
         public int IncrementCount()
         {
             return Interlocked.Increment(ref totalSeenTuples);
+        }
+
+        public bool TryAddSeenField(string fieldval)
+        {
+            return SeenTupleFieldValues.TryAdd(fieldval, true);
         }
 
 
