@@ -468,6 +468,7 @@ namespace PuppetMaster
         {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
+
             rep.Unfreeze();
         }
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    class NeighbourOperator 
+    class NeighbourOperator
     {
         public List<IReplica> replicas;
         public RoutingStrategy RoutingStrategy { get; set; }
@@ -30,7 +30,7 @@ namespace Operator
 
         public NeighbourOperator(Replica parent, DestinationInfo info, Semantic semantic)
         {
-           
+
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
             {
@@ -48,7 +48,7 @@ namespace Operator
                 {
                     RoutingStrategy = new RandomStrategy(replicas);
                 }
-                
+
             });
 
             parent.OnStart += (sender, args) =>
@@ -61,8 +61,8 @@ namespace Operator
             Semantic = semantic;
             Thread t = new Thread(FlushEventBuffer);
             t.Start();
-            
-            
+
+
         }
 
         public void Deliver(CTuple tuple)
@@ -98,7 +98,7 @@ namespace Operator
         public void Ping()
         {
             // Just need to ensure that one replica is alive
-            if(replicas!=null && replicas.Count > 0)
+            if (replicas != null && replicas.Count > 0)
                 foreach (IReplica rep in replicas)
                 {
                     try
@@ -119,12 +119,15 @@ namespace Operator
         {
             lock (this)
             {
-                while (outBuffer.Count == 0)
+
+
+                while (outBuffer.Count == 0 || FreezeFlag)
                     Monitor.Wait(this);
+                   
 
                 // might be src of bug
                 int eventsLeft = outBuffer.Count;
-                if( Processing && !FreezeFlag)
+                if (Processing)
                 {
                     foreach (CTuple s in outBuffer)
                     {
@@ -137,5 +140,18 @@ namespace Operator
             Thread.Sleep(10);
             FlushEventBuffer();
         }
+
+        public void Unfreeze()
+        {
+            lock(this)
+            {
+                FreezeFlag = false;
+                Monitor.Pulse(this);
+
+            }
+           
+        }
+
+
     }
 }
