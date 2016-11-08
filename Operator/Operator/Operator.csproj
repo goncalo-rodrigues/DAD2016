@@ -45,8 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HashingStrategy.cs" />
+    <Compile Include="Destination.cs" />
     <Compile Include="NeighbourOperator.cs" />
     <Compile Include="Operations.cs" />
+    <Compile Include="OutputFile.cs" />
     <Compile Include="PrimaryStrategy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

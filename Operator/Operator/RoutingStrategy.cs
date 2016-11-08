@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    abstract class RoutingStrategy
+    public abstract class RoutingStrategy
     {
         private object p1;
         private object p2;

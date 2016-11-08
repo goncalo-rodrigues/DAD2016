@@ -21,7 +21,7 @@ namespace Operator
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
     
 
-    class Replica : MarshalByRefObject, IReplica
+    public class Replica : MarshalByRefObject, IReplica
     {
         public bool IsPrimary { get; }
         public string OperatorId { get; }
@@ -32,7 +32,7 @@ namespace Operator
         private ILogger logger;
 
         private readonly ProcessDelegate processFunction;
-        private IList<NeighbourOperator> destinations;
+        private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
         private List<string> inputFiles;
 
@@ -61,7 +61,14 @@ namespace Operator
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
 
-            this.destinations = info.OutputOperators.Select((dstInfo) => new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
+            if (info.OutputOperators == null || info.OutputOperators.Count == 0)
+            {
+                // it is an output operator
+                this.destinations = new List<Destination> { new OutputFile(this, info.Semantic) };
+            } else
+            {
+                this.destinations = info.OutputOperators.Select((dstInfo) => (Destination)new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
+            }
             var initTask = Task.Run(async () =>
             {
                 this.otherReplicas =
@@ -117,6 +124,7 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         var ctuple = new CTuple(tupleData);
+                        Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == null)
                         {
                             ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
@@ -151,7 +159,6 @@ namespace Operator
             var resultData = processFunction(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
             
-            Console.WriteLine($"Received {tuple.ToString()}");
             return resultTuples;
         }
 
@@ -194,7 +201,7 @@ namespace Operator
             OnStart.Invoke(this, new EventArgs());
             if(destinations != null)
             {
-                foreach (NeighbourOperator nop in destinations)
+                foreach (Destination nop in destinations)
                     nop.Processing = true;
             }
             processingState = true;
@@ -204,7 +211,7 @@ namespace Operator
         {
             if(destinations != null)
             {
-                foreach (NeighbourOperator nop in destinations)
+                foreach (Destination nop in destinations)
                     nop.SetTimeOut(mils);
             }
         }
@@ -217,7 +224,7 @@ namespace Operator
             int repCnt = 0;
             if (destinations != null && destinations.Count > 0)
             {
-                foreach (NeighbourOperator neighbour in destinations)
+                foreach (Destination neighbour in destinations)
                 {
                     try
                     {
@@ -274,13 +281,13 @@ namespace Operator
         public void Kill()
         {
             Process p = System.Diagnostics.Process.GetCurrentProcess();
-           
+            //p.Dispose();
             p.Kill();
         }
         public void Freeze()
         {
             if (destinations != null) { 
-                foreach (NeighbourOperator neighbour in destinations)
+                foreach (Destination neighbour in destinations)
                     neighbour.FreezeFlag = true;
             }
 
@@ -289,7 +296,7 @@ namespace Operator
         {
             if (destinations != null)
             {
-                foreach (NeighbourOperator neighbour in destinations)
+                foreach (Destination neighbour in destinations)
                 {
                     neighbour.Unfreeze();
                 }
