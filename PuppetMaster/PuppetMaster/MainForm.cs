@@ -91,8 +91,9 @@ namespace PuppetMaster
 
         private void ButtonWait_Click(object sender, EventArgs e)
         {
-            int ms = Convert.ToInt32(TextBoxWait.Text);
-            master.Wait(ms);
+            string ms = TextBoxWait.Text;
+            String[] args = { ms };
+            master.ExecuteCommand("unfreeze", args);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -100,8 +101,9 @@ namespace PuppetMaster
             foreach (var node in this.master.nodes)
             {
                 for (int i = 0; i < node.Value.Replicas.Count; i++)
-                {
-                    master.Crash(node.Key, i);
+                { 
+                    String[] args = { node.Key, i.ToString() };
+                    master.ExecuteCommand("crash", args);
                 }
             }
 
