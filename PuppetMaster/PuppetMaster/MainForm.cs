@@ -36,12 +36,13 @@ namespace PuppetMaster
 
         public MainForm(PuppetMaster master)
         {
-            
+
             this.master = master;
-         
+
             InitializeComponent();
 
-            foreach (var node in this.master.nodes){
+            foreach (var node in this.master.nodes)
+            {
                 StartOpID.Items.Add(node.Key);
                 IntervalOpID.Items.Add(node.Key);
                 CrashOpID.Items.Add(node.Key);
@@ -56,36 +57,36 @@ namespace PuppetMaster
             var height = screen.Height;
 
             commandReader = new StringReader(master.commandsToBeExecuted);
+        }
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
         }
-
-
- 
-
         private void ButtonCrash_Click(object sender, EventArgs e)
         {
             string opID = CrashOpID.Text;
-            int index = Convert.ToInt32(CrashID.Value);
-            master.Crash(opID,index);
 
+            String[] args = { opID };
+            master.ExecuteCommand("crash", args);
         }
 
         private void ButtonFreeze_Click(object sender, EventArgs e)
         {
             string opID = FreezeOpID.Text;
-            int index = Convert.ToInt32(FreezeID.Value);
-            master.Freeze(opID, index); 
+            string index = FreezeID.Value.ToString();
+            String[] args = { opID, index };
+           
+            master.ExecuteCommand("freeze", args);
         }
 
         private void ButtonUnfreeze_Click(object sender, EventArgs e)
         {
-            string opID = UnfreezeOpID.Text;
-            int index = Convert.ToInt32(UnfreezeID.Value);
-            master.Unfreeze(opID, index);
+            string opID = FreezeOpID.Text;
+            string index = UnfreezeID.Value.ToString();
+            String[] args = { opID, index };
 
+            master.ExecuteCommand("unfreeze", args);
         }
 
         private void ButtonWait_Click(object sender, EventArgs e)

@@ -7,14 +7,15 @@ namespace PuppetMaster
     {
         public CrashCommand(PuppetMaster master) : base(master, "Crash", "Force a process to crash") { }
 
-        public override void execute(string[] args)
+        public override void Execute(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
                 Console.WriteLine("Usage: " + name + "<operator_id> <rep_id>");
                 return; 
             }
-            master.Crash(args[1], Int32.Parse(args[2]));
+            master.Crash(args[0], Int32.Parse(args[1]));
+            Notify(args);
         }
     }
 }

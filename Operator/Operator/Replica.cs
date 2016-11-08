@@ -134,6 +134,8 @@ namespace Operator
             TcpChannel channel = new TcpChannel();
             ChannelServices.RegisterChannel(channel, false);
             logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
+            if (logger != null)
+                Console.WriteLine("Could not locate server");
         }
  
         private IEnumerable<CTuple> Process(CTuple tuple)
@@ -169,7 +171,6 @@ namespace Operator
             }
             catch (SocketException)
             {
-                
                 System.Console.WriteLine("Could not locate server");
             }
         }

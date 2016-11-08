@@ -59,10 +59,10 @@ namespace PuppetMaster
                 { "start" , new StartCommand(this) },
                 { "interval", new IntervalCommand(this) },
                 { "status", new StatusCommand(this) },
-                { "crash", new StatusCommand(this) },
-                { "freeze", new StatusCommand(this) },
-                { "unfreeze", new StatusCommand(this) },
-                { "wait", new StatusCommand(this) }
+                { "crash", new CrashCommand(this) },
+                { "freeze", new FreezeCommand(this) },
+                { "unfreeze", new UnfreezeCommand(this) },
+                { "wait", new WaitCommand(this) }
             };
             // Configure windows position
             Console.Title = "PuppetMaster";

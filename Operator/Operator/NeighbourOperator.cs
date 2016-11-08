@@ -137,7 +137,6 @@ namespace Operator
             Thread.Sleep(10);
             FlushEventBuffer();
         }
-
         public void SetTimeOut(int mils)
         {
             Interval = mils;

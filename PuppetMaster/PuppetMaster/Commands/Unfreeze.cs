@@ -4,21 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuppetMaster.Commands
+namespace PuppetMaster
 {
-    class Unfreeze : ACommand
+    class UnfreezeCommand : ACommand
     {
 
-        public Unfreeze(PuppetMaster master) : base(master, "Unfreeze", "Put a freeze process back to normal operation") { }
+        public UnfreezeCommand(PuppetMaster master) : base(master, "Unfreeze", "Put a frozen process back to normal operation") { }
 
-        public override void execute(string[] args)
+        public override void Execute(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
                 Console.WriteLine("Usage: " + name + "<operator_id> <rep_id>");
-                return; // TODO - Throw Exception ?
+                return; 
             }
-            master.Freeze(args[1], Int32.Parse(args[2]));
+            master.Freeze(args[0], Int32.Parse(args[0]));
+            Notify(args);
         }
     }
 }
