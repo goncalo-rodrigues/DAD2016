@@ -133,9 +133,12 @@ namespace Operator
         {
             TcpChannel channel = new TcpChannel();
             ChannelServices.RegisterChannel(channel, false);
+
             logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
             if (logger != null)
-                Console.WriteLine("Could not locate server");
+                Console.WriteLine($"Could not locate server >>>> {MasterURL}");
+            else
+                Console.WriteLine($"PMLogService was successfully initiated: {logger}");
         }
  
         private IEnumerable<CTuple> Process(CTuple tuple)
@@ -276,17 +279,21 @@ namespace Operator
         }
         public void Freeze()
         {
-            foreach (NeighbourOperator neighbour in destinations)
-                neighbour.FreezeFlag = true;
+            if (destinations != null) { 
+                foreach (NeighbourOperator neighbour in destinations)
+                    neighbour.FreezeFlag = true;
+            }
 
         }
         public void Unfreeze()
         {
-            foreach (NeighbourOperator neighbour in destinations)
+            if (destinations != null)
             {
-                neighbour.Unfreeze();
+                foreach (NeighbourOperator neighbour in destinations)
+                {
+                    neighbour.Unfreeze();
+                }
             }
-                
             
         }
         public int IncrementCount()

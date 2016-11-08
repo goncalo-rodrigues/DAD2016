@@ -18,7 +18,7 @@ namespace PuppetMaster
                 Console.WriteLine("Usage: " + name + "<operator_id> <rep_id>");
                 return; 
             }
-            master.Freeze(args[0], Int32.Parse(args[0]));
+            master.Freeze(args[0], Int32.Parse(args[1]));
             Notify(args);
         }
     }

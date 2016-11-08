@@ -142,6 +142,7 @@ namespace Operator
         public void SetTimeOut(int mils)
         {
             Interval = mils;
+        }
 
         public void Unfreeze()
         {

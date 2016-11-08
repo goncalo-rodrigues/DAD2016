@@ -189,10 +189,7 @@ namespace PuppetMaster
 
             // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
-
-
             commandsToBeExecuted = config;
-    
         }
 
         public void InitEventLogging() {
@@ -205,6 +202,7 @@ namespace PuppetMaster
             ChannelServices.RegisterChannel(channel, false);
             pmLogger = new PMLoggerService();
             RemotingServices.Marshal(pmLogger, "PMLogger");
+            Console.WriteLine("Logger was successfully initialized");
         }
 
      
@@ -473,7 +471,7 @@ namespace PuppetMaster
         }
         public void Freeze(string opID, int index)
         {
-            if (opID != null && index != null)
+            if (!String.IsNullOrEmpty(opID) && index >= 0 && index < nodes?.Count)
             {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
@@ -482,7 +480,7 @@ namespace PuppetMaster
         }
         public void Unfreeze(string opID, int index)
         {
-            if (opID != null && index != null)
+            if (!String.IsNullOrEmpty(opID) && index >= 0 && index < nodes?.Count)
             {
             OperatorNode op = nodes[opID];
             IReplica rep = op.Replicas[index];
