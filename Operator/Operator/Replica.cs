@@ -19,7 +19,8 @@ namespace Operator
     public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
     // A delegate type for handling events from PuppetMaster
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
-    
+    public delegate void PuppetMasterIntervalEventHandler(object sender, IntervalEventArgs e);
+
 
     public class Replica : MarshalByRefObject, IReplica
     {
@@ -46,6 +47,9 @@ namespace Operator
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
+        public event PuppetMasterEventHandler OnFreeze;
+        public event PuppetMasterEventHandler OnUnfreeze;
+        public event PuppetMasterIntervalEventHandler OnInterval;
 
         public Replica(ReplicaCreationInfo rep)
         {
@@ -168,7 +172,7 @@ namespace Operator
             {
                  if (shouldNotify)
                        Notify(tuple);
-                neighbor.Send(tuple);
+                Task.Run(()=>neighbor.Send(tuple));
             }
         }
 
@@ -198,22 +202,20 @@ namespace Operator
 
         public void Start()
         {
-            OnStart.Invoke(this, new EventArgs());
-            if(destinations != null)
+            if (!processingState)
             {
-                foreach (Destination nop in destinations)
-                    nop.Processing = true;
+                OnStart.Invoke(this, new EventArgs());
+                processingState = true;
             }
-            processingState = true;
+
         }
 
         public void Interval(int mils)
         {
-            if(destinations != null)
+            OnInterval?.Invoke(this, new IntervalEventArgs
             {
-                foreach (Destination nop in destinations)
-                    nop.SetTimeOut(mils);
-            }
+                Millis = mils
+            });
         }
         public void Status()
         {
@@ -286,23 +288,16 @@ namespace Operator
         }
         public void Freeze()
         {
-            if (destinations != null) { 
-                foreach (Destination neighbour in destinations)
-                    neighbour.FreezeFlag = true;
-            }
+            OnFreeze?.Invoke(this, new EventArgs());
 
         }
         public void Unfreeze()
         {
-            if (destinations != null)
-            {
-                foreach (Destination neighbour in destinations)
-                {
-                    neighbour.Unfreeze();
-                }
-            }
-            
+            Console.WriteLine("Invoking unfreeze");
+            Console.WriteLine(OnUnfreeze);
+            OnUnfreeze?.Invoke(this, new EventArgs());
         }
+        #region COOPERATION
         public int IncrementCount()
         {
             return Interlocked.Increment(ref totalSeenTuples);
@@ -312,9 +307,13 @@ namespace Operator
         {
             return SeenTupleFieldValues.TryAdd(fieldval, true);
         }
-
-
+        #endregion COOPERATION
 
         #endregion
+    }
+
+    public class IntervalEventArgs : EventArgs
+    {
+        public int Millis { get; set; }
     }
 }

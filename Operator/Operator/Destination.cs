@@ -29,21 +29,18 @@ namespace Operator
 
         public Destination(Replica parent, Semantic semantic)
         {
-            parent.OnStart += (sender, args) =>
-            {
-                lock(this)
-                {
-                    Console.WriteLine("Proccessing = True");
-                    Processing = true;
-                    Monitor.Pulse(this);
-                }
-            };
+
+            parent.OnFreeze += Parent_OnFreeze;
+            parent.OnUnfreeze += Parent_OnUnfreeze;
+            parent.OnStart += Parent_OnStart;
+            parent.OnInterval += Parent_OnInterval;
 
             outBuffer = new List<CTuple>();
             Semantic = semantic;
             Thread t = new Thread(FlushEventBuffer);
             t.Start();
         }
+
         public void Send(CTuple tuple)
         {
             lock (this)
@@ -52,6 +49,7 @@ namespace Operator
                 Monitor.Pulse(this);
             }
         }
+
         private void FlushEventBuffer()
         {
             lock (this)
@@ -80,22 +78,41 @@ namespace Operator
             FlushEventBuffer();
         }
 
-        #region DEBUGCOMMANDS
-        public void SetTimeOut(int mils)
-        {
-            Interval = mils;
-        }
-        public void Unfreeze()
+        #region PARENTCOMMANDS
+        private void Parent_OnStart(object sender, EventArgs e)
         {
             lock (this)
             {
+                Processing = true;
+                Monitor.Pulse(this);
+            }
+        }
+
+        private void Parent_OnUnfreeze(object sender, EventArgs e)
+        {
+            Console.WriteLine("Unfreezing...");
+            lock (this)
+            {
+                Console.WriteLine("Unfrozen");
                 FreezeFlag = false;
                 Monitor.Pulse(this);
 
             }
-
         }
-        #endregion DEBUGCOMMANDS
+
+        private void Parent_OnFreeze(object sender, EventArgs e)
+        {
+            FreezeFlag = true;
+        }
+
+        private void Parent_OnInterval(object sender, IntervalEventArgs e)
+        {
+            Interval = e.Millis;
+        }
+
+
+
+        #endregion PARENTCOMMANDS
 
         #region ABSTRACT
         public abstract void Deliver(CTuple tuple);
