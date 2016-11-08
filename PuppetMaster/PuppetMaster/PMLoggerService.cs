@@ -33,7 +33,11 @@ namespace PuppetMaster
                 foreach (Record s in eventsBuffer)
                 {
                     // TODO - have to change the method when we have a GUI 
-                    Console.WriteLine(s.ToString());
+                    // Console.WriteLine(s.ToString());
+                    //f.Invoke(new delUF(UpdateMyForm), new object[] { param1, param2 });
+                    //delUF is a public delegate with the same parameters and return values as UpdateMyForm
+                    // param1, param2 are the hypothetical parameters of method UpdateMyForm
+
                 }
                 eventsBuffer.Clear();
                 Monitor.Pulse(this);

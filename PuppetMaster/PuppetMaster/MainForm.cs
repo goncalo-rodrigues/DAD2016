@@ -66,8 +66,9 @@ namespace PuppetMaster
         private void ButtonCrash_Click(object sender, EventArgs e)
         {
             string opID = CrashOpID.Text;
+            string index = CrashID.Value.ToString();
 
-            String[] args = { opID };
+            String[] args = { opID, index };
             master.ExecuteCommand("crash", args);
         }
 
@@ -128,6 +129,11 @@ namespace PuppetMaster
         private async void NextCmdButton_Click(object sender, EventArgs e)
         {
             var success = await master.ExecuteNextCommand(commandReader);
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

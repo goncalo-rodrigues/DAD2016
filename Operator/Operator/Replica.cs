@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -111,7 +109,7 @@ namespace Operator
                     }
                 };
             if (shouldNotify)
-                InitPMLogService();
+                destinations.Add(new LoggerDestination(this, info.Semantic, MasterURL));
         }
 
         public void StartProcessingFromFile(string path)
@@ -141,17 +139,6 @@ namespace Operator
             }
         }
 
-        public void InitPMLogService()
-        {
-            TcpChannel channel = new TcpChannel();
-            ChannelServices.RegisterChannel(channel, false);
-
-            logger = (ILogger) Activator.GetObject(typeof(ILogger), MasterURL);
-            if (logger != null)
-                Console.WriteLine($"Could not locate server >>>> {MasterURL}");
-            else
-                Console.WriteLine($"PMLogService was successfully initiated: {logger}");
-        }
  
         private IEnumerable<CTuple> Process(CTuple tuple)
         {
@@ -170,8 +157,6 @@ namespace Operator
         {
             foreach (var neighbor in destinations)
             {
-                 if (shouldNotify)
-                       Notify(tuple);
                 Task.Run(()=>neighbor.Send(tuple));
             }
         }
@@ -224,24 +209,40 @@ namespace Operator
            
             int neighboursCnt = 0;
             int repCnt = 0;
-            if (destinations != null && destinations.Count > 0)
+
+            IList<Destination> onlyOperatorDestinations = null;
+            if (!shouldNotify || destinations == null)
             {
-                foreach (Destination neighbour in destinations)
+
+                onlyOperatorDestinations = destinations;
+            }
+            else
+            {
+
+                // remove logger from destinations (https://msdn.microsoft.com/en-us/library/bb549418.aspx)
+                onlyOperatorDestinations = destinations.Where((dest, index) => index < destinations?.Count - 1).ToList();
+            }
+
+            if (onlyOperatorDestinations != null && onlyOperatorDestinations.Count > 0)
+            {
+                foreach (Destination neighbour in onlyOperatorDestinations)
                 {
                     try
                     {
-                        if (neighbour != null)
+                        if (neighbour != null )
                         {
                             var task = Task.Run(() => neighbour.Ping());
                             if (task.Wait(TimeSpan.FromMilliseconds(100)))
+                            {
                                 neighboursCnt++;
+                            }
                         }
                     }
                     catch (AggregateException e)
                     {
                         // does nothing
                     }
-                    status += $", Neighbours: {(neighboursCnt)} (of {(destinations.Count)})";
+                    status += $", Neighbours: {(neighboursCnt)} (of {(onlyOperatorDestinations.Count)})";
                 }
             }
             else

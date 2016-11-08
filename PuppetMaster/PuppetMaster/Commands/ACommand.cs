@@ -16,7 +16,12 @@ namespace PuppetMaster
             this.name = name;
             this.help = help;
         }
-        public abstract void Execute(string[] args);
+        public void Execute(string[] args)
+        {
+            Dispatch(args);
+            Notify(args);
+        }
+
         public void Notify(string[] args)
         {
             string toNotify = "";
@@ -29,5 +34,7 @@ namespace PuppetMaster
             }
             master?.getLogger()?.Notify((new Record($"{name} {toNotify}", DateTime.Now)));
         }
+
+        public abstract void Dispatch(string[] args);
     }
 }

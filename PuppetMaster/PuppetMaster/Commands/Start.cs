@@ -7,14 +7,13 @@ namespace PuppetMaster
     {
         public StartCommand(PuppetMaster master) : base(master, "Start", "Tells the operator to start processing tuples." ){ }
 
-        public override void Execute(string[] args)
+        public override void Dispatch(string[] args)
         {
             if (args.Length < 1) {
                 Console.WriteLine("Usage: " +  name + "<operator_id>");
                 return; // TODO - Throw Exception ?
             }
             master.Start(args[0]);
-            Notify(args);
         }
     }
 }

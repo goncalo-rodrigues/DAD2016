@@ -11,7 +11,7 @@ namespace PuppetMaster
 
         public WaitCommand(PuppetMaster master) : base(master, "Wait", "Instructs the pupper master to sleep for x milliseconds") { }
 
-        public override void Execute(string[] args)
+        public override void Dispatch(string[] args)
         {
             if (args.Length < 1)
             {
@@ -19,7 +19,6 @@ namespace PuppetMaster
                 return;
             }
             master.Wait(Int32.Parse(args[0]));
-            Notify(args);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace PuppetMaster
 
         public UnfreezeCommand(PuppetMaster master) : base(master, "Unfreeze", "Put a frozen process back to normal operation") { }
 
-        public override void Execute(string[] args)
+        public override void Dispatch(string[] args)
         {
             if (args.Length < 2)
             {
@@ -19,7 +19,6 @@ namespace PuppetMaster
                 return; 
             }
             master.Unfreeze(args[0], Int32.Parse(args[1]));
-            Notify(args);
         }
     }
 }

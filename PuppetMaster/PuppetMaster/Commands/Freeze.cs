@@ -11,7 +11,7 @@ namespace PuppetMaster
 
         public FreezeCommand(PuppetMaster master) : base(master, "Freeze", "Simulate a delay in the process") { }
 
-        public override void Execute(string[] args)
+        public override void Dispatch(string[] args)
         {
             if (args.Length < 2)
             {
@@ -19,7 +19,6 @@ namespace PuppetMaster
                 return; // TODO - Throw Exception ?
             }
             master.Freeze(args[0], Int32.Parse(args[1]));
-            Notify(args);
         }
     }
 }

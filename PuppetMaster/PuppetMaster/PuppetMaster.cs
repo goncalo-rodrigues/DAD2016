@@ -196,16 +196,19 @@ namespace PuppetMaster
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
             provider.TypeFilterLevel = TypeFilterLevel.Full;
             IDictionary props = new Hashtable();
-            props["PMLoggerPort"] = PM_SERVICE_PORT;
-            TcpChannel channel = new TcpChannel(props, null, provider);
+            props["port"] = PM_SERVICE_PORT;
+            //timeout for puppetMaster responses
+            props["timeout"] = 500; // in milliseconds
 
+            TcpChannel channel = new TcpChannel(props, null, provider);
             ChannelServices.RegisterChannel(channel, false);
             pmLogger = new PMLoggerService();
             RemotingServices.Marshal(pmLogger, "PMLogger");
             Console.WriteLine("Logger was successfully initialized");
+
         }
 
-     
+
         public string Serialize(OperatorInfo info, string address)
         {
             var rep = new ReplicaCreationInfo
@@ -461,36 +464,50 @@ namespace PuppetMaster
                 }
         }
 
-        public void Crash(string opID,  int index ) {
-            if (opID != null && index != null)
+        public void Crash(string opID,  int index )
+        {
+            if (!String.IsNullOrEmpty(opID))
             {
-            OperatorNode op = nodes[opID];
-            IReplica rep = op.Replicas[index];
-            rep.Kill();
-        }
+                OperatorNode op = nodes[opID];
+                if (index >= 0 && index < op.Replicas.Count)
+                {
+                    IReplica rep = op.Replicas[index];
+                    rep.Kill();
+                }
+            }
         }
         public void Freeze(string opID, int index)
         {
-            if (!String.IsNullOrEmpty(opID) && index >= 0 && index < nodes?.Count)
+            if (!String.IsNullOrEmpty(opID))
             {
-            OperatorNode op = nodes[opID];
-            IReplica rep = op.Replicas[index];
-            rep.Freeze();
-        }
+                OperatorNode op = nodes[opID];
+                if (index >= 0 && index < op.Replicas.Count)
+                {
+                    IReplica rep = op.Replicas[index];
+                    rep.Freeze();
+                }
+            }
         }
         public void Unfreeze(string opID, int index)
         {
-            if (!String.IsNullOrEmpty(opID) && index >= 0 && index < nodes?.Count)
+            if (!String.IsNullOrEmpty(opID))
             {
-            OperatorNode op = nodes[opID];
-            IReplica rep = op.Replicas[index];
-
-            rep.Unfreeze();
-        }
+                OperatorNode op = nodes[opID];
+                if (index >= 0 && index < op.Replicas.Count)
+                {
+                    IReplica rep = op.Replicas[index];
+                    rep.Unfreeze();
+                }
+            }
         }
         public void Wait(int ms)
         {
-            Thread.Sleep(ms);
+            if (ms >= 0)
+            {
+                Console.WriteLine($"PupperMaster is pausing for {ms} seconds...");
+                Thread.Sleep(ms);
+                Console.WriteLine($"PupperMaster is leaving pause.");
+            }
         }
 
         #endregion

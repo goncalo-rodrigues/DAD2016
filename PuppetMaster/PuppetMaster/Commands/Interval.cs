@@ -7,7 +7,7 @@ namespace PuppetMaster
     {
         public IntervalCommand(PuppetMaster master) : base(master, "Interval", "Tells the operator to sleep for x milliseconds between to consecutive events.") { }
 
-        public override void Execute(string[] args)
+        public override void Dispatch(string[] args)
         {
             if (args.Length < 1)
             {
@@ -15,7 +15,6 @@ namespace PuppetMaster
                 return; // TODO - Throw Exception ?
             }
             master.Interval(args[0], Int32.Parse(args[1]));
-            Notify(args);
         }
     }
 }
