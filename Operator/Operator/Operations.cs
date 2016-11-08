@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -92,19 +93,51 @@ namespace Operator
         {
             if (comparator == "=")
             {
-                return new ProcessDelegate((x) => x[fieldNumber] == value ? new IList<string>[] { x } : new IList<string>[0]);
+                return new ProcessDelegate((x) =>
+                {
+                    if (Regex.Match(value, @"^\d+$").Success && Regex.Match(x[fieldNumber], @"^\d+$").Success)
+                    {
+                        return Int32.Parse(x[fieldNumber]) == Int32.Parse(value) ? new IList<string>[] { x } : new IList<string>[0];
+                    } else
+                    {
+                        return x[fieldNumber].CompareTo(value) == 0 ? new IList<string>[] { x } : new IList<string>[0];
+                    }
+                    
+                });
+            
             } else if (comparator == ">")
             {
-                return new ProcessDelegate((x) => x[fieldNumber].CompareTo(value) > 0 ? new IList<string>[] { x } : new IList<string>[0]);
+                return new ProcessDelegate((x) =>
+                {
+                    if (Regex.Match(value, @"^\d+$").Success && Regex.Match(x[fieldNumber], @"^\d+$").Success)
+                    {
+                        return Int32.Parse(x[fieldNumber]) > Int32.Parse(value) ? new IList<string>[] { x } : new IList<string>[0];
+                    }
+                    else
+                    {
+                        return x[fieldNumber].CompareTo(value) > 0 ? new IList<string>[] { x } : new IList<string>[0];
+                    }
+
+                });
             } else if (comparator == "<")
             {
-                return new ProcessDelegate((x) => x[fieldNumber].CompareTo(value) > 0 ? new IList<string>[] { x } : new IList<string>[0]);
+                return new ProcessDelegate((x) =>
+                {
+                    if (Regex.Match(value, @"^\d+$").Success && Regex.Match(x[fieldNumber], @"^\d+$").Success)
+                    {
+                        return Int32.Parse(x[fieldNumber]) < Int32.Parse(value) ? new IList<string>[] { x } : new IList<string>[0];
+                    }
+                    else
+                    {
+                        return x[fieldNumber].CompareTo(value) < 0 ? new IList<string>[] { x } : new IList<string>[0];
+                    }
+
+                });
             } else
             {
                 return GetDupOperation();
             }
         }
-
         public static ProcessDelegate GetCustomOperation(string dll, string className, string method)
         {
             var dllFile = new FileInfo(dll);
