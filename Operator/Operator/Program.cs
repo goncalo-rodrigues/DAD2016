@@ -44,7 +44,7 @@ namespace Operator
 
             if (rep == null) loop();
             var info = rep.Operator;
-            Console.WriteLine($"Successfully initiated this replica of {info.ID}.");
+            Console.WriteLine($"Successfully initiated replica {info.Addresses.IndexOf(rep.Address)} of {info.ID}.");
             string address = rep.Address;
 
 
