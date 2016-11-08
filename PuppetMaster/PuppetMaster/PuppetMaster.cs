@@ -17,7 +17,7 @@ using System.Collections;
 using System.Runtime.Serialization.Formatters;
 
 namespace PuppetMaster
-{
+{ 
 
     public class PuppetMaster
     {
@@ -51,7 +51,7 @@ namespace PuppetMaster
         public bool fullLogging = false;
         public Semantic semantic;
         public string commandsToBeExecuted = null;
-
+       
         public PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
@@ -192,7 +192,7 @@ namespace PuppetMaster
 
 
             commandsToBeExecuted = config;
-           
+    
         }
 
         public void InitEventLogging() {
@@ -462,32 +462,33 @@ namespace PuppetMaster
                     }
                 }
         }
-        
+
         public void Crash(string opID,  int index ) {
             if (opID != null && index != null)
             {
-                OperatorNode op = nodes[opID];
-                IReplica rep = op.Replicas[index];
-                rep.Kill();
-            }
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Kill();
+        }
         }
         public void Freeze(string opID, int index)
         {
             if (opID != null && index != null)
             {
-                OperatorNode op = nodes[opID];
-                IReplica rep = op.Replicas[index];
-                rep.Freeze();
-            }
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+            rep.Freeze();
+        }
         }
         public void Unfreeze(string opID, int index)
         {
             if (opID != null && index != null)
             {
-                OperatorNode op = nodes[opID];
-                IReplica rep = op.Replicas[index];
-                rep.Unfreeze();
-            }
+            OperatorNode op = nodes[opID];
+            IReplica rep = op.Replicas[index];
+
+            rep.Unfreeze();
+        }
         }
         public void Wait(int ms)
         {

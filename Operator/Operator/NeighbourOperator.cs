@@ -95,7 +95,7 @@ namespace Operator
         public void Ping()
         {
             // Just need to ensure that one replica is alive
-            if(replicas!=null && replicas.Count > 0)
+            if (replicas != null && replicas.Count > 0)
                 foreach (IReplica rep in replicas)
                 {
                     try
@@ -116,11 +116,13 @@ namespace Operator
         {
             lock (this)
             {
-                while (outBuffer.Count == 0)
+
+
+                while (outBuffer.Count == 0 || FreezeFlag)
                     Monitor.Wait(this);
-                
+
                 int eventsLeft = outBuffer.Count;
-                if( Processing && !FreezeFlag)
+                if (Processing)
                 {
                     foreach (CTuple s in outBuffer)
                     {
@@ -140,6 +142,18 @@ namespace Operator
         public void SetTimeOut(int mils)
         {
             Interval = mils;
+
+        public void Unfreeze()
+        {
+            lock(this)
+            {
+                FreezeFlag = false;
+                Monitor.Pulse(this);
+
+            }
+           
         }
+
+
     }
 }

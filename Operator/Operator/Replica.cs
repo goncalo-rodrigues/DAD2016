@@ -277,13 +277,17 @@ namespace Operator
         public void Freeze()
         {
             foreach (NeighbourOperator neighbour in destinations)
-                neighbour.FreezeFlag = false;
+                neighbour.FreezeFlag = true;
 
         }
         public void Unfreeze()
         {
             foreach (NeighbourOperator neighbour in destinations)
-                neighbour.FreezeFlag = true;
+            {
+                neighbour.Unfreeze();
+            }
+                
+            
         }
         public int IncrementCount()
         {
