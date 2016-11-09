@@ -112,7 +112,7 @@ namespace PuppetMaster
         }
 
         public void LogEvent(String s) {
-            TextBoxEventLog.Text = TextBoxEventLog.Text + "\r\n" + s; 
+            RichTBEventLog.Text = RichTBEventLog.Text + "\r\n" + s; 
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -135,9 +135,10 @@ namespace PuppetMaster
 
         }
 
-        private void TextBoxEventLog_TextChanged(object sender, EventArgs e)
+        private void RichTBEventLog_TextChanged(object sender, EventArgs e)
         {
-
+            RichTBEventLog.SelectionStart = RichTBEventLog.Text.Length;
+            RichTBEventLog.ScrollToCaret();
         }
     }
 }

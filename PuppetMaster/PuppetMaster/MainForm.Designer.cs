@@ -58,11 +58,11 @@
             this.UnfreezeOpID = new System.Windows.Forms.ComboBox();
             this.StartOpID = new System.Windows.Forms.ComboBox();
             this.IntervalOpID = new System.Windows.Forms.ComboBox();
-            this.TextBoxEventLog = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.RunAllCmdsButton = new System.Windows.Forms.Button();
             this.NextCmdButton = new System.Windows.Forms.Button();
+            this.RichTBEventLog = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.CrashID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).BeginInit();
@@ -332,17 +332,6 @@
             this.IntervalOpID.Size = new System.Drawing.Size(101, 21);
             this.IntervalOpID.TabIndex = 38;
             // 
-            // TextBoxEventLog
-            // 
-            this.TextBoxEventLog.BackColor = System.Drawing.SystemColors.MenuText;
-            this.TextBoxEventLog.ForeColor = System.Drawing.SystemColors.MenuBar;
-            this.TextBoxEventLog.Location = new System.Drawing.Point(324, 59);
-            this.TextBoxEventLog.Multiline = true;
-            this.TextBoxEventLog.Name = "TextBoxEventLog";
-            this.TextBoxEventLog.Size = new System.Drawing.Size(257, 212);
-            this.TextBoxEventLog.TabIndex = 39;
-            this.TextBoxEventLog.TextChanged += new System.EventHandler(this.TextBoxEventLog_TextChanged);
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -385,16 +374,27 @@
             this.NextCmdButton.UseVisualStyleBackColor = true;
             this.NextCmdButton.Click += new System.EventHandler(this.NextCmdButton_Click);
             // 
+            // RichTBEventLog
+            // 
+            this.RichTBEventLog.BackColor = System.Drawing.SystemColors.MenuText;
+            this.RichTBEventLog.ForeColor = System.Drawing.SystemColors.Window;
+            this.RichTBEventLog.Location = new System.Drawing.Point(315, 58);
+            this.RichTBEventLog.Name = "RichTBEventLog";
+            this.RichTBEventLog.Size = new System.Drawing.Size(248, 227);
+            this.RichTBEventLog.TabIndex = 45;
+            this.RichTBEventLog.Text = "";
+            this.RichTBEventLog.TextChanged += new System.EventHandler(this.RichTBEventLog_TextChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(593, 396);
+            this.ClientSize = new System.Drawing.Size(582, 396);
+            this.Controls.Add(this.RichTBEventLog);
             this.Controls.Add(this.NextCmdButton);
             this.Controls.Add(this.RunAllCmdsButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.TextBoxEventLog);
             this.Controls.Add(this.IntervalOpID);
             this.Controls.Add(this.StartOpID);
             this.Controls.Add(this.UnfreezeOpID);
@@ -469,11 +469,11 @@
         private System.Windows.Forms.ComboBox UnfreezeOpID;
         private System.Windows.Forms.ComboBox StartOpID;
         private System.Windows.Forms.ComboBox IntervalOpID;
-        private System.Windows.Forms.TextBox TextBoxEventLog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button RunAllCmdsButton;
         private System.Windows.Forms.Button NextCmdButton;
+        private System.Windows.Forms.RichTextBox RichTBEventLog;
     }
 }
 
