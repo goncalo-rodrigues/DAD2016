@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -132,7 +133,12 @@ namespace PuppetMaster
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-
+            var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+            var width = screen.Width;
+            var height = screen.Height;
+            this.Size = new Size(width/2, height-(height / 3));
+            this.Location = new Point(0, height / 3);
+            this.StartPosition = FormStartPosition.Manual;
         }
 
         private void RichTBEventLog_TextChanged(object sender, EventArgs e)

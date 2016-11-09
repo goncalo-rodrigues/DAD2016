@@ -71,7 +71,7 @@
             // LabelOpID_start
             // 
             this.LabelOpID_start.AutoSize = true;
-            this.LabelOpID_start.Location = new System.Drawing.Point(29, 62);
+            this.LabelOpID_start.Location = new System.Drawing.Point(29, 53);
             this.LabelOpID_start.Name = "LabelOpID_start";
             this.LabelOpID_start.Size = new System.Drawing.Size(62, 13);
             this.LabelOpID_start.TabIndex = 0;
@@ -79,7 +79,7 @@
             // 
             // ButtonStart
             // 
-            this.ButtonStart.Location = new System.Drawing.Point(214, 62);
+            this.ButtonStart.Location = new System.Drawing.Point(214, 53);
             this.ButtonStart.Name = "ButtonStart";
             this.ButtonStart.Size = new System.Drawing.Size(75, 23);
             this.ButtonStart.TabIndex = 1;
@@ -89,7 +89,7 @@
             // 
             // ButtonInterval
             // 
-            this.ButtonInterval.Location = new System.Drawing.Point(215, 132);
+            this.ButtonInterval.Location = new System.Drawing.Point(215, 123);
             this.ButtonInterval.Name = "ButtonInterval";
             this.ButtonInterval.Size = new System.Drawing.Size(75, 23);
             this.ButtonInterval.TabIndex = 4;
@@ -100,7 +100,7 @@
             // LabelOpID_interval
             // 
             this.LabelOpID_interval.AutoSize = true;
-            this.LabelOpID_interval.Location = new System.Drawing.Point(30, 99);
+            this.LabelOpID_interval.Location = new System.Drawing.Point(30, 90);
             this.LabelOpID_interval.Name = "LabelOpID_interval";
             this.LabelOpID_interval.Size = new System.Drawing.Size(62, 13);
             this.LabelOpID_interval.TabIndex = 3;
@@ -108,7 +108,7 @@
             // 
             // TextBoxMilliseconds_interval
             // 
-            this.TextBoxMilliseconds_interval.Location = new System.Drawing.Point(99, 134);
+            this.TextBoxMilliseconds_interval.Location = new System.Drawing.Point(99, 125);
             this.TextBoxMilliseconds_interval.Name = "TextBoxMilliseconds_interval";
             this.TextBoxMilliseconds_interval.Size = new System.Drawing.Size(100, 20);
             this.TextBoxMilliseconds_interval.TabIndex = 7;
@@ -116,7 +116,7 @@
             // LabelMilliseconds_interval
             // 
             this.LabelMilliseconds_interval.AutoSize = true;
-            this.LabelMilliseconds_interval.Location = new System.Drawing.Point(30, 134);
+            this.LabelMilliseconds_interval.Location = new System.Drawing.Point(30, 125);
             this.LabelMilliseconds_interval.Name = "LabelMilliseconds_interval";
             this.LabelMilliseconds_interval.Size = new System.Drawing.Size(67, 13);
             this.LabelMilliseconds_interval.TabIndex = 6;
@@ -124,7 +124,7 @@
             // 
             // ButtonStatus
             // 
-            this.ButtonStatus.Location = new System.Drawing.Point(214, 171);
+            this.ButtonStatus.Location = new System.Drawing.Point(214, 162);
             this.ButtonStatus.Name = "ButtonStatus";
             this.ButtonStatus.Size = new System.Drawing.Size(75, 23);
             this.ButtonStatus.TabIndex = 8;
@@ -136,7 +136,7 @@
             // 
             this.LabelTitle1.AutoSize = true;
             this.LabelTitle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LabelTitle1.Location = new System.Drawing.Point(29, 21);
+            this.LabelTitle1.Location = new System.Drawing.Point(29, 12);
             this.LabelTitle1.Name = "LabelTitle1";
             this.LabelTitle1.Size = new System.Drawing.Size(141, 20);
             this.LabelTitle1.TabIndex = 10;
@@ -146,7 +146,7 @@
             // 
             this.LabelTitle2.AutoSize = true;
             this.LabelTitle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LabelTitle2.Location = new System.Drawing.Point(29, 213);
+            this.LabelTitle2.Location = new System.Drawing.Point(29, 204);
             this.LabelTitle2.Name = "LabelTitle2";
             this.LabelTitle2.Size = new System.Drawing.Size(190, 20);
             this.LabelTitle2.TabIndex = 11;
@@ -154,7 +154,7 @@
             // 
             // ButtonCrash
             // 
-            this.ButtonCrash.Location = new System.Drawing.Point(214, 247);
+            this.ButtonCrash.Location = new System.Drawing.Point(214, 238);
             this.ButtonCrash.Name = "ButtonCrash";
             this.ButtonCrash.Size = new System.Drawing.Size(75, 23);
             this.ButtonCrash.TabIndex = 13;
@@ -165,7 +165,7 @@
             // LabelCrashOpID
             // 
             this.LabelCrashOpID.AutoSize = true;
-            this.LabelCrashOpID.Location = new System.Drawing.Point(28, 253);
+            this.LabelCrashOpID.Location = new System.Drawing.Point(28, 244);
             this.LabelCrashOpID.Name = "LabelCrashOpID";
             this.LabelCrashOpID.Size = new System.Drawing.Size(62, 13);
             this.LabelCrashOpID.TabIndex = 12;
@@ -173,7 +173,7 @@
             // 
             // ButtonFreeze
             // 
-            this.ButtonFreeze.Location = new System.Drawing.Point(215, 283);
+            this.ButtonFreeze.Location = new System.Drawing.Point(215, 274);
             this.ButtonFreeze.Name = "ButtonFreeze";
             this.ButtonFreeze.Size = new System.Drawing.Size(75, 23);
             this.ButtonFreeze.TabIndex = 16;
@@ -184,7 +184,7 @@
             // LabelFreezeOpID
             // 
             this.LabelFreezeOpID.AutoSize = true;
-            this.LabelFreezeOpID.Location = new System.Drawing.Point(30, 283);
+            this.LabelFreezeOpID.Location = new System.Drawing.Point(30, 274);
             this.LabelFreezeOpID.Name = "LabelFreezeOpID";
             this.LabelFreezeOpID.Size = new System.Drawing.Size(62, 13);
             this.LabelFreezeOpID.TabIndex = 15;
@@ -192,7 +192,7 @@
             // 
             // ButtonUnfreeze
             // 
-            this.ButtonUnfreeze.Location = new System.Drawing.Point(214, 319);
+            this.ButtonUnfreeze.Location = new System.Drawing.Point(214, 310);
             this.ButtonUnfreeze.Name = "ButtonUnfreeze";
             this.ButtonUnfreeze.Size = new System.Drawing.Size(75, 23);
             this.ButtonUnfreeze.TabIndex = 19;
@@ -203,7 +203,7 @@
             // LabelUnfreezeOpID
             // 
             this.LabelUnfreezeOpID.AutoSize = true;
-            this.LabelUnfreezeOpID.Location = new System.Drawing.Point(29, 319);
+            this.LabelUnfreezeOpID.Location = new System.Drawing.Point(29, 310);
             this.LabelUnfreezeOpID.Name = "LabelUnfreezeOpID";
             this.LabelUnfreezeOpID.Size = new System.Drawing.Size(62, 13);
             this.LabelUnfreezeOpID.TabIndex = 18;
@@ -211,14 +211,14 @@
             // 
             // TextBoxWait
             // 
-            this.TextBoxWait.Location = new System.Drawing.Point(97, 354);
+            this.TextBoxWait.Location = new System.Drawing.Point(97, 345);
             this.TextBoxWait.Name = "TextBoxWait";
             this.TextBoxWait.Size = new System.Drawing.Size(100, 20);
             this.TextBoxWait.TabIndex = 23;
             // 
             // ButtonWait
             // 
-            this.ButtonWait.Location = new System.Drawing.Point(214, 354);
+            this.ButtonWait.Location = new System.Drawing.Point(214, 345);
             this.ButtonWait.Name = "ButtonWait";
             this.ButtonWait.Size = new System.Drawing.Size(75, 23);
             this.ButtonWait.TabIndex = 22;
@@ -229,7 +229,7 @@
             // LabelWait
             // 
             this.LabelWait.AutoSize = true;
-            this.LabelWait.Location = new System.Drawing.Point(29, 354);
+            this.LabelWait.Location = new System.Drawing.Point(29, 345);
             this.LabelWait.Name = "LabelWait";
             this.LabelWait.Size = new System.Drawing.Size(67, 13);
             this.LabelWait.TabIndex = 21;
@@ -238,7 +238,7 @@
             // LabelStatus
             // 
             this.LabelStatus.AutoSize = true;
-            this.LabelStatus.Location = new System.Drawing.Point(29, 176);
+            this.LabelStatus.Location = new System.Drawing.Point(29, 167);
             this.LabelStatus.Name = "LabelStatus";
             this.LabelStatus.Size = new System.Drawing.Size(166, 13);
             this.LabelStatus.TabIndex = 24;
@@ -247,7 +247,7 @@
             // LabelCrashIndex
             // 
             this.LabelCrashIndex.AutoSize = true;
-            this.LabelCrashIndex.Location = new System.Drawing.Point(146, 250);
+            this.LabelCrashIndex.Location = new System.Drawing.Point(146, 241);
             this.LabelCrashIndex.Name = "LabelCrashIndex";
             this.LabelCrashIndex.Size = new System.Drawing.Size(19, 13);
             this.LabelCrashIndex.TabIndex = 25;
@@ -256,7 +256,7 @@
             // LabelFreezeID
             // 
             this.LabelFreezeID.AutoSize = true;
-            this.LabelFreezeID.Location = new System.Drawing.Point(146, 288);
+            this.LabelFreezeID.Location = new System.Drawing.Point(146, 279);
             this.LabelFreezeID.Name = "LabelFreezeID";
             this.LabelFreezeID.Size = new System.Drawing.Size(19, 13);
             this.LabelFreezeID.TabIndex = 27;
@@ -265,7 +265,7 @@
             // LabelUnfreezeID
             // 
             this.LabelUnfreezeID.AutoSize = true;
-            this.LabelUnfreezeID.Location = new System.Drawing.Point(146, 325);
+            this.LabelUnfreezeID.Location = new System.Drawing.Point(146, 316);
             this.LabelUnfreezeID.Name = "LabelUnfreezeID";
             this.LabelUnfreezeID.Size = new System.Drawing.Size(19, 13);
             this.LabelUnfreezeID.TabIndex = 29;
@@ -273,21 +273,21 @@
             // 
             // CrashID
             // 
-            this.CrashID.Location = new System.Drawing.Point(171, 250);
+            this.CrashID.Location = new System.Drawing.Point(171, 241);
             this.CrashID.Name = "CrashID";
             this.CrashID.Size = new System.Drawing.Size(37, 20);
             this.CrashID.TabIndex = 31;
             // 
             // FreezeID
             // 
-            this.FreezeID.Location = new System.Drawing.Point(172, 286);
+            this.FreezeID.Location = new System.Drawing.Point(172, 277);
             this.FreezeID.Name = "FreezeID";
             this.FreezeID.Size = new System.Drawing.Size(37, 20);
             this.FreezeID.TabIndex = 32;
             // 
             // UnfreezeID
             // 
-            this.UnfreezeID.Location = new System.Drawing.Point(172, 320);
+            this.UnfreezeID.Location = new System.Drawing.Point(172, 311);
             this.UnfreezeID.Name = "UnfreezeID";
             this.UnfreezeID.Size = new System.Drawing.Size(37, 20);
             this.UnfreezeID.TabIndex = 33;
@@ -295,7 +295,7 @@
             // CrashOpID
             // 
             this.CrashOpID.FormattingEnabled = true;
-            this.CrashOpID.Location = new System.Drawing.Point(97, 250);
+            this.CrashOpID.Location = new System.Drawing.Point(97, 241);
             this.CrashOpID.Name = "CrashOpID";
             this.CrashOpID.Size = new System.Drawing.Size(43, 21);
             this.CrashOpID.TabIndex = 34;
@@ -303,7 +303,7 @@
             // FreezeOpID
             // 
             this.FreezeOpID.FormattingEnabled = true;
-            this.FreezeOpID.Location = new System.Drawing.Point(97, 283);
+            this.FreezeOpID.Location = new System.Drawing.Point(97, 274);
             this.FreezeOpID.Name = "FreezeOpID";
             this.FreezeOpID.Size = new System.Drawing.Size(43, 21);
             this.FreezeOpID.TabIndex = 35;
@@ -311,7 +311,7 @@
             // UnfreezeOpID
             // 
             this.UnfreezeOpID.FormattingEnabled = true;
-            this.UnfreezeOpID.Location = new System.Drawing.Point(97, 319);
+            this.UnfreezeOpID.Location = new System.Drawing.Point(97, 310);
             this.UnfreezeOpID.Name = "UnfreezeOpID";
             this.UnfreezeOpID.Size = new System.Drawing.Size(43, 21);
             this.UnfreezeOpID.TabIndex = 36;
@@ -319,7 +319,7 @@
             // StartOpID
             // 
             this.StartOpID.FormattingEnabled = true;
-            this.StartOpID.Location = new System.Drawing.Point(97, 62);
+            this.StartOpID.Location = new System.Drawing.Point(97, 53);
             this.StartOpID.Name = "StartOpID";
             this.StartOpID.Size = new System.Drawing.Size(102, 21);
             this.StartOpID.TabIndex = 37;
@@ -327,7 +327,7 @@
             // IntervalOpID
             // 
             this.IntervalOpID.FormattingEnabled = true;
-            this.IntervalOpID.Location = new System.Drawing.Point(98, 99);
+            this.IntervalOpID.Location = new System.Drawing.Point(98, 90);
             this.IntervalOpID.Name = "IntervalOpID";
             this.IntervalOpID.Size = new System.Drawing.Size(101, 21);
             this.IntervalOpID.TabIndex = 38;
@@ -336,7 +336,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(320, 21);
+            this.label1.Location = new System.Drawing.Point(320, 12);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(95, 20);
             this.label1.TabIndex = 40;
@@ -346,7 +346,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(320, 288);
+            this.label2.Location = new System.Drawing.Point(29, 382);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(243, 20);
             this.label2.TabIndex = 41;
@@ -355,7 +355,7 @@
             // 
             // RunAllCmdsButton
             // 
-            this.RunAllCmdsButton.Location = new System.Drawing.Point(324, 320);
+            this.RunAllCmdsButton.Location = new System.Drawing.Point(33, 414);
             this.RunAllCmdsButton.Name = "RunAllCmdsButton";
             this.RunAllCmdsButton.Size = new System.Drawing.Size(144, 23);
             this.RunAllCmdsButton.TabIndex = 43;
@@ -366,7 +366,7 @@
             // NextCmdButton
             // 
             this.NextCmdButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.NextCmdButton.Location = new System.Drawing.Point(324, 349);
+            this.NextCmdButton.Location = new System.Drawing.Point(33, 443);
             this.NextCmdButton.Name = "NextCmdButton";
             this.NextCmdButton.Size = new System.Drawing.Size(144, 23);
             this.NextCmdButton.TabIndex = 44;
@@ -378,9 +378,9 @@
             // 
             this.RichTBEventLog.BackColor = System.Drawing.SystemColors.MenuText;
             this.RichTBEventLog.ForeColor = System.Drawing.SystemColors.Window;
-            this.RichTBEventLog.Location = new System.Drawing.Point(315, 58);
+            this.RichTBEventLog.Location = new System.Drawing.Point(315, 49);
             this.RichTBEventLog.Name = "RichTBEventLog";
-            this.RichTBEventLog.Size = new System.Drawing.Size(248, 227);
+            this.RichTBEventLog.Size = new System.Drawing.Size(311, 399);
             this.RichTBEventLog.TabIndex = 45;
             this.RichTBEventLog.Text = "";
             this.RichTBEventLog.TextChanged += new System.EventHandler(this.RichTBEventLog_TextChanged);
@@ -389,7 +389,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(582, 396);
+            this.ClientSize = new System.Drawing.Size(670, 486);
             this.Controls.Add(this.RichTBEventLog);
             this.Controls.Add(this.NextCmdButton);
             this.Controls.Add(this.RunAllCmdsButton);

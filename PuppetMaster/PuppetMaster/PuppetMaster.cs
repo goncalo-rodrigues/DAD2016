@@ -69,8 +69,7 @@ namespace PuppetMaster
             var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
             var width = screen.Width;
             var height = screen.Height;
-            SetWindowPosition(0, 0, width/2, height/5);
-
+            SetWindowPosition(0, 0, width/2, height/3);
 
             InitEventLogging();
         }
