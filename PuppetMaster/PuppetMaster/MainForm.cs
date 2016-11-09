@@ -10,6 +10,7 @@ namespace PuppetMaster
 
         PuppetMaster master = null;
         TextReader commandReader = null;
+        public delegate void UpdateFormDelegate(string message);
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
@@ -36,9 +37,9 @@ namespace PuppetMaster
 
         public MainForm(PuppetMaster master)
         {
-
             this.master = master;
 
+            PMLoggerService.form = this;
             InitializeComponent();
 
             foreach (var node in this.master.nodes)
@@ -111,10 +112,8 @@ namespace PuppetMaster
         }
 
         public void LogEvent(String s) {
-            TextBoxEventLog.Text = TextBoxEventLog.Text + "\n\r" + s; 
+            TextBoxEventLog.Text = TextBoxEventLog.Text + "\r\n" + s; 
         }
-
-      
 
         private void label2_Click(object sender, EventArgs e)
         {
@@ -132,6 +131,11 @@ namespace PuppetMaster
         }
 
         private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextBoxEventLog_TextChanged(object sender, EventArgs e)
         {
 
         }

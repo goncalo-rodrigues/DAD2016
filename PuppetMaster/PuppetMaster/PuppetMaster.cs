@@ -43,7 +43,7 @@ namespace PuppetMaster
 
         public String commandList;
         public const int PM_SERVICE_PORT = 10001;
-        public const string PM_SERVICE_URL = "tcp://localhost:10001/PMLogger";
+        public string PM_SERVICE_URL = $"tcp://localhost:{PM_SERVICE_PORT}/PMLogger";
 
         private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;

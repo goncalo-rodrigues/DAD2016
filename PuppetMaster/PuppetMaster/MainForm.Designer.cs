@@ -341,6 +341,7 @@
             this.TextBoxEventLog.Name = "TextBoxEventLog";
             this.TextBoxEventLog.Size = new System.Drawing.Size(257, 212);
             this.TextBoxEventLog.TabIndex = 39;
+            this.TextBoxEventLog.TextChanged += new System.EventHandler(this.TextBoxEventLog_TextChanged);
             // 
             // label1
             // 
@@ -375,6 +376,7 @@
             // 
             // NextCmdButton
             // 
+            this.NextCmdButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.NextCmdButton.Location = new System.Drawing.Point(324, 349);
             this.NextCmdButton.Name = "NextCmdButton";
             this.NextCmdButton.Size = new System.Drawing.Size(144, 23);

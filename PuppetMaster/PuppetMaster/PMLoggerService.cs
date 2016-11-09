@@ -10,6 +10,7 @@ namespace PuppetMaster
 {   
     class PMLoggerService : MarshalByRefObject, ILogger
     {
+        public static MainForm form;
         private List<Record> eventsBuffer = new List<Record>();
 
         public PMLoggerService()
@@ -33,10 +34,11 @@ namespace PuppetMaster
                 foreach (Record s in eventsBuffer)
                 {
                     // TODO - have to change the method when we have a GUI 
-                    // Console.WriteLine(s.ToString());
-                    //f.Invoke(new delUF(UpdateMyForm), new object[] { param1, param2 });
-                    //delUF is a public delegate with the same parameters and return values as UpdateMyForm
-                    // param1, param2 are the hypothetical parameters of method UpdateMyForm
+                    Console.WriteLine(s.ToString());
+                    if(form != null)
+                    {
+                        form.Invoke(new MainForm.UpdateFormDelegate(form.LogEvent), new object[] { s.ToString() });
+                    }
 
                 }
                 eventsBuffer.Clear();
