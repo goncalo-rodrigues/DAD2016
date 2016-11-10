@@ -11,8 +11,8 @@ namespace Operator
 
         public LoggerDestination(Replica parent, Semantic semantic, string loggerUrl) : base(parent, semantic)
         {
-            TcpChannel channel = new TcpChannel();
-            ChannelServices.RegisterChannel(channel, false);
+            //TcpChannel channel = new TcpChannel();
+            //ChannelServices.RegisterChannel(channel, false);
 
             Logger = (ILogger)Activator.GetObject(typeof(ILogger), loggerUrl);
             if (Logger == null)

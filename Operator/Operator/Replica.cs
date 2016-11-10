@@ -215,6 +215,7 @@ namespace Operator
 
         public void Interval(int mils)
         {
+            Console.WriteLine($"Intervaling {mils}...");
             OnInterval?.Invoke(this, new IntervalEventArgs
             {
                 Millis = mils
@@ -312,8 +313,7 @@ namespace Operator
         }
         public void Unfreeze()
         {
-            Console.WriteLine("Invoking unfreeze");
-            Console.WriteLine(OnUnfreeze);
+            Console.WriteLine($"Unfreezing...");
             OnUnfreeze?.Invoke(this, new EventArgs());
         }
         #region COOPERATION

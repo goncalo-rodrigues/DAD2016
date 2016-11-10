@@ -31,7 +31,6 @@ namespace PuppetMaster
         {
             this.ID = ID;
             this.addresses = addresses;
-            Console.WriteLine($"Operator {ID} initialized with {(Replicas.Count)} replicas.");
         }
 
         #region PuppetMaster's Commands

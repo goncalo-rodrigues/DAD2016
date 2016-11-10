@@ -35,7 +35,7 @@ namespace ProcessCreationService
         private void SocketListenerThreadStart()
         {
             int size = 0;
-            Byte[] byteBuffer = new Byte[2048];
+            Byte[] byteBuffer = new Byte[1024];
             string result = "";
             bool done = false;
             while (!done)
@@ -45,8 +45,8 @@ namespace ProcessCreationService
                     size = clientSocket.Receive(byteBuffer, byteBuffer.Length - 1, SocketFlags.None);
                     if (byteBuffer[size-1] == (byte) '\0')
                         done = true;
-                    byteBuffer[size] = (byte)'\0';
-                    result += System.Text.Encoding.ASCII.GetString(byteBuffer);
+                    result += System.Text.Encoding.ASCII.GetString(byteBuffer, 0, size);
+                    Console.WriteLine($"Receiving {size} bytes from {clientSocket.RemoteEndPoint}. TotalSize: {result.Length}");
                 }
                 catch (SocketException se)
                 {

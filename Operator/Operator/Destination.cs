@@ -93,7 +93,6 @@ namespace Operator
             Console.WriteLine("Unfreezing...");
             lock (this)
             {
-                Console.WriteLine("Unfrozen");
                 FreezeFlag = false;
                 Monitor.Pulse(this);
 
@@ -102,6 +101,7 @@ namespace Operator
 
         private void Parent_OnFreeze(object sender, EventArgs e)
         {
+            Console.WriteLine("Freezing...");
             FreezeFlag = true;
         }
 
