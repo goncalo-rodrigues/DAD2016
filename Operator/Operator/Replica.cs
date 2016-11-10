@@ -126,8 +126,18 @@ namespace Operator
 
             // Configure windows position
             Console.Title = this.OperatorId;
+            string a = this.OperatorId;
 
-            SetWindowPosition(700, 0, 500, 200);
+            if (a.Equals("OP1")) { SetWindowPosition(600, 0, 400, 200); }
+            if (a.Equals("OP3")) { SetWindowPosition(950, 0, 400, 200); }
+            if (a.Equals("OP4")) { SetWindowPosition(600, 200, 400, 200); }
+            if (a.Equals("OP5")) { SetWindowPosition(950, 200, 400, 200); }
+            if (a.Equals("OP6")) { SetWindowPosition(600, 400, 400, 200); }
+            if (a.Equals("OP7")) { SetWindowPosition(950, 400, 400, 200); }
+            if (a.Equals("OP8")) { SetWindowPosition(600, 600, 400, 200); }
+            if (a.Equals("OP9")) { SetWindowPosition(950, 600, 400, 200); }
+            if (a.Equals("OP10")) { SetWindowPosition(600, 800, 400, 200); }
+
         }
 
         public void StartProcessingFromFile(string path)

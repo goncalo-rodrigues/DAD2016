@@ -2,7 +2,7 @@
 Semantics exactly-once
 LoggingLevel full
 OP1 input ops tweeters.data
-rep fact 1 routing primary
+rep fact 2 routing primary
 address tcp://localhost:12000/op
 operator spec DUP
 OP2 input ops OP1
