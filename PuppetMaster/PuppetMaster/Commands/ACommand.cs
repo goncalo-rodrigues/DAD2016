@@ -32,7 +32,7 @@ namespace PuppetMaster
                     toNotify += arg + " ";
                 }
             }
-            master?.getLogger()?.Notify((new Record($"{name} {toNotify}", DateTime.Now)));
+            master?.getLogger()?.Notify((new Record($"{name}", $"{toNotify}", DateTime.Now)));
         }
 
         public abstract void Dispatch(string[] args);
