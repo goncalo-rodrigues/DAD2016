@@ -109,6 +109,7 @@ namespace PuppetMaster
                     master.ExecuteCommand("crash", args);
                 }
             }
+            
 
         }
 
