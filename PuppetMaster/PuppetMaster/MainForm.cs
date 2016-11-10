@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
@@ -102,19 +103,16 @@ namespace PuppetMaster
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-          /*  var mTask = Task.Run(async () =>
+            List<Task> tasks = new List<Task>();
+            foreach (var node in this.master.nodes)
             {
-            */
-                foreach (var node in this.master.nodes)
-                {
-                    for (int i = 0; i < node.Value.Replicas.Count; i++)
-                    {
-                        String[] args = { node.Key, i.ToString() };
-                        master.ExecuteCommand("crash", args);
-                    }
+                for (int i = 0; i < node.Value.Replicas.Count; i++)
+                { 
+                    String[] args = { node.Key, i.ToString() };
+                    tasks.Add(Task.Run(() => master.ExecuteCommand("crash", args)));
                 }
-           /* });*/
-            
+            }
+            Task.WaitAll(tasks.ToArray());
 
         }
 

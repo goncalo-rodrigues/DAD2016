@@ -37,7 +37,7 @@ namespace PuppetMaster
                     Console.WriteLine(s.ToString());
                     if(form != null)
                     {
-                        form.Invoke(new MainForm.UpdateFormDelegate(form.LogEvent), new object[] { s.ToString() });
+                        form.BeginInvoke(new MainForm.UpdateFormDelegate(form.LogEvent), new object[] { s.ToString() });
                     }
 
                 }
