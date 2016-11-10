@@ -33,7 +33,6 @@ namespace PuppetMaster
                 eventsBuffer.Sort((r1, r2) => r1.CompareTo(r2));
                 foreach (Record s in eventsBuffer)
                 {
-                    // TODO - have to change the method when we have a GUI 
                     Console.WriteLine(s.ToString());
                     if(form != null)
                     {
