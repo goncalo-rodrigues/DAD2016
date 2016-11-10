@@ -148,8 +148,8 @@ namespace PuppetMaster
                     ReplicationFactor = Int32.Parse(op.Groups["rep_fact"].Value),
                     RtStrategy = strat,
                     Addresses = addresses.Select((x) => x.Trim()).ToList(),
-                    OperatorFunction = op.Groups["function"].Value.Trim().Replace("\"", ""),
-                    OperatorFunctionArgs = functionArgs.Select((x) => x.Trim().Replace("\"", "")).ToList(),
+                    OperatorFunction = op.Groups["function"].Value.Trim(),
+                    OperatorFunctionArgs = functionArgs.Select((x) => x.Trim().Trim('"')).ToList(),
                     HashingArg = hashingArg,
                     Semantic = semantic,
                     ShouldNotify = fullLogging
