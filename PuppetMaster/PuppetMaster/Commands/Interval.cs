@@ -9,7 +9,7 @@ namespace PuppetMaster
 
         public override void Dispatch(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
                 Console.WriteLine("Usage: " + name + "<operator_id> <x_ms>");
                 return; // TODO - Throw Exception ?

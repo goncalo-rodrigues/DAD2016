@@ -189,6 +189,19 @@ namespace PuppetMaster
             // after all parsing, start creating the processes
             CreateAllProcesses(operators.Values);
             commandsToBeExecuted = config;
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    var success = await ExecuteNextCommand(Console.In);
+                    if (!success)
+                    {
+                        Console.WriteLine("Unknown command.");
+                    }
+                }
+                    
+            });
         }
 
         public void InitEventLogging() {
@@ -328,15 +341,17 @@ namespace PuppetMaster
         }
         public void CreateAllProcesses(ICollection<OperatorInfo> ops)
         {
+            List<Task> tasks = new List<Task>();
             if(ops != null)
             foreach (var op in ops)
             {
                     if(op.Addresses != null)
                 foreach (var addr in op.Addresses)
                 {
-                    CreateProcessAt(addr, op);
+                    tasks.Add(Task.Run(() => CreateProcessAt(addr, op)));
                 }
             }
+            Task.WaitAll(tasks.ToArray());
         }
         #endregion Initialization
         #region Command Parsing
