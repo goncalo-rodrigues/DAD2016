@@ -380,6 +380,7 @@
             this.RichTBEventLog.ForeColor = System.Drawing.SystemColors.Window;
             this.RichTBEventLog.Location = new System.Drawing.Point(315, 49);
             this.RichTBEventLog.Name = "RichTBEventLog";
+            this.RichTBEventLog.ReadOnly = true;
             this.RichTBEventLog.Size = new System.Drawing.Size(311, 399);
             this.RichTBEventLog.TabIndex = 45;
             this.RichTBEventLog.Text = "";
