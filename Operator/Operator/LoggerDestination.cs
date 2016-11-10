@@ -8,23 +8,23 @@ namespace Operator
     public class LoggerDestination : Destination
     {
         private ILogger Logger { get; set; } = null;
+        
+        private string SenderID { get; set; } = null;
 
-        public LoggerDestination(Replica parent, Semantic semantic, string loggerUrl) : base(parent, semantic)
+        public LoggerDestination(Replica parent, Semantic semantic, string senderID, string loggerUrl) : base(parent, semantic)
         {
-            //TcpChannel channel = new TcpChannel();
-            //ChannelServices.RegisterChannel(channel, false);
-
+            SenderID = senderID;
             Logger = (ILogger)Activator.GetObject(typeof(ILogger), loggerUrl);
             if (Logger == null)
                 Console.WriteLine($"Could not locate logging service at {loggerUrl}");
             else
                 Console.WriteLine("PMLogService was successfully initiated.");
-        }
+        } 
 
         override public void Deliver(CTuple tuple)
         {
             if (Logger != null)
-                Logger.Notify(new Record(tuple.ToString(), DateTime.Now));
+                Logger.Notify(new Record(SenderID, tuple.ToString(), DateTime.Now));
         }
 
         override public void Ping()

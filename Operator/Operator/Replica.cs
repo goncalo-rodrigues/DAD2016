@@ -122,7 +122,7 @@ namespace Operator
                     }
                 };
             if (shouldNotify)
-                destinations.Add(new LoggerDestination(this, info.Semantic, MasterURL));
+                destinations.Add(new LoggerDestination(this, info.Semantic, OperatorId, MasterURL));
 
             // Configure windows position
             Console.Title = this.OperatorId;
@@ -189,19 +189,6 @@ namespace Operator
             }
         }
 
-        private void Notify(CTuple tuple) {
-            try
-            {
-                String content = $"tuple {selfURL}, {tuple.ToString()}";
-                if(logger!=null)
-                    logger.Notify(new Record(content, DateTime.Now));
-            }
-            catch (SocketException)
-            {
-                System.Console.WriteLine("Could not locate server");
-            }
-        }
-
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
@@ -248,7 +235,7 @@ namespace Operator
             else
             {
 
-                // remove logger from destinations (https://msdn.microsoft.com/en-us/library/bb549418.aspx)
+                // remove logger from destinations list (https://msdn.microsoft.com/en-us/library/bb549418.aspx)
                 onlyOperatorDestinations = destinations.Where((dest, index) => index < destinations?.Count - 1).ToList();
             }
 

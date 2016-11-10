@@ -18,8 +18,5 @@ namespace SharedTypes
         {
             base.GetObjectData(info, context);
         }
-
-
-
     }
 }

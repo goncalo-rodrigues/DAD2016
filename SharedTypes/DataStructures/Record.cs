@@ -11,14 +11,17 @@ namespace SharedTypes
     {
         public DateTime Timestamp { get; set; }
         public string Content { get; set; }
-        public Record(string content, DateTime time)
+        public string Owner { get; set; }
+
+        public Record(string owner, string content, DateTime time)
         {
+            Owner = owner;
             Content = content;
             Timestamp = time;    
         }
         public override string ToString()
         {
-            return $"[{Timestamp}] {Content}";
+            return $"[{Timestamp}] [OpID: {Owner}] {Content}";
         }
         public int CompareTo(Record other)
         {
