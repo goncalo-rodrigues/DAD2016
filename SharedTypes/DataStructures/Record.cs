@@ -10,18 +10,21 @@ namespace SharedTypes
     public class Record : IComparable<Record>
     {
         public DateTime Timestamp { get; set; }
+        public string Type { get; set; }
         public string Content { get; set; }
         public string Owner { get; set; }
 
-        public Record(string owner, string content, DateTime time)
+        public Record(string type, string owner, string content, DateTime time)
         {
+            Type = type;
             Owner = owner;
             Content = content;
             Timestamp = time;    
         }
         public override string ToString()
         {
-            return $"[{Timestamp}  <{Owner}>]: {Content}";
+            //return $"[{Timestamp}  <{Owner}>]: {Content}";
+            return $"{Type}   {Owner}   {Content}";
         }
         public int CompareTo(Record other)
         {

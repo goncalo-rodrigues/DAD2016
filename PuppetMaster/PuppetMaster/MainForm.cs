@@ -113,7 +113,7 @@ namespace PuppetMaster
                 }
             }
             Task.WaitAll(tasks.ToArray());
-
+            Environment.Exit(0);
         }
 
         public void LogEvent(String s) {

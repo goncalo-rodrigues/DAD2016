@@ -122,7 +122,7 @@ namespace Operator
                     }
                 };
             if (shouldNotify)
-                destinations.Add(new LoggerDestination(this, info.Semantic, OperatorId, MasterURL));
+                destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
 
             // Configure windows position
             Console.Title = this.OperatorId;
