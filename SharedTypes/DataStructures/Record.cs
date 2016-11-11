@@ -21,7 +21,7 @@ namespace SharedTypes
         }
         public override string ToString()
         {
-            return $"[{Timestamp}] [OpID: {Owner}] {Content}";
+            return $"[{Timestamp}  <{Owner}>]: {Content}";
         }
         public int CompareTo(Record other)
         {
