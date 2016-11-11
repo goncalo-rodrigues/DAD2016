@@ -24,9 +24,8 @@ namespace Operator
             String s = tuple.GetFieldByIndex(id);
           
             int i = s.GetHashCode();
-           
-            return (this.list[Math.Abs(i) %list.Count]);
 
+            return (this.list[Math.Abs(i) %list.Count]);
 
         }
 

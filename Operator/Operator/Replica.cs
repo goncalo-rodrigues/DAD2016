@@ -119,10 +119,11 @@ namespace Operator
                 }
             };
             if (shouldNotify)
-                destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
+                //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
+                destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
 
-            // Configure windows position
-            Console.Title = this.OperatorId;
+                // Configure windows position
+                Console.Title = this.OperatorId;
             string a = this.OperatorId;
 
             if (a.Equals("OP1")) { SetWindowPosition(600, 0, 400, 200); }

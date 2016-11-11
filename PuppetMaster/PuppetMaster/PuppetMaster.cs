@@ -180,7 +180,8 @@ namespace PuppetMaster
                         ID = x.Key,
                         Addresses = x.Value.Addresses,
                         ReplicationFactor = x.Value.ReplicationFactor,
-                        RtStrategy = x.Value.RtStrategy
+                        RtStrategy = x.Value.RtStrategy,
+                        HashingArg = x.Value.HashingArg
                     }).ToList();
                 // those inputs that do not match any operator name are considered file inputs
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();

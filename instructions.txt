@@ -1,0 +1,13 @@
+Steps to execute the project:
+
+To build ProcessCreationService please open Visual Studio and execute build (ctrl shift b).
+Then build the Operator project again opening Visual Studio and executing build (ctrl shift b).
+Both .exes generated should be in the same folder along with the input file 'tweeters.dat'.
+
+All the above steps have been done and the output is located at the folder "DAD2016/Builds". Only recompile if needed.
+
+Run ProcessCreationService.exe
+
+Run PuppetMaster using Visual Studio
+
+The config file is located at "DAD2016\PuppetMaster\PuppetMaster\bin\Debug\dadstorm.config". Change according to needs.
