@@ -377,13 +377,16 @@
             // RichTBEventLog
             // 
             this.RichTBEventLog.BackColor = System.Drawing.SystemColors.MenuText;
+            this.RichTBEventLog.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.RichTBEventLog.ForeColor = System.Drawing.SystemColors.Window;
             this.RichTBEventLog.Location = new System.Drawing.Point(315, 49);
             this.RichTBEventLog.Name = "RichTBEventLog";
             this.RichTBEventLog.ReadOnly = true;
-            this.RichTBEventLog.Size = new System.Drawing.Size(311, 399);
+            this.RichTBEventLog.Size = new System.Drawing.Size(354, 417);
             this.RichTBEventLog.TabIndex = 45;
+            this.RichTBEventLog.TabStop = false;
             this.RichTBEventLog.Text = "";
+            this.RichTBEventLog.WordWrap = false;
             this.RichTBEventLog.TextChanged += new System.EventHandler(this.RichTBEventLog_TextChanged);
             // 
             // MainForm

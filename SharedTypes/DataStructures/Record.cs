@@ -24,7 +24,7 @@ namespace SharedTypes
         public override string ToString()
         {
             //return $"[{Timestamp}  <{Owner}>]: {Content}";
-            return $"{Type}   {Owner}   {Content}";
+            return $"{Type.PadRight(8, ' ')} {Owner.PadRight(8, ' ')} {Content}";
         }
         public int CompareTo(Record other)
         {

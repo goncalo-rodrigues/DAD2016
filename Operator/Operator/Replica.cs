@@ -36,6 +36,7 @@ namespace Operator
 
         public bool IsPrimary { get; }
         public string OperatorId { get; }
+        public int ID { get; set; }
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
         public string FunctionString { get; }
@@ -75,6 +76,7 @@ namespace Operator
             this.IsPrimary = rep.Address == info.Addresses[0];
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
+            this.ID = info.Addresses.IndexOf(rep.Address);
 
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
@@ -92,7 +94,7 @@ namespace Operator
                     info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
                     .ToList();
                 var allReplicas = (new List<IReplica>(otherReplicas));
-                Console.WriteLine("initialize routing");
+
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
                     this.routingStrategy = new PrimaryStrategy(allReplicas);
@@ -110,19 +112,14 @@ namespace Operator
 
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
+            {
+                foreach (var path in inputFiles)
                 {
-                    if (!processingState)
-                    {
-                        Console.WriteLine("Starting...");
-                        foreach (var path in inputFiles)
-                        {
-                            Task.Run(() => StartProcessingFromFile(path));
-                        }
-                        Console.WriteLine("Started");
-                    }
-                };
+                    Task.Run(() => StartProcessingFromFile(path));
+                }
+            };
             if (shouldNotify)
-                destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
+                destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
 
             // Configure windows position
             Console.Title = this.OperatorId;
@@ -258,8 +255,9 @@ namespace Operator
                     {
                         // does nothing
                     }
-                    status += $", Neighbours: {(neighboursCnt)} (of {(onlyOperatorDestinations.Count)})";
+                    
                 }
+                status += $", Neighbours: {(neighboursCnt)} (of {(onlyOperatorDestinations.Count)})";
             }
             else
             {
@@ -284,11 +282,12 @@ namespace Operator
                         // does nothing
                     }
                 }
-                status += $", Working Replicas: {(repCnt)} (of {(otherReplicas?.Count)})";
+                status += $", Working Replicas: {(repCnt+1)} (of {(otherReplicas?.Count)})";
             } 
             else
             {
-                status += $", Working Replicas: 0 (of 0)";
+                //myself only
+                status += $", Working Replicas: 1 (of 1)";
             }
             Console.WriteLine(status);
         }
@@ -313,17 +312,6 @@ namespace Operator
             Console.WriteLine($"Unfreezing...");
             OnUnfreeze?.Invoke(this, new EventArgs());
         }
-        #region COOPERATION
-        public int IncrementCount()
-        {
-            return Interlocked.Increment(ref totalSeenTuples);
-        }
-
-        public bool TryAddSeenField(string fieldval)
-        {
-            return SeenTupleFieldValues.TryAdd(fieldval, true);
-        }
-        #endregion COOPERATION
 
         #endregion
 

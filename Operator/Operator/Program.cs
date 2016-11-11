@@ -26,7 +26,7 @@ namespace Operator
                 Console.WriteLine("Missing creation info argument.");
                 loop();
             }
-            Console.WriteLine($"Received {args[0].Length} bytes");
+
             TextReader tr = new StringReader(args[0]);
             ReplicaCreationInfo rep = null;
             try

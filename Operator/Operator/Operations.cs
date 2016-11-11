@@ -49,15 +49,6 @@ namespace Operator
                 var isUnique = seenTuples.TryAdd(x[fieldNumber], true);
                 if (isUnique)
                 {
-                    if (!ReplicaInstance.IsPrimary)
-                    {
-                        // send to primary replica the seen field and check if it is actually unique
-                        isUnique = ReplicaInstance.otherReplicas[0].TryAddSeenField(x[fieldNumber]);
-                        if (!isUnique)
-                        {
-                            return new IList<string>[0];
-                        }
-                    }
                     return new IList<string>[] { x };
                 } else
                 {
@@ -73,17 +64,10 @@ namespace Operator
             return new ProcessDelegate((x) =>
             {
                 int count = -2;
-                // if is primary
-                if (ReplicaInstance.IsPrimary)
-                {
-                    // thread-safe
-                    count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
-                } else
-                // send to primary
-                {
-                    count = ReplicaInstance.otherReplicas[0].IncrementCount();
-                }
 
+                // thread-safe
+                count = Interlocked.Increment(ref ReplicaInstance.totalSeenTuples);
+                
                 return new IList<string>[] { new List<string> { count.ToString() } };
 
             });

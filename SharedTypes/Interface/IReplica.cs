@@ -17,8 +17,5 @@ namespace SharedTypes
         void Freeze();
         void Unfreeze();
 
-        // State cooperation
-        int IncrementCount();
-        bool TryAddSeenField(string filter);
     }
 }
