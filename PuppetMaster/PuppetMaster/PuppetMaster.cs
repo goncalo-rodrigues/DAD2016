@@ -371,7 +371,11 @@ namespace PuppetMaster
                 var match = commandRegex.Match(line);
                 if (!match.Success) continue;
                 var command = match.Groups["command"].Value;
-                if (!allCommands.ContainsKey(command.ToLower())) continue;
+                if (!allCommands.ContainsKey(command.ToLower()))
+                {
+                    Console.WriteLine($"Ignoring unrecognized command ({line})");
+                    continue;
+                }
                 success = true;
                 // if it is a valid command
                 string[] args;
