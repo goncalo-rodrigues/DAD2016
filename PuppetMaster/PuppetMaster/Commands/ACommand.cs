@@ -18,8 +18,9 @@ namespace PuppetMaster
         }
         public void Execute(string[] args)
         {
-            Dispatch(args);
             Notify(args);
+            Dispatch(args);
+            
         }
 
         public void Notify(string[] args)
