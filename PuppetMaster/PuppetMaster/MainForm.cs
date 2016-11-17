@@ -98,7 +98,7 @@ namespace PuppetMaster
         {
             string ms = TextBoxWait.Text;
             String[] args = { ms };
-            master.ExecuteCommand("unfreeze", args);
+            master.ExecuteCommand("wait", args);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
