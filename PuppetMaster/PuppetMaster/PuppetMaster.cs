@@ -392,7 +392,7 @@ namespace PuppetMaster
                 }
                 Console.WriteLine("Executing: " + match.Value);
 
-                await Task.Run(() => allCommands[command].Execute(args));
+                await Task.Run(() => allCommands[command.ToLower()].Execute(args));
                 done = true;
             }
             return success;

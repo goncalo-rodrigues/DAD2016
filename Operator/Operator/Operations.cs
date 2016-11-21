@@ -145,13 +145,13 @@ namespace Operator
                 theType = DLL.GetType(className);
             }
             
-            //var c = Activator.CreateInstance(theType);
+            var c = Activator.CreateInstance(theType);
             var m = theType.GetMethod(method, new[] { typeof(IList<string>) });
 
             return new ProcessDelegate((x) =>
             {
 
-                return (IList<string>[]) m.Invoke(null, new object[] {x});
+                return (IList<IList<string>>) m.Invoke(c, new object[] {x});
             });
 
         }

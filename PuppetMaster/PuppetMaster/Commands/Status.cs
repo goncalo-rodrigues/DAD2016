@@ -9,11 +9,6 @@ namespace PuppetMaster
 
         public override void Dispatch(string[] args)
         {
-            if (args != null)
-            {
-                Console.WriteLine("Usage: " + name);
-                return; // TODO - Throw Exception ?
-            }
             master.Status();
         }
     }
