@@ -25,7 +25,7 @@ namespace Operator
 
     public class Replica : MarshalByRefObject, IReplica
     {
-
+        const int BUFFER_SIZE = 128;
         const int SWP_NOZORDER = 0x4;
         const int SWP_NOACTIVATE = 0x10;
         [DllImport("kernel32")]
@@ -47,6 +47,8 @@ namespace Operator
         private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
         private List<string> inputFiles;
+
+        private BlockingCollection<CTuple> tuplesToProcess;
 
 
         private RoutingStrategy routingStrategy;
@@ -118,6 +120,12 @@ namespace Operator
                     Task.Run(() => StartProcessingFromFile(path));
                 }
             };
+
+            tuplesToProcess = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BUFFER_SIZE);
+
+            Task.Run(() => Processor());
+
+            
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
                 destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
@@ -190,12 +198,7 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            var result = Process(tuple);
-            //Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
-            foreach (var tup in result)
-            {
-                SendToAll(tup);
-            }
+            tuplesToProcess.Add(tuple);
         }
 
         public void Start()
@@ -329,6 +332,36 @@ namespace Operator
             }
         }
         /*Just to configure windows position - END*/
+
+        private void Processor()
+        {
+            while (!tuplesToProcess.IsCompleted)
+            {
+
+                CTuple tuple = null;
+                // Blocks if number.Count == 0
+                // IOE means that Take() was called on a completed collection.
+                // Some other thread can call CompleteAdding after we pass the
+                // IsCompleted check but before we call Take. 
+                // In this example, we can simply catch the exception since the 
+                // loop will break on the next iteration.
+                try
+                {
+                    tuple = tuplesToProcess.Take();
+                }
+                catch (InvalidOperationException) { }
+
+                if (tuple != null)
+                {
+                    var result = Process(tuple);
+                    //Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
+                    foreach (var tup in result)
+                    {
+                        SendToAll(tup);
+                    }
+                }
+            }
+        }
     }
 
     public class IntervalEventArgs : EventArgs

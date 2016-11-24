@@ -150,8 +150,15 @@ namespace Operator
 
             return new ProcessDelegate((x) =>
             {
-
-                return (IList<IList<string>>) m.Invoke(c, new object[] {x});
+                try
+                {
+                    return (IList<IList<string>>)m.Invoke(c, new object[] { x });
+                } catch (Exception e)
+                {
+                    Console.WriteLine(e.Message + ";" + e.InnerException?.Message);
+                    return null;
+                }
+                
             });
 
         }
