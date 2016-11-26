@@ -13,6 +13,7 @@ namespace Operator
     {
         public List<IReplica> replicas;
         public RoutingStrategy RoutingStrategy { get; set; }
+        public bool controlFlag = false;
 
         public NeighbourOperator(Replica master, DestinationInfo info, Semantic semantic) : base(master, semantic)
         {
@@ -43,7 +44,18 @@ namespace Operator
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
-                    Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    controlFlag = false;
+                    
+                    while (!controlFlag)
+                    {
+                        try
+                        {
+                            rep.ProcessAndForward(tuple);
+                            controlFlag = true;
+                        }
+                        catch (Exception e) { };
+                    }
+                    //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
                     rep.ProcessAndForward(tuple);

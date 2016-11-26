@@ -18,6 +18,7 @@ namespace Operator
     // Delegate for calling other remote operators asynchronously
     public delegate void RemoteProcessAsyncDelegate(CTuple tuple);
     public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
+
     // A delegate type for handling events from PuppetMaster
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
     public delegate void PuppetMasterIntervalEventHandler(object sender, IntervalEventArgs e);
@@ -135,14 +136,14 @@ namespace Operator
             string a = this.OperatorId;
 
             if (a.Equals("OP1")) { SetWindowPosition(600, 0, 400, 200); }
-            if (a.Equals("OP3")) { SetWindowPosition(950, 0, 400, 200); }
-            if (a.Equals("OP4")) { SetWindowPosition(600, 200, 400, 200); }
-            if (a.Equals("OP5")) { SetWindowPosition(950, 200, 400, 200); }
-            if (a.Equals("OP6")) { SetWindowPosition(600, 400, 400, 200); }
-            if (a.Equals("OP7")) { SetWindowPosition(950, 400, 400, 200); }
-            if (a.Equals("OP8")) { SetWindowPosition(600, 600, 400, 200); }
-            if (a.Equals("OP9")) { SetWindowPosition(950, 600, 400, 200); }
-            if (a.Equals("OP10")) { SetWindowPosition(600, 800, 400, 200); }
+            if (a.Equals("OP2")) { SetWindowPosition(950, 0, 400, 200); }
+            if (a.Equals("OP3")) { SetWindowPosition(600, 200, 400, 200); }
+            if (a.Equals("OP4")) { SetWindowPosition(950, 200, 400, 200); }
+            if (a.Equals("OP5")) { SetWindowPosition(600, 400, 400, 200); }
+            if (a.Equals("OP6")) { SetWindowPosition(950, 400, 400, 200); }
+            if (a.Equals("OP7")) { SetWindowPosition(600, 600, 400, 200); }
+            if (a.Equals("OP8")) { SetWindowPosition(950, 600, 400, 200); }
+            if (a.Equals("OP9")) { SetWindowPosition(600, 800, 400, 200); }
 
         }
 
