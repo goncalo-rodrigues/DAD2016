@@ -360,6 +360,8 @@ namespace Operator
                     {
                         SendToAll(tup);
                     }
+                    //tuple é processado -> inserir na lista aqui o seu id (fazer depois da replicaçao)
+
                 }
             }
         }

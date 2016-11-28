@@ -52,17 +52,20 @@ namespace Operator
                         {
                             rep.ProcessAndForward(tuple);
                             controlFlag = true;
+                            Console.WriteLine("********Processed");
                         }
-                        catch (Exception e) { };
+                        //FIXME Exceção que faz timeout automatico 
+                        catch (Exception e) { Console.WriteLine("**********Exception"); };
                     }
                     //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
                     rep.ProcessAndForward(tuple);
-                    //RemoteProcessAsyncDelegate remoteDel = new RemoteProcessAsyncDelegate(rep.ProcessAndForward);
-                    //IAsyncResult RemAr = remoteDel.BeginInvoke(tuple, TupleProcessedAsyncCallBack, null);
                     break;
                 case Semantic.ExactlyOnce:
+                    //Problema: O custom escreve para ficheiros, se falha a meio volta a escrever
+                    //Transações ?? custom 
+                    //Na replica, antes de fazer process verificar -> ter um id por tuplo a ser processado e verifico se esse id já foi processado é só 
                     Console.WriteLine($"The semantic exaclty-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 default:

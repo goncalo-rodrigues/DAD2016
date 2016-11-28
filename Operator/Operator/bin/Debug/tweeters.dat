@@ -1,12 +1,12 @@
 %% This file contains the URLs sent by tweeters. 
 %% The format of each line is: id, tweeter id, url
-1, user3, "www.tecnico.ulisboa.pt"
-2, user7, "www.google.com"
-3, user8, "www.sapo.pt"
-4, user2, "www.sinfo.pt"
-5, user1, "www.samsung.pt"
-6, user22, "www.asus.pt"
-7, user5, "www.microsoft.pt"
-8, user6, "www.kahoot.pt"
-9, user8, "www.microsoft.pt"
-10, user11, "www.sinfo.pt"
+1, user3, www.tecnico.ulisboa.pt
+2, user7, www.google.com
+3, user8, www.sapo.pt
+4, user2, www.sinfo.pt
+5, user1, www.samsung.pt
+6, user22, www.asus.pt
+7, user5, www.microsoft.pt
+8, user6, www.kahoot.pt
+9, user8, www.microsoft.pt
+10, user11, www.sinfo.pt
