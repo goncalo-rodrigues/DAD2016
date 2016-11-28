@@ -23,6 +23,7 @@ namespace Operator
 
         override public void Deliver(CTuple tuple)
         {
+            // Console.WriteLine($"Logging deliver: {tuple.ToString()}");
             if (Logger != null)
                 Logger.Notify(new Record("tuple", SenderID, tuple.ToString(), DateTime.Now));
         }
