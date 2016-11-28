@@ -59,7 +59,6 @@ namespace Operator
                     Monitor.Wait(this);
                 }
                    
-
                 int eventsLeft = outBuffer.Count;
 
                 foreach (CTuple s in outBuffer)
@@ -68,7 +67,9 @@ namespace Operator
                     if (Interval != -1)
                     {
                         Thread.Sleep(Interval);
+                        Console.WriteLine($" {Interval}");
                     }
+                    Console.WriteLine("============================================================================");
                 }
                 outBuffer.Clear();
 

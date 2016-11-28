@@ -163,7 +163,7 @@ namespace Operator
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == null)
                         {
-                            ThreadPool.QueueUserWorkItem((x) => this.ProcessAndForward((CTuple)x), ctuple);
+                            ProcessAndForward(ctuple);
                         }   
                     }
                 }
@@ -189,7 +189,7 @@ namespace Operator
 
         private void SendToAll(CTuple tuple)
         {
-            foreach (var neighbor in destinations)
+             foreach (var neighbor in destinations)
             {
                 Task.Run(()=>neighbor.Send(tuple));
             }
@@ -198,6 +198,7 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
+            Console.WriteLine($"Process And Forward {tuple.ToString()}");
             tuplesToProcess.Add(tuple);
         }
 
@@ -337,7 +338,6 @@ namespace Operator
         {
             while (!tuplesToProcess.IsCompleted)
             {
-
                 CTuple tuple = null;
                 // Blocks if number.Count == 0
                 // IOE means that Take() was called on a completed collection.
@@ -353,8 +353,9 @@ namespace Operator
 
                 if (tuple != null)
                 {
+
                     var result = Process(tuple);
-                    //Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
+                    Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
                     foreach (var tup in result)
                     {
                         SendToAll(tup);

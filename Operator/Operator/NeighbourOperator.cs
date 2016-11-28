@@ -38,7 +38,7 @@ namespace Operator
         }
         public override void Deliver(CTuple tuple)
         {
-            Console.WriteLine($"Delivering Tuple {tuple.ToString()}.");
+            // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
             var rep = RoutingStrategy.ChooseReplica(tuple);
             switch (Semantic)
             {

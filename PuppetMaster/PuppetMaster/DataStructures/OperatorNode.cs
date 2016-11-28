@@ -48,8 +48,13 @@ namespace PuppetMaster
         public void Interval(int mills)
         {
             if (Replicas != null)
-                foreach (IReplica irep in Replicas)  // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
+            {
+                foreach (IReplica irep in Replicas)
+                {  // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
                     irep.Interval(mills);
+                }
+            }
+               
         }
         public void Status()
         {
