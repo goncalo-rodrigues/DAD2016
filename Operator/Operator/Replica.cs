@@ -41,12 +41,14 @@ namespace Operator
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
         public string FunctionString { get; }
+        public List<string> InputOperators { get;  }
 
         private ILogger logger;
 
         private Operation processFunction;
         private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
+        public IList<IReplica> inputReplicas;
         private List<string> inputFiles;
         private PerfectFailureDetector perfectFailureDetector;
         private BlockingCollection<CTuple> tuplesToProcess;
@@ -79,7 +81,8 @@ namespace Operator
             this.IsPrimary = rep.Address == info.Addresses[0];
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
-            this.ID = info.Addresses.IndexOf(rep.Address);
+            this.InputOperators = info.InputReplicas;
+
 
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
@@ -119,7 +122,12 @@ namespace Operator
                 {
                     this.routingStrategy = new RandomStrategy(allReplicas, OperatorId.GetHashCode());
                 }
+
+                this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators);
+
             });
+
+
 
 
             // Start reading from file(s)
