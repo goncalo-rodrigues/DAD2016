@@ -186,7 +186,7 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         TupleCounter++;
-                        var ctuple = new CTuple(tupleData, TupleCounter, TupleCounter);
+                        var ctuple = new CTuple(tupleData, TupleCounter, 0);
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
