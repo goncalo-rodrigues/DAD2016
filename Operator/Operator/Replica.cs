@@ -42,6 +42,7 @@ namespace Operator
         public string selfURL { get; set; }
         public string FunctionString { get; }
         public List<string> InputOperators { get;  }
+        public int TupleCounter { get; set; } = 0;
 
         private ILogger logger;
 
@@ -140,7 +141,7 @@ namespace Operator
             {
                 foreach (var path in inputFiles)
                 {
-                    Task.Run(() => StartProcessingFromFile(path));
+                    StartProcessingFromFile(path);
                 }
             };
 
@@ -184,7 +185,8 @@ namespace Operator
                         
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                        var ctuple = new CTuple(tupleData);
+                        TupleCounter++;
+                        var ctuple = new CTuple(tupleData, TupleCounter, TupleCounter);
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
@@ -207,7 +209,7 @@ namespace Operator
 
             var data = tuple.GetFields();
             var resultData = processFunction.Process(data);
-            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
+            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, TupleCounter++));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
@@ -398,7 +400,6 @@ namespace Operator
             }
         }
 
-
         public void OnFail(object sender, NodeFailedEventArgs e) {
             int failedId = -1;
             for (int i = 0; i < adresses.Count; i++) {
@@ -413,10 +414,12 @@ namespace Operator
 
         }
 
-        //public ReplicaState GetState()
-        //{
-
-        //}
+        public ReplicaState GetState()
+        {
+            var result = new ReplicaState();
+            result.OperationInternalState = processFunction.InternalState;
+            return result;
+        }
     }
 
     public class IntervalEventArgs : EventArgs
