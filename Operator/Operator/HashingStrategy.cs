@@ -19,13 +19,13 @@ namespace Operator
 
         }
 
-        public override IReplica ChooseReplica(CTuple tuple) {
+        public override int ChooseReplica(CTuple tuple) {
 
             String s = tuple.GetFieldByIndex(id);
           
             int i = s.GetHashCode();
 
-            return (this.list[Math.Abs(i) %list.Count]);
+            return (Math.Abs(i) %list.Count);
 
         }
 

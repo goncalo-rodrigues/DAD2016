@@ -510,7 +510,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Kill();
+                    rep.Kill(index);
                 }
             }
         }
@@ -522,7 +522,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Freeze();
+                    rep.Freeze(index);
                 }
             }
         }
@@ -534,7 +534,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Unfreeze();
+                    rep.Unfreeze(index);
                 }
             }
         }

@@ -24,7 +24,7 @@ namespace Operator
     public delegate void PuppetMasterIntervalEventHandler(object sender, IntervalEventArgs e);
 
 
-    public class Replica : MarshalByRefObject, IReplica
+    public class Replica 
     {
         const int BUFFER_SIZE = 128;
         const int SWP_NOZORDER = 0x4;
@@ -49,9 +49,11 @@ namespace Operator
         private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
         public IList<IReplica> inputReplicas;
+        public List<string> adresses;
         private List<string> inputFiles;
         private PerfectFailureDetector perfectFailureDetector;
         private BlockingCollection<CTuple> tuplesToProcess;
+        
 
 
         private RoutingStrategy routingStrategy;
@@ -82,8 +84,9 @@ namespace Operator
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
             this.InputOperators = info.InputReplicas;
-
-
+            this.ID = info.Addresses.IndexOf(selfURL);
+            Console.WriteLine("***url.: " + selfURL);
+            Console.WriteLine("***ID.: " +ID);
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
                 // it is an output operator
@@ -96,6 +99,7 @@ namespace Operator
             this.perfectFailureDetector.NodeFailed += (sender, args) => {
                 Console.WriteLine($"{args.FailedNodeName} failed");
             };
+            this.perfectFailureDetector.NodeFailed += OnFail;
             var initTask = Task.Run(async () =>
             {
                 this.otherReplicas =
@@ -104,11 +108,7 @@ namespace Operator
                     info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
                     .ToList();
                 var allReplicas = (new List<IReplica>(otherReplicas));
-                for (int i = 0; i < info.Addresses.Count; i++)
-                {
-                    if (info.Addresses[i] != selfURL)
-                        perfectFailureDetector.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
-                }
+
 
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
@@ -124,7 +124,12 @@ namespace Operator
                 }
 
                 this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators);
-
+                for (int i = 0; i < info.Addresses.Count; i++)
+                {
+                    this.adresses.Add(info.Addresses[i]);
+                    if (info.Addresses[i] != selfURL)
+                        perfectFailureDetector.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                }
             });
 
 
@@ -165,6 +170,7 @@ namespace Operator
 
         }
 
+
         public void StartProcessingFromFile(string path)
         {
             try
@@ -180,13 +186,13 @@ namespace Operator
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         var ctuple = new CTuple(tupleData);
                         Console.WriteLine($"Read tuple from file: {ctuple}");
-                        if (routingStrategy.ChooseReplica(ctuple) == null)
+                        if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
                             ProcessAndForward(ctuple);
                         }   
                     }
                 }
-            } catch (Exception e)
+            } catch (IOException e)
             {
                 Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
             }
@@ -390,6 +396,21 @@ namespace Operator
 
                 }
             }
+        }
+
+
+        public void OnFail(object sender, NodeFailedEventArgs e) {
+            int failedId = -1;
+            for (int i = 0; i < adresses.Count; i++) {
+                if (adresses[i].Equals(e.FailedNodeName)) {
+                    failedId = i; 
+                }
+            }
+            if (failedId != -1 && ID==failedId+1) {
+                //recover
+                
+            }
+
         }
     }
 

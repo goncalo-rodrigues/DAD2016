@@ -40,7 +40,8 @@ namespace Operator
         public override void Deliver(CTuple tuple)
         {
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
-            var rep = RoutingStrategy.ChooseReplica(tuple);
+            int id = RoutingStrategy.ChooseReplica(tuple);
+            var rep = replicas[id];
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -50,7 +51,7 @@ namespace Operator
                     {
                         try
                         {
-                            rep.ProcessAndForward(tuple);
+                            rep.ProcessAndForward(tuple,id);
                             controlFlag = true;
                             Console.WriteLine("********Processed");
                         }
@@ -60,7 +61,7 @@ namespace Operator
                     //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
-                    rep.ProcessAndForward(tuple);
+                    rep.ProcessAndForward(tuple, id);
                     break;
                 case Semantic.ExactlyOnce:
                     //Problema: O custom escreve para ficheiros, se falha a meio volta a escrever

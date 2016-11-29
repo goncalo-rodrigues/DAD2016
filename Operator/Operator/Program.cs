@@ -47,9 +47,12 @@ namespace Operator
             Console.WriteLine($"Successfully initiated replica {info.Addresses.IndexOf(rep.Address)} of {info.ID}.");
             string address = rep.Address;
 
-
+            
             Replica replica = new Replica(rep);
-            Operations.ReplicaInstance = replica;
+            ReplicaManager repManager = new ReplicaManager(replica);
+           
+            //FIXME: COUNT and UNIQ doesn't work
+            // Operations.ReplicaInstance = replica;
 
             //loop();
 
@@ -71,7 +74,7 @@ namespace Operator
                 Console.WriteLine(e.Message);
             }
 
-            RemotingServices.Marshal(replica, name, typeof(Replica));
+            RemotingServices.Marshal(repManager, name, typeof(ReplicaManager));
             Console.WriteLine($"Listening at {address}. Press Enter to exit.");
             Console.ReadLine();
             
