@@ -17,7 +17,7 @@ namespace Operator
 {
     // Delegate for calling other remote operators asynchronously
     public delegate void RemoteProcessAsyncDelegate(CTuple tuple);
-    public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple);
+    public delegate IEnumerable<IList<string>> ProcessDelegate(IList<string> tuple, ref object state, IList<object> args);
 
     // A delegate type for handling events from PuppetMaster
     public delegate void PuppetMasterEventHandler(object sender, EventArgs e);
@@ -45,7 +45,7 @@ namespace Operator
 
         private ILogger logger;
 
-        private readonly ProcessDelegate processFunction;
+        private Operation processFunction;
         private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
         public IList<IReplica> inputReplicas;
@@ -53,7 +53,7 @@ namespace Operator
         private List<string> inputFiles;
         private PerfectFailureDetector perfectFailureDetector;
         private BlockingCollection<CTuple> tuplesToProcess;
-        
+
 
 
         private RoutingStrategy routingStrategy;
@@ -206,7 +206,7 @@ namespace Operator
             
 
             var data = tuple.GetFields();
-            var resultData = processFunction(data);
+            var resultData = processFunction.Process(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
@@ -405,13 +405,18 @@ namespace Operator
                 if (adresses[i].Equals(e.FailedNodeName)) {
                     failedId = i; 
                 }
-            }
+                }
             if (failedId != -1 && ID==failedId+1) {
                 //recover
                 
             }
 
         }
+
+        //public ReplicaState GetState()
+        //{
+
+        //}
     }
 
     public class IntervalEventArgs : EventArgs
