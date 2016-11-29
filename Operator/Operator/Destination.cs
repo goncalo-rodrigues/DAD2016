@@ -67,9 +67,7 @@ namespace Operator
                     if (Interval != -1)
                     {
                         Thread.Sleep(Interval);
-                        Console.WriteLine($" {Interval}");
                     }
-                    Console.WriteLine("============================================================================");
                 }
                 outBuffer.Clear();
 

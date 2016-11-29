@@ -13,6 +13,7 @@ namespace SharedTypes
         public string Type { get; set; }
         public string Content { get; set; }
         public string Owner { get; set; }
+        
 
         public Record(string type, string owner, string content, DateTime time)
         {

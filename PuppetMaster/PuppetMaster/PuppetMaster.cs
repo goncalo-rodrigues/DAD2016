@@ -51,8 +51,17 @@ namespace PuppetMaster
         public bool fullLogging = false;
         public Semantic semantic;
         public string commandsToBeExecuted = null;
+        private static PuppetMaster _instance;
+        public static PuppetMaster Instance {
+            get
+            {
+                if (_instance == null)
+                    _instance = new PuppetMaster();
+                return _instance;
+            }
+        }
        
-        public PuppetMaster()
+        private PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
             {

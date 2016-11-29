@@ -11,7 +11,7 @@ using System.Diagnostics;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.InteropServices;
 using System.Windows;
-
+using SharedTypes.PerfectFailureDetector;
 
 namespace Operator
 {
@@ -48,7 +48,7 @@ namespace Operator
         private IList<Destination> destinations;
         public IList<IReplica> otherReplicas;
         private List<string> inputFiles;
-
+        private PerfectFailureDetector perfectFailureDetector;
         private BlockingCollection<CTuple> tuplesToProcess;
 
 
@@ -89,6 +89,10 @@ namespace Operator
             {
                 this.destinations = info.OutputOperators.Select((dstInfo) => (Destination)new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
             }
+            this.perfectFailureDetector = new PerfectFailureDetector();
+            this.perfectFailureDetector.NodeFailed += (sender, args) => {
+                Console.WriteLine($"{args.FailedNodeName} failed");
+            };
             var initTask = Task.Run(async () =>
             {
                 this.otherReplicas =
@@ -97,6 +101,11 @@ namespace Operator
                     info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
                     .ToList();
                 var allReplicas = (new List<IReplica>(otherReplicas));
+                for (int i = 0; i < info.Addresses.Count; i++)
+                {
+                    if (info.Addresses[i] != selfURL)
+                        perfectFailureDetector.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                }
 
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
@@ -130,6 +139,7 @@ namespace Operator
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
                 destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
+
 
                 // Configure windows position
                 Console.Title = this.OperatorId;
@@ -179,12 +189,12 @@ namespace Operator
         {
             IEnumerable<CTuple> resultTuples = null;
             // debug print 
-            Console.WriteLine($"Received {tuple.ToString()}");
+            
 
             var data = tuple.GetFields();
             var resultData = processFunction(data);
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList()));
-            
+            Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
 
@@ -310,6 +320,7 @@ namespace Operator
         }
         public void Freeze()
         {
+            Console.WriteLine("Freezing...");
             OnFreeze?.Invoke(this, new EventArgs());
 
         }
@@ -317,6 +328,12 @@ namespace Operator
         {
             Console.WriteLine($"Unfreezing...");
             OnUnfreeze?.Invoke(this, new EventArgs());
+        }
+
+        public void Finish()
+        {
+            if (/*todo: if all input operators have called this method */false)
+                tuplesToProcess.CompleteAdding();
         }
 
         #endregion

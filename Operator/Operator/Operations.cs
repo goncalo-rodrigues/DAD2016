@@ -156,7 +156,7 @@ namespace Operator
                 } catch (Exception e)
                 {
                     Console.WriteLine(e.Message + ";" + e.InnerException?.Message);
-                    return null;
+                    return new List<IList<string>>();
                 }
                 
             });
