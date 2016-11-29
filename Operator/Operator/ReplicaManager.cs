@@ -16,52 +16,55 @@ namespace Operator
 
         public ReplicaManager( Replica rep) {
             this.replicas = new Dictionary<int, Replica>();
-            replicas.Add(rep.ID, rep);
+            this.replicas.Add(rep.ID, rep);
            
         }
 
         public void AddReplica(Replica rep) {
-
+            this.replicas.Add(rep.ID, rep);
         }
 
         public void Freeze(int id)
         {
-            replicas[0].Freeze();
+            replicas[id].Freeze();
         }
 
         public void Interval(int id, int mils)
         {
-            replicas[0].Interval(mils);
+            replicas[id].Interval(mils);
         }
 
         public void Kill(int id)
         {
-            replicas[0].Kill();
+            replicas[id].Kill();
         }
 
         public void Ping()
         {
-            replicas[0].Ping();
+            foreach (Replica rep in replicas.Values) {
+                rep.Ping();
+            }
+            
         }
 
         public void ProcessAndForward(CTuple tuple, int id)
         {
-            replicas[0].ProcessAndForward(tuple);
+            replicas[id].ProcessAndForward(tuple);
         }
 
         public void Start(int id)
         {
-            replicas[0].Start();
+            replicas[id].Start();
         }
 
         public void Status(int id)
         {
-            replicas[0].Status();
+            replicas[id].Status();
         }
 
         public void Unfreeze(int id)
         {
-            replicas[0].Unfreeze();
+            replicas[id].Unfreeze();
         }
     }
 }
