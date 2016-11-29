@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Operator
+namespace SharedTypes
 {
     [Serializable]
     public class ReplicaState
     {
         public object OperationInternalState { get; set; }
-        public Dictionary<string, DestinationState> InputStreamsIds { get; set; }
+        //public Dictionary<string, DestinationState> InputStreamsIds { get; set; } TODO
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
 
     }

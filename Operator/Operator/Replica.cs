@@ -43,8 +43,8 @@ namespace Operator
         public string FunctionString { get; }
         public List<string> InputOperators { get;  }
         public int TupleCounter { get; set; } = 0;
-        public List<int> InputCounters { get; set; }
 
+        public List<ReplicaState> OtherReplicasStates;
 
         private ILogger logger;
 
@@ -146,10 +146,14 @@ namespace Operator
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
-                foreach (var path in inputFiles)
+                Task.Run(() =>
                 {
-                    StartProcessingFromFile(path);
-                }
+                    foreach (var path in inputFiles)
+                    {
+                        StartProcessingFromFile(path);
+                    }
+                });
+
             };
 
             tuplesToProcess = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BUFFER_SIZE);
@@ -225,7 +229,7 @@ namespace Operator
         {
              foreach (var neighbor in destinations.Values)
             {
-                Task.Run(()=>neighbor.Send(tuple));
+                neighbor.Send(tuple);
             }
         }
 

@@ -62,16 +62,22 @@ namespace PuppetMaster
         {
             lock (latestRecordTimes)
             {
-                if (!latestRecordTimes.ContainsKey(record.Owner))
+                var owner = PuppetMaster.Instance.operators.FirstOrDefault((x) => x.Value.Addresses.Contains(record.Owner)).Key;
+                //Console.WriteLine(owner);
+                if (owner != null)
                 {
-                    latestRecordTimes[record.Owner] = new Queue<Record>();
-                    totals[record.Owner] = 0;
+                    if (!latestRecordTimes.ContainsKey(owner))
+                    {
+                        latestRecordTimes[owner] = new Queue<Record>();
+                        totals[owner] = 0;
+                    }
+
+                    var queue = latestRecordTimes[owner];
+                    var total = ++totals[owner];
+                    var r = new Record(record.Type, owner, record.Content, DateTime.Now);
+                    queue.Enqueue(r);
                 }
 
-                var queue = latestRecordTimes[record.Owner];
-                var total = ++totals[record.Owner];
-                var r = new Record(record.Type, record.Owner, record.Content, DateTime.Now);
-                queue.Enqueue(r);
             }
             lock (this)
             {
@@ -99,8 +105,11 @@ namespace PuppetMaster
                             break;
                         firstVal = queue.Peek();
                     }
+                    
                     Console.WriteLine($"Throughput of ${owner} is ${queue.Count} per second");
                 }
+                if (form != null && latestRecordTimes.ContainsKey("OP1"))
+                    form.BeginInvoke(new MainForm.UpdateFormDelegate(form.AddNewPointToChart), new object[] { latestRecordTimes["OP1"].Count.ToString() });
             }
 
             

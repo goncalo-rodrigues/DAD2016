@@ -47,7 +47,8 @@ namespace PuppetMaster
 
         private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;
-        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
+        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>();
+        public IDictionary<string, OperatorInfo> operators;
         public bool fullLogging = false;
         public Semantic semantic;
         public string commandsToBeExecuted = null;
@@ -88,7 +89,7 @@ namespace PuppetMaster
         #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
-            IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
+            operators = new Dictionary<string, OperatorInfo>();
 
             //remove comments
             var commentRegex = new Regex(@"%[^\n]*\n?", RegexOptions.IgnoreCase);

@@ -53,6 +53,7 @@
     <Compile Include="PerfectFailureDetector\PerfectFailureDetector.cs" />
     <Compile Include="Reliable multicast\IMulticastReceiver.cs" />
     <Compile Include="Reliable multicast\ReliableMulticastSender.cs" />
+    <Compile Include="ReplicaState.cs" />
     <Compile Include="RtStrategy.cs" />
     <Compile Include="DataStructures\DestinationInfo.cs" />
     <Compile Include="DataStructures\OperatorCreationInfo.cs" />

@@ -13,6 +13,7 @@ namespace Operator
 
        //private List<Replica> replicas;
         public IDictionary<int, Replica> replicas;
+        public List<ReplicaState> otherReplicasStates;
         public List<string> adresses;
 
 
@@ -20,6 +21,17 @@ namespace Operator
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
             this.adresses = rep.adresses;
+            this.otherReplicasStates = new List<ReplicaState>();
+            Task.Run(async () =>
+            {
+                await Task.Delay(10000);
+                var initialState = rep.GetState();
+                for (int i = 0; i < rep.adresses.Count; i++)
+                {
+                    otherReplicasStates.Add(initialState);
+                }
+            });
+
         }
 
         public void AddReplica(Replica rep) {
@@ -94,7 +106,9 @@ namespace Operator
 
         }
 
-
-
+        public ReplicaState GetState(int id)
+        {
+            return replicas[id].GetState();
+        }
     }
 }

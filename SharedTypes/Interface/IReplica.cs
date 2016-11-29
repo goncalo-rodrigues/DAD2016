@@ -13,10 +13,15 @@ namespace SharedTypes
         void Interval(int id, int mils);
         void Status(int id);
         
+        
         [OneWayAttribute()]
         void Kill(int id);
         void Freeze(int id);
         void Unfreeze(int id);
+
+
+        ReplicaState GetState(int id);
+        
 
     }
 }

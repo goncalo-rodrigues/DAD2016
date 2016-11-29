@@ -56,7 +56,6 @@
     <Compile Include="RandomStrategy.cs" />
     <Compile Include="Replica.cs" />
     <Compile Include="ReplicaManager.cs" />
-    <Compile Include="ReplicaState.cs" />
     <Compile Include="RoutingStrategy.cs" />
   </ItemGroup>
   <ItemGroup>

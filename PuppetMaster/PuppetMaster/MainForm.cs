@@ -4,13 +4,16 @@ using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Graph = System.Windows.Forms.DataVisualization.Charting;
 
 namespace PuppetMaster
 {
     public partial class MainForm : Form
     {
-       
 
+
+        //Graph.Chart chart;
+        const int chartX = 30;
         PuppetMaster master = null;
         TextReader commandReader = null;
         public delegate void UpdateFormDelegate(string message);
@@ -143,6 +146,57 @@ namespace PuppetMaster
             this.Size = new Size(width/2, height-(height / 3));
             this.Location = new Point(0, height / 3);
             this.StartPosition = FormStartPosition.Manual;
+            InitChart();
+        }
+        //public int[] xVals = new int[chartX];
+        private int currentX;
+        private void InitChart()
+        {
+            currentX = chartX;
+            // Create new Graph
+            //chart = new Graph.Chart();
+            //chart.Location = new System.Drawing.Point(10, 10);
+            //chart.Size = new System.Drawing.Size(700, 700);
+            // Add a chartarea called "draw", add axes to it and color the area black
+            chart.ChartAreas.Add("draw");
+            chart.ChartAreas["draw"].AxisX.Minimum = 0;
+            chart.ChartAreas["draw"].AxisX.Maximum = chartX;
+            chart.ChartAreas["draw"].AxisX.Interval = 5;
+            chart.ChartAreas["draw"].AxisX.MajorGrid.LineColor = Color.White;
+            chart.ChartAreas["draw"].AxisX.MajorGrid.LineDashStyle = Graph.ChartDashStyle.Dash;
+            chart.ChartAreas["draw"].AxisY.Minimum = 0;
+            chart.ChartAreas["draw"].AxisY.Maximum = 300;
+            chart.ChartAreas["draw"].AxisY.Interval =50;
+            chart.ChartAreas["draw"].AxisY.MajorGrid.LineColor = Color.White;
+            chart.ChartAreas["draw"].AxisY.MajorGrid.LineDashStyle = Graph.ChartDashStyle.Dash;
+
+            chart.ChartAreas["draw"].BackColor = Color.Black;
+
+            // Create a new function series
+            chart.Series.Add("MyFunc");
+            // Set the type to line      
+            chart.Series["MyFunc"].ChartType = Graph.SeriesChartType.Line;
+            // Color the line of the graph light green and give it a thickness of 3
+            chart.Series["MyFunc"].Color = Color.LightGreen;
+            chart.Series["MyFunc"].BorderWidth = 3;
+            //This function cannot include zero, and we walk through it in steps of 0.1 to add coordinates to our series
+            for (double x = 0; x < chartX; x += 1)
+            {
+                chart.Series["MyFunc"].Points.AddXY(x, 0);
+            }
+            chart.Series["MyFunc"].LegendText = "Throughput";
+            // Create a new legend called "MyLegend".
+            chart.Legends.Add("MyLegend");
+            chart.Legends["MyLegend"].BorderColor = Color.Tomato; // I like tomato juice!
+            //Controls.Add(this.chart);
+        }
+        
+        public void AddNewPointToChart(string value)
+        {
+            chart.ChartAreas["draw"].AxisX.Minimum += 1;
+            chart.ChartAreas["draw"].AxisX.Maximum += 1;
+            chart.Series["MyFunc"].Points.RemoveAt(0);
+            chart.Series["MyFunc"].Points.AddXY(currentX+=1, Int32.Parse(value));
         }
 
         private void RichTBEventLog_TextChanged(object sender, EventArgs e)
