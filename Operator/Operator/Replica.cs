@@ -43,11 +43,13 @@ namespace Operator
         public string FunctionString { get; }
         public List<string> InputOperators { get;  }
         public int TupleCounter { get; set; } = 0;
+        public List<int> InputCounters { get; set; }
+
 
         private ILogger logger;
 
         private Operation processFunction;
-        private IList<Destination> destinations;
+        private IDictionary<string, Destination> destinations;
         public IList<IReplica> otherReplicas;
         public IList<IReplica> inputReplicas;
         public List<string> adresses;
@@ -91,16 +93,21 @@ namespace Operator
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
                 // it is an output operator
-                this.destinations = new List<Destination> { new OutputFile(this, info.Semantic) };
+                this.destinations = new Dictionary<string, Destination>();
+                this.destinations.Add("output_file", new OutputFile(this, info.Semantic));
             } else
             {
-                this.destinations = info.OutputOperators.Select((dstInfo) => (Destination)new NeighbourOperator(this, dstInfo, info.Semantic)).ToList();
+                this.destinations = new Dictionary<string, Destination>();
+                foreach (var dstInfo in info.OutputOperators)
+                {
+                    destinations.Add(dstInfo.ID, new NeighbourOperator(this, dstInfo, info.Semantic));
+                }
             }
             this.perfectFailureDetector = new PerfectFailureDetector();
             this.perfectFailureDetector.NodeFailed += (sender, args) => {
                 Console.WriteLine($"{args.FailedNodeName} failed");
             };
-            this.perfectFailureDetector.NodeFailed += OnFail;
+            //this.perfectFailureDetector.NodeFailed += OnFail;
             var initTask = Task.Run(async () =>
             {
                 this.otherReplicas =
@@ -152,7 +159,7 @@ namespace Operator
             
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
-                destinations.Add(new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
+                destinations.Add("puppet_master_logger", new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
 
 
                 // Configure windows position
@@ -186,7 +193,7 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         TupleCounter++;
-                        var ctuple = new CTuple(tupleData, TupleCounter, 0);
+                        var ctuple = new CTuple(tupleData, TupleCounter);
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
@@ -209,14 +216,14 @@ namespace Operator
 
             var data = tuple.GetFields();
             var resultData = processFunction.Process(data);
-            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, TupleCounter++));
+            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
 
         private void SendToAll(CTuple tuple)
         {
-             foreach (var neighbor in destinations)
+             foreach (var neighbor in destinations.Values)
             {
                 Task.Run(()=>neighbor.Send(tuple));
             }
@@ -259,13 +266,13 @@ namespace Operator
             if (!shouldNotify || destinations == null)
             {
 
-                onlyOperatorDestinations = destinations;
+                onlyOperatorDestinations = destinations.Values.ToList();
             }
             else
             {
 
                 // remove logger from destinations list (https://msdn.microsoft.com/en-us/library/bb549418.aspx)
-                onlyOperatorDestinations = destinations.Where((dest, index) => index < destinations?.Count - 1).ToList();
+                onlyOperatorDestinations = destinations.Values.Where((dest, index) => index < destinations?.Count - 1).ToList();
             }
 
             if (onlyOperatorDestinations != null && onlyOperatorDestinations.Count > 0)
@@ -400,14 +407,41 @@ namespace Operator
             }
         }
 
-
         public ReplicaState GetState()
         {
             var result = new ReplicaState();
             result.OperationInternalState = processFunction.InternalState;
+            result.OutputStreamsIds = new Dictionary<string, DestinationState>();
+            foreach (var d in destinations)
+            {
+                var state = d.Value.GetState();
+                if (state != null)
+                    result.OutputStreamsIds[d.Key] = state;
+            }
             return result;
         }
+
+        public void LoadState(ReplicaState state)
+        {
+            processFunction.InternalState = state.OperationInternalState;
+            foreach (var d in state.OutputStreamsIds)
+            {
+                destinations[d.Key].LoadState(d.Value);
+            }
+            
+            // ask to resend
+        }
+
+        public void Resend(int id, string operatorId, int replicaId)
+        {
+            destinations[operatorId].Resend(id, replicaId);
+        }
+        public void GarbageCollect(int id, string operatorId, int replicaId)
+        {
+            destinations[operatorId].GarbageCollect(id, replicaId);
+        }
     }
+
 
     public class IntervalEventArgs : EventArgs
     {

@@ -77,6 +77,25 @@ namespace Operator
             FlushEventBuffer();
         }
 
+        public virtual DestinationState GetState()
+        {
+            return null;
+        }
+
+        public virtual void LoadState(DestinationState state)
+        {
+            return;
+        }
+
+        public virtual void Resend(int id, int replicaId)
+        {
+            Console.WriteLine("Resend not implemented.");
+        }
+        public virtual void GarbageCollect(int id, int replicaId)
+        {
+            Console.WriteLine("GarbageCollect not implemented.");
+        }
+
         #region PARENTCOMMANDS
         private void Parent_OnStart(object sender, EventArgs e)
         {
@@ -118,4 +137,6 @@ namespace Operator
         public abstract void Ping();
         #endregion ABSTRACT
     }
+
+
 }

@@ -10,7 +10,13 @@ namespace Operator
     public class ReplicaState
     {
         public object OperationInternalState { get; set; }
-        public List<int> InputStreamsIds { get; set; }
-        public int OutputId { get; set; }
+        public Dictionary<string, DestinationState> InputStreamsIds { get; set; }
+        public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
+
+    }
+    [Serializable]
+    public class DestinationState
+    {
+        public List<int> SentIds;
     }
 }

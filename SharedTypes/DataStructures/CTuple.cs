@@ -8,15 +8,13 @@ namespace SharedTypes
     {
         private List<string> fields = new List<string>();
         public int ID { get; }
-        public int LocalId { get; set; }
 
         public CTuple() {
         }
-        public CTuple(List<string> fields, int ID, int localId) {
+        public CTuple(List<string> fields, int ID) {
             foreach (string f in fields)
                 this.fields.Add(f);
             this.ID = ID;
-            this.LocalId = localId;
         }
         public void AddField(string field) {
             this.fields.Add(field);
@@ -32,7 +30,7 @@ namespace SharedTypes
         }
         public override string ToString()
         {
-            string repr = $"{ID} {LocalId} [";
+            string repr = $"{ID} [";
             if (fields != null)
             {
                 int i = 0;

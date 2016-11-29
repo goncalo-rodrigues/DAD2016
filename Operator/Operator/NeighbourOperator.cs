@@ -12,11 +12,17 @@ namespace Operator
     class NeighbourOperator : Destination
     {
         public List<IReplica> replicas;
+        public List<CTuple> CachedOutputTuples;
+        public List<int> GarbageCollectedTupleIds;
+        public List<int> SentTupleIds;
         public RoutingStrategy RoutingStrategy { get; set; }
         public bool controlFlag = false;
 
         public NeighbourOperator(Replica master, DestinationInfo info, Semantic semantic) : base(master, semantic)
         {
+            CachedOutputTuples = new List<CTuple>();
+            GarbageCollectedTupleIds = new List<int>(new int[info.Addresses.Count]);
+            SentTupleIds = new List<int>(new int[info.Addresses.Count]);
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
             {
@@ -42,6 +48,7 @@ namespace Operator
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
             int id = RoutingStrategy.ChooseReplica(tuple);
             var rep = replicas[id];
+
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -71,8 +78,60 @@ namespace Operator
                     break;
                 default:
                     Console.WriteLine($"The specified semantic ({Semantic}) is not supported within our system");
-                    return;
+                    break;
+                
             }
+            lock (this)
+            {
+                CachedOutputTuples.Add(tuple);
+                SentTupleIds[id] = tuple.ID;
+            }
+        }
+        public override void Resend(int id, int replicaId)
+        {
+            List<CTuple> toDeliver = new List<CTuple>();
+            lock (this)
+            {
+                var upTo = SentTupleIds[replicaId];
+                for (int i = 0; i < CachedOutputTuples.Count; i++)
+                {
+                    if (CachedOutputTuples[i].ID > upTo) break;
+                    if (CachedOutputTuples[i].ID < id) continue;
+                    toDeliver.Add(CachedOutputTuples[i]);
+                }
+            }
+            foreach (var t in toDeliver)
+            {
+                Deliver(t);
+            }
+        }
+
+        public override void GarbageCollect(int id, int replicaId)
+        {
+            lock (this)
+            {
+                GarbageCollectedTupleIds[replicaId] = id;
+                var currentMin = id;
+
+                currentMin = Math.Min(currentMin, GarbageCollectedTupleIds.Min());
+                while (CachedOutputTuples[0].ID >= currentMin)
+                {
+                    CachedOutputTuples.RemoveAt(0);
+                }
+            }
+
+        }
+
+        public override DestinationState GetState()
+        {
+            return new DestinationState
+            {
+                SentIds = SentTupleIds
+            };
+        }
+        public override void LoadState(DestinationState state)
+        {
+            this.SentTupleIds = state.SentIds;
         }
         public override void Ping()
         {
