@@ -210,3 +210,13 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/dadstorm.config.full
+/dadstorm.config.full_nounder
+/dadstorm.config.nocustom
+/dadstorm.config.nocustom_norepl_nounder
+/dadstorm.config.nocustom_nounder
+/followers.dat
+/LibDADStorm.dll
+/mylib.dll
+/mylib_nointerface.dll
+/tweeters.dat
