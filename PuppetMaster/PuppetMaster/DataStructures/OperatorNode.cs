@@ -37,22 +37,25 @@ namespace PuppetMaster
         public void Start()
         {
             if (Replicas != null)
-                foreach (IReplica irep in Replicas)
-                {
-                    if(irep != null)
-                    {
-                        irep.Start();
+
+                for (int i = 0; i < Replicas.Count; i++) {
+                    if (Replicas[i] != null) {
+                        Replicas[i].Start(i);
                     }
                 }
+              
         }
         public void Interval(int mills)
         {
             if (Replicas != null)
             {
-                foreach (IReplica irep in Replicas)
-                {  // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
-                    irep.Interval(mills);
+                for (int i = 0; i < Replicas.Count; i++)
+                {
+                    // TODO - what if one of the interval requests gets lost. All replicas will be sleeping but that one will be processing
+                    Replicas[i].Interval(i, mills);
+
                 }
+                
             }
                
         }
@@ -62,17 +65,19 @@ namespace PuppetMaster
             {
                 if (Replicas != null)
                 {
-                    foreach (IReplica irep in Replicas)
-                    {
-                        if (irep != null)
+
+                    for (int i = 0; i < Replicas.Count; i++) {
+                        if (Replicas[i] != null)
                         {
-                            irep.Status();
+                            Replicas[i].Status(i);
                         }
-                        else
-                        {
+                        else {
                             Console.WriteLine($"Replica from operator {ID} is null");
                         }
                     }
+
+
+                        
                 }
             } catch (NeighbourOperatorIsDeadException noide)
             {

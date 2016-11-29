@@ -17,6 +17,10 @@ namespace Operator
     {
         static void Main(string[] args)
         {
+            var c = new List<string> { "a", "b" };
+            var op = Operations.GetOperation("COUNT");
+            op.Process(c);
+            op.Process(c);
             //var a = Operations.GetCustomOperation(@"SharedTypes.dll", "SharedTypes.CustomFunctions", "reverse");
             // var b = Operations.GetCustomOperation(@"C:\Users\Goncalo\Source\Repos\DAD2016\Operator\Operator\bin\Debug\SharedTypes.dll", "SharedTypes.CustomFunctions", "dup");
             //var c = a(new List<string> { "a", "b" });
@@ -47,9 +51,12 @@ namespace Operator
             Console.WriteLine($"Successfully initiated replica {info.Addresses.IndexOf(rep.Address)} of {info.ID}.");
             string address = rep.Address;
 
-
+            
             Replica replica = new Replica(rep);
-            Operations.ReplicaInstance = replica;
+            ReplicaManager repManager = new ReplicaManager(replica);
+           
+            //FIXME: COUNT and UNIQ doesn't work
+            // Operations.ReplicaInstance = replica;
 
             //loop();
 
@@ -71,7 +78,7 @@ namespace Operator
                 Console.WriteLine(e.Message);
             }
 
-            RemotingServices.Marshal(replica, name, typeof(Replica));
+            RemotingServices.Marshal(repManager, name, typeof(ReplicaManager));
             Console.WriteLine($"Listening at {address}. Press Enter to exit.");
             Console.ReadLine();
             

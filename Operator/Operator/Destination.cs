@@ -67,9 +67,7 @@ namespace Operator
                     if (Interval != -1)
                     {
                         Thread.Sleep(Interval);
-                        Console.WriteLine($" {Interval}");
                     }
-                    Console.WriteLine("============================================================================");
                 }
                 outBuffer.Clear();
 
@@ -77,6 +75,25 @@ namespace Operator
             }
             Thread.Sleep(10);
             FlushEventBuffer();
+        }
+
+        public virtual DestinationState GetState()
+        {
+            return null;
+        }
+
+        public virtual void LoadState(DestinationState state)
+        {
+            return;
+        }
+
+        public virtual void Resend(int id, int replicaId)
+        {
+            Console.WriteLine("Resend not implemented.");
+        }
+        public virtual void GarbageCollect(int id, int replicaId)
+        {
+            Console.WriteLine("GarbageCollect not implemented.");
         }
 
         #region PARENTCOMMANDS
@@ -120,4 +137,6 @@ namespace Operator
         public abstract void Ping();
         #endregion ABSTRACT
     }
+
+
 }

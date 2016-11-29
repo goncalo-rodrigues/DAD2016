@@ -19,12 +19,12 @@ namespace Operator
 
         }
 
-        public override IReplica ChooseReplica(CTuple tuple)
+        public override int ChooseReplica(CTuple tuple)
         {
             int number = random.Next(0, this.list.Count);
 
             //TODO: verify if "crash flag" is on - after checkpoint
-            return this.list[number];
+            return number;
 
         }
     }

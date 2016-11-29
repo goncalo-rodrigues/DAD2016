@@ -63,9 +63,11 @@
             this.RunAllCmdsButton = new System.Windows.Forms.Button();
             this.NextCmdButton = new System.Windows.Forms.Button();
             this.RichTBEventLog = new System.Windows.Forms.RichTextBox();
+            this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.CrashID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
             this.SuspendLayout();
             // 
             // LabelOpID_start
@@ -382,18 +384,27 @@
             this.RichTBEventLog.Location = new System.Drawing.Point(315, 49);
             this.RichTBEventLog.Name = "RichTBEventLog";
             this.RichTBEventLog.ReadOnly = true;
-            this.RichTBEventLog.Size = new System.Drawing.Size(354, 417);
+            this.RichTBEventLog.Size = new System.Drawing.Size(354, 274);
             this.RichTBEventLog.TabIndex = 45;
             this.RichTBEventLog.TabStop = false;
             this.RichTBEventLog.Text = "";
             this.RichTBEventLog.WordWrap = false;
             this.RichTBEventLog.TextChanged += new System.EventHandler(this.RichTBEventLog_TextChanged);
             // 
+            // chart
+            // 
+            this.chart.Location = new System.Drawing.Point(315, 338);
+            this.chart.Name = "chart";
+            this.chart.Size = new System.Drawing.Size(354, 128);
+            this.chart.TabIndex = 46;
+            this.chart.Text = "chart1";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(670, 486);
+            this.ClientSize = new System.Drawing.Size(670, 476);
+            this.Controls.Add(this.chart);
             this.Controls.Add(this.RichTBEventLog);
             this.Controls.Add(this.NextCmdButton);
             this.Controls.Add(this.RunAllCmdsButton);
@@ -436,6 +447,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.CrashID)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FreezeID)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.UnfreezeID)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -478,6 +490,7 @@
         private System.Windows.Forms.Button RunAllCmdsButton;
         private System.Windows.Forms.Button NextCmdButton;
         private System.Windows.Forms.RichTextBox RichTBEventLog;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart;
     }
 }
 

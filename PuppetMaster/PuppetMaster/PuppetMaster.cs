@@ -47,12 +47,22 @@ namespace PuppetMaster
 
         private PMLoggerService pmLogger = null;
         public IDictionary<string, ACommand> allCommands;
-        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>(); 
+        public IDictionary<string, OperatorNode> nodes = new Dictionary<string, OperatorNode>();
+        public IDictionary<string, OperatorInfo> operators;
         public bool fullLogging = false;
         public Semantic semantic;
         public string commandsToBeExecuted = null;
+        private static PuppetMaster _instance;
+        public static PuppetMaster Instance {
+            get
+            {
+                if (_instance == null)
+                    _instance = new PuppetMaster();
+                return _instance;
+            }
+        }
        
-        public PuppetMaster()
+        private PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
             {
@@ -79,7 +89,7 @@ namespace PuppetMaster
         #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
-            IDictionary<string, OperatorInfo> operators = new Dictionary<string, OperatorInfo>();
+            operators = new Dictionary<string, OperatorInfo>();
 
             //remove comments
             var commentRegex = new Regex(@"%[^\n]*\n?", RegexOptions.IgnoreCase);
@@ -153,6 +163,7 @@ namespace PuppetMaster
                     HashingArg = hashingArg,
                     Semantic = semantic,
                     ShouldNotify = fullLogging
+
                 };
                 
                 // check if everything is ok
@@ -185,10 +196,18 @@ namespace PuppetMaster
                     }).ToList();
                 // those inputs that do not match any operator name are considered file inputs
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
+                TempInputReplicas = op.InputOperators.Where((x) => operators.Keys.Contains(x)).ToList();
+
+               
+                foreach (string s in TempInputReplicas)
+                {
+                    if (op.InputReplicas != null)
+                        op.InputReplicas.AddRange(operators[s].Addresses);
+                }
             }
 
-            // after all parsing, start creating the processes
-            CreateAllProcesses(operators.Values);
+                // after all parsing, start creating the processes
+                CreateAllProcesses(operators.Values);
             commandsToBeExecuted = config;
 
             Task.Run(async () =>
@@ -219,7 +238,8 @@ namespace PuppetMaster
             RemotingServices.Marshal(pmLogger, "PMLogger");
             Console.WriteLine("Logger was successfully initialized");
 
-        }
+          
+            }
 
 
         public string Serialize(OperatorInfo info, string address)
@@ -491,7 +511,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Kill();
+                    rep.Kill(index);
                 }
             }
         }
@@ -503,7 +523,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Freeze();
+                    rep.Freeze(index);
                 }
             }
         }
@@ -515,7 +535,7 @@ namespace PuppetMaster
                 if (index >= 0 && index < op.Replicas.Count)
                 {
                     IReplica rep = op.Replicas[index];
-                    rep.Unfreeze();
+                    rep.Unfreeze(index);
                 }
             }
         }
@@ -544,6 +564,8 @@ namespace PuppetMaster
                 return GetConsoleWindow();
             }
         }
+
+        public List<string> TempInputReplicas { get; private set; }
         /*Just to configure windows position - END*/
     }
 }
