@@ -10,6 +10,7 @@ namespace SharedTypes
         public RoutingStrategy RtStrategy { get; set; }
         public List<string> InputOperators { get; set; }
         public List<string> InputFiles { get; set; }
+        public List<string> InputReplicas { get; set; }
         public List<DestinationInfo> OutputOperators { get; set; }
         public List<string> Addresses { get; set; } // of the multiple replicas
         public string OperatorFunction { get; set; }

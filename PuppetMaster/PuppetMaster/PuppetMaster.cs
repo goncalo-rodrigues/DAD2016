@@ -153,6 +153,7 @@ namespace PuppetMaster
                     HashingArg = hashingArg,
                     Semantic = semantic,
                     ShouldNotify = fullLogging
+
                 };
                 
                 // check if everything is ok
@@ -185,10 +186,25 @@ namespace PuppetMaster
                     }).ToList();
                 // those inputs that do not match any operator name are considered file inputs
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
+                TempInputReplicas = op.InputOperators.Where((x) => operators.Keys.Contains(x)).ToList();
+
+                foreach (string s in TempInputReplicas)
+                {
+                   // try { 
+                    if (op.InputReplicas != null)
+                        op.InputReplicas.AddRange(operators[s].Addresses);
+                        Console.WriteLine("OP ID: " + s + " url: " + operators[s].Addresses);
+                   /* }catch (NullReferenceException e) {
+                    }*/
+                 
+                }
             }
 
-            // after all parsing, start creating the processes
-            CreateAllProcesses(operators.Values);
+           
+
+
+                // after all parsing, start creating the processes
+                CreateAllProcesses(operators.Values);
             commandsToBeExecuted = config;
 
             Task.Run(async () =>
@@ -219,7 +235,8 @@ namespace PuppetMaster
             RemotingServices.Marshal(pmLogger, "PMLogger");
             Console.WriteLine("Logger was successfully initialized");
 
-        }
+          
+            }
 
 
         public string Serialize(OperatorInfo info, string address)
@@ -544,6 +561,8 @@ namespace PuppetMaster
                 return GetConsoleWindow();
             }
         }
+
+        public List<string> TempInputReplicas { get; private set; }
         /*Just to configure windows position - END*/
     }
 }
