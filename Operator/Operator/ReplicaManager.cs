@@ -1,4 +1,5 @@
 ﻿using SharedTypes;
+using SharedTypes.PerfectFailureDetector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,13 @@ namespace Operator
 
        //private List<Replica> replicas;
         public IDictionary<int, Replica> replicas;
+        public List<string> adresses;
 
 
         public ReplicaManager( Replica rep) {
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
-           
+            this.adresses = rep.adresses;
         }
 
         public void AddReplica(Replica rep) {
@@ -66,5 +68,33 @@ namespace Operator
         {
             replicas[id].Unfreeze();
         }
+
+
+        public void OnFail(object sender, NodeFailedEventArgs e)
+        {
+            int failedId = -1;
+            for (int i = 0; i < this.adresses.Count; i++)
+            {
+                if (this.adresses[i].Equals(e.FailedNodeName))
+                {
+                    failedId = i;
+                }
+            }
+            if (failedId != -1)
+            {
+                foreach (Replica rep in replicas.Values) {
+                    if (rep.ID == failedId + 1) {
+                        //recover
+                        break;
+                    }
+                }
+                
+
+            }
+
+        }
+
+
+
     }
 }

@@ -400,19 +400,6 @@ namespace Operator
             }
         }
 
-        public void OnFail(object sender, NodeFailedEventArgs e) {
-            int failedId = -1;
-            for (int i = 0; i < adresses.Count; i++) {
-                if (adresses[i].Equals(e.FailedNodeName)) {
-                    failedId = i; 
-                }
-                }
-            if (failedId != -1 && ID==failedId+1) {
-                //recover
-                
-            }
-
-        }
 
         public ReplicaState GetState()
         {
