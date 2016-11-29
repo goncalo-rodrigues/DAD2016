@@ -17,7 +17,7 @@ namespace PuppetMaster
         static void Main()
         {
             string config = null;
-            PuppetMaster master = new PuppetMaster();
+            PuppetMaster master = PuppetMaster.Instance;
             try
             {
                 config = File.ReadAllText("dadstorm.config");

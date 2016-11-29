@@ -51,8 +51,17 @@ namespace PuppetMaster
         public bool fullLogging = false;
         public Semantic semantic;
         public string commandsToBeExecuted = null;
+        private static PuppetMaster _instance;
+        public static PuppetMaster Instance {
+            get
+            {
+                if (_instance == null)
+                    _instance = new PuppetMaster();
+                return _instance;
+            }
+        }
        
-        public PuppetMaster()
+        private PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
             {
@@ -188,20 +197,13 @@ namespace PuppetMaster
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
                 TempInputReplicas = op.InputOperators.Where((x) => operators.Keys.Contains(x)).ToList();
 
+               
                 foreach (string s in TempInputReplicas)
                 {
-                   // try { 
                     if (op.InputReplicas != null)
                         op.InputReplicas.AddRange(operators[s].Addresses);
-                        Console.WriteLine("OP ID: " + s + " url: " + operators[s].Addresses);
-                   /* }catch (NullReferenceException e) {
-                    }*/
-                 
                 }
             }
-
-           
-
 
                 // after all parsing, start creating the processes
                 CreateAllProcesses(operators.Values);

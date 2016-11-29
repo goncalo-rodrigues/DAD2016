@@ -1,9 +1,10 @@
 ﻿
+using SharedTypes.PerfectFailureDetector;
 using System.Runtime.Remoting.Messaging;
 
 namespace SharedTypes
 {
-    public interface IReplica
+    public interface IReplica : IPingable
     {
         void ProcessAndForward(CTuple tuple);
         
@@ -11,7 +12,7 @@ namespace SharedTypes
         void Start();
         void Interval(int mils);
         void Status();
-        void Ping();
+        
         [OneWayAttribute()]
         void Kill();
         void Freeze();

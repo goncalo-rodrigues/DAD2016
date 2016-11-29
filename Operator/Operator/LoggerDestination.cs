@@ -26,6 +26,8 @@ namespace Operator
             // Console.WriteLine($"Logging deliver: {tuple.ToString()}");
             if (Logger != null)
                 Logger.Notify(new Record("tuple", SenderID, tuple.ToString(), DateTime.Now));
+
+            Console.WriteLine($"Delivering {tuple}");
         }
 
         override public void Ping()
