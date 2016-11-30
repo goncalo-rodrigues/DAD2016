@@ -199,10 +199,10 @@ namespace PuppetMaster
                 TempInputReplicas = op.InputOperators.Where((x) => operators.Keys.Contains(x)).ToList();
 
                
-                foreach (string s in TempInputReplicas)
+                foreach (var input in op.InputOperators)
                 {
-                    if (op.InputReplicas != null)
-                        op.InputReplicas.AddRange(operators[s].Addresses);
+                    if (operators.Keys.Contains(input))
+                        op.InputReplicas[input] = operators[input].Addresses;
                 }
             }
 

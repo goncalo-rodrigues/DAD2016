@@ -40,7 +40,7 @@ namespace Operator
         public int ID { get; set; }
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
-        public List<string> InputOperators { get;  }
+        public Dictionary<string, List<string>> InputOperators { get;  }
         public int TupleCounter { get; set; } = 0;
 
         public List<ReplicaState> OtherReplicasStates;
@@ -55,10 +55,12 @@ namespace Operator
         private PerfectFailureDetector perfectFailureDetector;
         private RoutingStrategy routingStrategy;
 
+        private Dictionary<string, List<OriginOperator>> originOperators;
         private OriginOperator inBuffer;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
         private bool processingState = false;
+        public Operation ProcessFunction { get; private set; }
 
         // event is raised when processing starts
         public event PuppetMasterEventHandler OnStart;
@@ -72,7 +74,8 @@ namespace Operator
             var info = rep.Operator;
             this.OperatorId = info.ID;
             this.MasterURL = info.MasterURL;
-            this.inBuffer = new OriginOperator(info.OperatorFunction, Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs));
+            this.ProcessFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
+            this.inBuffer = new OriginOperator();
             
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
@@ -126,8 +129,10 @@ namespace Operator
                 {
                     this.routingStrategy = new RandomStrategy(allReplicas, OperatorId.GetHashCode());
                 }
-
-                this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators);
+                foreach (var op in this.InputOperators.Keys)
+                {
+                    this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators[op]);
+                }
                 for (int i = 0; i < info.Addresses.Count; i++)
                 {
                     this.adresses.Add(info.Addresses[i]);
@@ -148,6 +153,8 @@ namespace Operator
                 });
 
             };
+
+            Task.Run(() => mainLoop());
             
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
@@ -170,6 +177,17 @@ namespace Operator
 
         }
 
+        private void mainLoop()
+        {
+            while (true)
+            {
+                
+                var t = inBuffer.Take();
+                var result = Process(t);
+                foreach (var tuple in result)
+                    SendToAll(tuple);
+            }
+        }
 
         public void StartProcessingFromFile(string path)
         {
@@ -208,10 +226,21 @@ namespace Operator
             }
         }
 
+        
+        private IEnumerable<CTuple> Process(CTuple tuple)
+        {
+            IEnumerable<CTuple> resultTuples = null;
+            // debug print 
+            var data = tuple.GetFields();
+            var resultData = ProcessFunction.Process(data);
+            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID));
+            Console.WriteLine($"Processed {tuple.ToString()}");
+            return resultTuples;
+        }
+
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine($"//DEBUG: Process And Forward {tuple.ToString()}");
             inBuffer.Insert(tuple);
         }
 
@@ -352,6 +381,8 @@ namespace Operator
                 return GetConsoleWindow();
             }
         }
+
+
         /*Just to configure windows position - END*/
 
         public ReplicaState GetState()
