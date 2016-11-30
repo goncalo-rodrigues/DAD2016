@@ -70,7 +70,7 @@ namespace SharedTypes.PerfectFailureDetector
                                 n.Failed = !success;
                                 if (n.Failed)
                                     NodeFailed?.Invoke(this, new NodeFailedEventArgs(n.Name, n.pingable));
-                                else Console.WriteLine($"Successfully pinged {n.Name}");
+                                //else Console.WriteLine($"Successfully pinged {n.Name}");
                             }
 
 
@@ -106,7 +106,7 @@ namespace SharedTypes.PerfectFailureDetector
                 stopWatch.Start();
                 while (!success && millis < timeOut)
                 {
-                    Console.WriteLine("starting ping...");
+                    //Console.WriteLine("starting ping...");
                     try
                     {
                         node.Ping();
@@ -118,7 +118,7 @@ namespace SharedTypes.PerfectFailureDetector
                     millis = stopWatch.ElapsedMilliseconds;
                 }
                 
-                Console.WriteLine($"success ping, took {millis} ms. max is {timeOut}");
+                //Console.WriteLine($"success ping, took {millis} ms. max is {timeOut}");
                 return millis < timeOut;
             });
             var result = task.Result;
