@@ -138,6 +138,7 @@ namespace Operator
 
         public void OnFail(object sender, NodeFailedEventArgs e)
         {
+            Console.WriteLine($"Detected failure of {e.FailedNodeName}");
             int failedId = -1;
             for (int i = 0; i < this.adresses.Count; i++)
             {
