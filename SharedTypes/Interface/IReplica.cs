@@ -6,7 +6,7 @@ namespace SharedTypes
 {
     public interface IReplica : IPingable
     {
-        void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId, int destinationId);
+        void ProcessAndForward(CTuple tuple, int destinationId);
         
 
         void Start(int id);

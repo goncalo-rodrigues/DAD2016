@@ -62,17 +62,6 @@ namespace Operator
                 }
             });
 
-
-           
-
-         
-
-
-
-
-
-
-
         }
 
         public void AddReplica(Replica rep) {
@@ -102,9 +91,9 @@ namespace Operator
             
         }
 
-        public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId, int destinationId)
+        public void ProcessAndForward(CTuple tuple, int destinationId)
         {
-            replicas[destinationId].ProcessAndForward(tuple, senderId, senderReplicaId);
+            replicas[destinationId].ProcessAndForward(tuple);
         }
 
         public void Start(int id)

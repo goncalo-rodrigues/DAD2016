@@ -62,7 +62,7 @@ namespace Operator
                     {
                         try
                         {
-                            rep.ProcessAndForward(tuple, master.OperatorId, master.ID, id);
+                            rep.ProcessAndForward(tuple, id);
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
@@ -71,7 +71,7 @@ namespace Operator
                     //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
-                    rep.ProcessAndForward(tuple, master.OperatorId, master.ID, id);
+                    rep.ProcessAndForward(tuple, id);
                     break;
                 case Semantic.ExactlyOnce:
                     //Problema: O custom escreve para ficheiros, se falha a meio volta a escrever

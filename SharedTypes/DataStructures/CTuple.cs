@@ -8,13 +8,17 @@ namespace SharedTypes
     {
         private List<string> fields = new List<string>();
         public int ID { get; }
+        public string opName { get;  }
+        public int repID { get; }
 
         public CTuple() {
         }
-        public CTuple(List<string> fields, int ID) {
+        public CTuple(List<string> fields, int ID, string opName, int repID) {
             foreach (string f in fields)
                 this.fields.Add(f);
             this.ID = ID;
+            this.opName = opName;
+            this.repID = repID;
         }
         public void AddField(string field) {
             this.fields.Add(field);

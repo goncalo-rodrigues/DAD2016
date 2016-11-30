@@ -193,13 +193,14 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
              
-                        var ctuple = new CTuple(tupleData, TupleCounter++);
+                        var ctuple = new CTuple(tupleData, TupleCounter++, this.OperatorId, this.ID);
                         
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         
                         if (TupleCounter >= startFrom && routingStrategy.ChooseReplica(ctuple) == ID)
                         {
-                            ProcessAndForward(ctuple, path, 0);
+                            
+                            ProcessAndForward(ctuple);
                         }
                     }
                 }
@@ -228,18 +229,25 @@ namespace Operator
             lock (this)
             {
                 resultData = ProcessFunction.Process(data);
+                ReplicaState repState = this.GetState();
+                Dictionary<string, OriginState> os = repState.InputStreamsIds;
+                List<int> sentIds = os[OperatorId].SentIds;
+                //FIXME
+                //id de quem me enviou
+                sentIds[ID]=tuple.repID;
+                
                 // todo: update processedtuples id
             }
-            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID));
+            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, this.OperatorId, this.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
 
         #region IReplica Implementation
-        public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId)
+        public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine("Received " + tuple + " from " + senderId);
-            originOperators[senderId][senderReplicaId].Insert(tuple);
+            Console.WriteLine("Received " + tuple + " from " + tuple.opName);
+            originOperators[tuple.opName][tuple.repID].Insert(tuple);
             Console.WriteLine("Successfully inserted");
         }
 
