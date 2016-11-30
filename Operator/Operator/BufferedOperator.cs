@@ -57,6 +57,7 @@ namespace Operator
 
         public void Insert(CTuple tuple)
         {
+         
             try
             {
                 buffer?.Add(tuple);

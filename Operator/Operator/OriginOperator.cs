@@ -11,6 +11,7 @@ namespace Operator
     {
         public string OpId { get; }
         public int ReplicaId { get; }
+        public int LastProcessedId { get; set; }
         public OriginOperator(string opId, int replicaId) : base(false) {
             this.OpId = opId;
             this.ReplicaId = replicaId;
@@ -18,12 +19,14 @@ namespace Operator
 
         public override CTuple Take()
         {
+           
             var tup = base.Take();
             // update stuff
             return tup;
         }
         public override void DoStuff(CTuple tuple)
         {
+            throw new NotImplementedException();
             // Not needed
         }
     

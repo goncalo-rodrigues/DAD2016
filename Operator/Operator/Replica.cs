@@ -169,11 +169,12 @@ namespace Operator
         {
             while (true)
             {
+               
                 
-                var t = inBuffer.Next();
-                var result = Process(t);
-                foreach (var tuple in result)
-                    SendToAll(tuple);
+                    var t = inBuffer.Next();
+                    var result = Process(t);
+                    foreach (var tuple in result)
+                        SendToAll(tuple);
             }
         }
 
@@ -213,6 +214,7 @@ namespace Operator
         {
              foreach (var neighbor in destinations.Values)
             {
+               
                 neighbor.Send(tuple);
             }
         }
@@ -220,6 +222,7 @@ namespace Operator
         
         private IEnumerable<CTuple> Process(CTuple tuple)
         {
+           
             IEnumerable<CTuple> resultTuples = null;
             // debug print 
             var data = tuple.GetFields();
@@ -227,15 +230,18 @@ namespace Operator
             lock (this)
             {
                 resultData = ProcessFunction.Process(data);
-                ReplicaState repState = this.GetState();
-                Dictionary<string, OriginState> os = repState.InputStreamsIds;
-                List<int> sentIds = os[OperatorId].SentIds;
+                //ReplicaState repState = this.GetState();
+              
+                originOperators[tuple.opName][tuple.repID].LastProcessedId = tuple.ID;
+               // Dictionary<string, OriginState> os = repState.InputStreamsIds;
+                //List<int> sentIds = os[tuple.opName].SentIds;
                 //FIXME
                 //id de quem me enviou
-                sentIds[ID]=tuple.repID;
+                //sentIds[ID]=tuple.repID;
                 
                 // todo: update processedtuples id
             }
+           
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, this.OperatorId, this.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
@@ -323,6 +329,7 @@ namespace Operator
                 var result = new ReplicaState();
                 result.OperationInternalState = ProcessFunction.InternalState;
                 result.OutputStreamsIds = new Dictionary<string, DestinationState>();
+                result.InputStreamsIds = new Dictionary<string, OriginState>();
                 foreach (var d in destinations)
                 {
                     var state = d.Value.GetState();
