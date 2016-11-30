@@ -10,12 +10,18 @@ namespace SharedTypes
     public class ReplicaState
     {
         public object OperationInternalState { get; set; }
-        //public Dictionary<string, DestinationState> InputStreamsIds { get; set; } TODO
+        public Dictionary<string, OriginState> InputStreamsIds { get; set; } 
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
 
     }
     [Serializable]
     public class DestinationState
+    {
+        public List<int> SentIds;
+    }
+
+    [Serializable]
+    public class OriginState
     {
         public List<int> SentIds;
     }

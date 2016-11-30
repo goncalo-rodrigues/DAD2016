@@ -154,15 +154,23 @@ namespace Operator
                         Replica r = CreateReplica(failedId);
                         
                         ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
-                        
-                       
-                        rep.LoadState(repState);
+                        Dictionary<string, OriginState> os = repState.InputStreamsIds;
+                        r.LoadState(repState);
+                        foreach (string opName in os.Keys) {
+                            List<int> sentIds = os[opName].SentIds;
+                            //for each operator ask a re-sent
+                            for (int j = 0; j < sentIds.Count; j++)
+                            {
+                                r.Resend(sentIds[j], opName, j);
+                            }
+                        }
 
+                        
+                        
+                        //resend 
                         break;
                     }
                 }
-                
-
             }
 
         }
