@@ -43,8 +43,6 @@ namespace Operator
         public int TupleCounter { get; set; } = 0;
         public int StartFrom { get; set; } = 0;
 
-        private ILogger logger;
-        
         private IDictionary<string, Destination> destinations;
         private List<string> inputFiles;
         private RoutingStrategy routingStrategy;

@@ -47,13 +47,13 @@ namespace Operator
                     // hack to not get his own stub
                     info.Addresses.Select((address) => (rep.SelfURL != address ? address : null)).ToList()))
                     .ToList();
-                var allReplicas = (new List<IReplica>(this.otherReplicas));
+               
 
                 for (int i = 0; i < info.Addresses.Count; i++)
                 {
                     if (i == rep.ID) continue;
                     
-                    pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                    pfd.StartMonitoringNewNode(info.Addresses[i], otherReplicas[i]);
                 }
 
                 foreach (var op in info.InputReplicas.Keys)
