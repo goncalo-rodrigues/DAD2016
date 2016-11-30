@@ -4,14 +4,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.InteropServices;
-using System.Windows;
-using SharedTypes.PerfectFailureDetector;
 
 namespace Operator
 {
@@ -150,7 +146,7 @@ namespace Operator
                 destinations.Add("puppet_master_logger", new LoggerDestination(this, info.Semantic, SelfURL, MasterURL));
 
                 // Configure windows position
-                Console.Title = $"{this.OperatorId} ({ID})";
+
             string a = this.OperatorId;
 
             if (a.Equals("OP1")) { SetWindowPosition(600, 0, 400, 200); }
@@ -170,7 +166,6 @@ namespace Operator
             while (true)
             {
                
-                
                     var t = inBuffer.Next();
                     var result = Process(t);
                     foreach (var tuple in result)
@@ -227,8 +222,8 @@ namespace Operator
             // debug print 
             var data = tuple.GetFields();
             IEnumerable<IList<string>> resultData;
-            lock (this)
-            {
+            //lock (this)
+            //{
                 resultData = ProcessFunction.Process(data);
                 //ReplicaState repState = this.GetState();
               
@@ -239,8 +234,8 @@ namespace Operator
                 //id de quem me enviou
                 //sentIds[ID]=tuple.repID;
                 
-                // todo: update processedtuples id
-            }
+            //    // todo: update processedtuples id
+            //}
            
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, this.OperatorId, this.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
@@ -318,10 +313,6 @@ namespace Operator
             }
         }
 
-
-        /*Just to configure windows position - END*/
-
-
         public ReplicaState GetState()
         {
             lock(this)
@@ -330,6 +321,14 @@ namespace Operator
                 result.OperationInternalState = ProcessFunction.InternalState;
                 result.OutputStreamsIds = new Dictionary<string, DestinationState>();
                 result.InputStreamsIds = new Dictionary<string, OriginState>();
+
+                foreach (var inputstream in originOperators)
+                {
+                    result.InputStreamsIds[inputstream.Key] = new OriginState
+                    {
+                        SentIds = inputstream.Value.Select((x) => x.LastProcessedId).ToList()
+                    };
+                }
                 foreach (var d in destinations)
                 {
                     var state = d.Value.GetState();
@@ -353,6 +352,8 @@ namespace Operator
 
         public void Resend(int id, string operatorId, int replicaId)
         {
+            if (operatorId == this.OperatorId && this.ID == replicaId)
+                return;
             destinations[operatorId].Resend(id, replicaId);
         }
 

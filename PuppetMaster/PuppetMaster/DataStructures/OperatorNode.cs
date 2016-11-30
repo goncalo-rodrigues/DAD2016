@@ -40,7 +40,8 @@ namespace PuppetMaster
 
                 for (int i = 0; i < Replicas.Count; i++) {
                     if (Replicas[i] != null) {
-                        Replicas[i].Start(i);
+                            Replicas[i].Start(i);
+                        
                     }
                 }
               
@@ -69,7 +70,14 @@ namespace PuppetMaster
                     for (int i = 0; i < Replicas.Count; i++) {
                         if (Replicas[i] != null)
                         {
-                            Replicas[i].Status();
+                            try
+                            {
+                                Replicas[i].Status();
+                            } catch (Exception)
+                            {
+                                Console.WriteLine("At least I tried...");
+                            }
+                            
                         }
                         else {
                             Console.WriteLine($"Replica from operator {ID} is null");

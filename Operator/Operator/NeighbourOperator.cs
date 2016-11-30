@@ -52,7 +52,6 @@ namespace Operator
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
             int id = RoutingStrategy.ChooseReplica(tuple);
             var rep = replicas[id];
-
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -84,6 +83,7 @@ namespace Operator
                     break;
                 
             }
+
             lock (this)
             {
                 CachedOutputTuples.Add(tuple);

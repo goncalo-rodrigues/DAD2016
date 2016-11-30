@@ -62,10 +62,13 @@ namespace Operator
                 }
             });
 
+            Console.Title = $"{rep.OperatorId} ({rep.ID})";
+
         }
 
         public void AddReplica(Replica rep) {
             this.replicas.Add(rep.ID, rep);
+            Console.Title += $" ({rep.ID})";
         }
 
         public void Freeze(int id)
@@ -141,6 +144,7 @@ namespace Operator
                 foreach (Replica rep in replicas.Values) {
                     if (rep.ID == failedId + 1) {
                         //recover 
+                        Console.WriteLine($"Started to recover replica {failedId}");
                         Replica r = CreateReplica(failedId);
                         
                         ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
@@ -154,7 +158,8 @@ namespace Operator
                                 r.Resend(sentIds[j], opName, j);
                             }
                         }
-
+                        replicas.Add(failedId, r);
+                        r.Start();
                         
                         
                         //resend 

@@ -42,16 +42,12 @@ namespace Operator
         }
 
         override public void DoStuff(CTuple tuple) {
-            if (Interval > -1)
+            if (Interval > 0)
             {
+                Console.WriteLine("Interval!");
                 Thread.Sleep(Interval);
-
-                Deliver(tuple);
-                
-            } else
-            {
-
             }
+            Deliver(tuple);
         }
 
         public virtual DestinationState GetState()

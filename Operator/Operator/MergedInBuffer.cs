@@ -13,6 +13,12 @@ namespace Operator
         
         public MergedInBuffer(List<OriginOperator> buffersToMerge) : base(false) {
             Origins = buffersToMerge;
+            foreach (var origin in Origins)
+            {
+                Task.Run(() => {
+                    while (true) Insert(origin.Take());
+                });
+            }
         }
 
         public override void DoStuff(CTuple tuple)
@@ -22,14 +28,6 @@ namespace Operator
 
         public CTuple Next()
         {
-            if (Count() > 0)
-            {
-                return Take();
-            }
-            foreach (var origin in Origins)
-            {
-                Task.Run(() => Insert(origin.Take()));
-            }
             return Take();
         }
     }
