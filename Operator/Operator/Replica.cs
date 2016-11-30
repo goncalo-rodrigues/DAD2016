@@ -55,7 +55,7 @@ namespace Operator
         private RoutingStrategy routingStrategy;
 
         private Dictionary<string, List<OriginOperator>> originOperators;
-        private OriginOperator inBuffer;
+        private MergedInBuffer inBuffer;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
         private bool processingState = false;
@@ -74,7 +74,7 @@ namespace Operator
             this.OperatorId = info.ID;
             this.MasterURL = info.MasterURL;
             this.ProcessFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
-            this.inBuffer = new OriginOperator();
+            
             
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
@@ -100,7 +100,20 @@ namespace Operator
                     destinations.Add(dstInfo.ID, new NeighbourOperator(this, dstInfo, info.Semantic));
                 }
             }
-          
+
+            var allOrigins = new List<OriginOperator>();
+            foreach (var op in this.InputOperators.Keys)
+            {
+                this.originOperators[op] = new List<OriginOperator>();
+                for (int i = 0; i < InputOperators[op].Count; i++)
+                {
+                    this.originOperators[op].Add(new OriginOperator(op, i));
+                    allOrigins.Add(originOperators[op][i]);
+                }
+                    
+            }
+            this.inBuffer = new MergedInBuffer(allOrigins);
+
             var initTask = Task.Run(async () =>
             {
                 
@@ -164,7 +177,7 @@ namespace Operator
             while (true)
             {
                 
-                var t = inBuffer.Take();
+                var t = inBuffer.Next();
                 var result = Process(t);
                 foreach (var tuple in result)
                     SendToAll(tuple);
@@ -221,9 +234,9 @@ namespace Operator
         }
 
         #region IReplica Implementation
-        public void ProcessAndForward(CTuple tuple)
+        public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId)
         {
-            inBuffer.Insert(tuple);
+            originOperators[senderId][senderReplicaId].Insert(tuple);
         }
 
         public void Start()

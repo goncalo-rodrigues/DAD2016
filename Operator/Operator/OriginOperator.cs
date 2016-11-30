@@ -9,7 +9,11 @@ namespace Operator
 {
     public class OriginOperator : BufferedOperator
     {
-        public OriginOperator() : base(false) {
+        public string OpId { get; }
+        public int ReplicaId { get; }
+        public OriginOperator(string opId, int replicaId) : base(false) {
+            this.OpId = opId;
+            this.ReplicaId = replicaId;
         }
 
         public override CTuple Take()

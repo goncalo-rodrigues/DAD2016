@@ -47,6 +47,7 @@
     <Compile Include="HashingStrategy.cs" />
     <Compile Include="Destination.cs" />
     <Compile Include="LoggerDestination.cs" />
+    <Compile Include="MergedInBuffer.cs" />
     <Compile Include="NeighbourOperator.cs" />
     <Compile Include="Operations.cs" />
     <Compile Include="BufferedOperator.cs" />
