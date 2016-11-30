@@ -17,9 +17,13 @@ namespace Operator
         public List<int> SentTupleIds;
         public RoutingStrategy RoutingStrategy { get; set; }
         public bool controlFlag = false;
+        private Replica master;
+        private DestinationInfo info; 
 
         public NeighbourOperator(Replica master, DestinationInfo info, Semantic semantic) : base(master, semantic)
         {
+            this.master = master;
+            this.info = info; 
             CachedOutputTuples = new List<CTuple>();
             GarbageCollectedTupleIds = new List<int>(new int[info.Addresses.Count]);
             SentTupleIds = new List<int>(new int[info.Addresses.Count]);
@@ -58,7 +62,7 @@ namespace Operator
                     {
                         try
                         {
-                            rep.ProcessAndForward(tuple,id);
+                            rep.ProcessAndForward(tuple, master.OperatorId, master.ID, id);
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
@@ -67,7 +71,7 @@ namespace Operator
                     //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
-                    rep.ProcessAndForward(tuple, id);
+                    rep.ProcessAndForward(tuple, master.OperatorId, master.ID, id);
                     break;
                 case Semantic.ExactlyOnce:
                     //Problema: O custom escreve para ficheiros, se falha a meio volta a escrever
