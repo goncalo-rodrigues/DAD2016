@@ -242,12 +242,15 @@ namespace PuppetMaster
             }
 
 
-        public string Serialize(OperatorInfo info, string address)
+        public string Serialize(OperatorInfo info, string address, int id)
         {
             var rep = new ReplicaCreationInfo
             {
                 Operator = info,
-                Address = address
+                Address = address, 
+                Id = id
+
+
             };
             TextWriter tw = new StringWriter();
             System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(rep.GetType());
@@ -313,7 +316,7 @@ namespace PuppetMaster
         /// </summary>
         /// <param name="addr">The address of the replica</param>
         /// <param name="info">The replica information</param>
-        private  void CreateProcessAt(string addr, OperatorInfo info)
+        private  void CreateProcessAt(string addr, OperatorInfo info, int id)
         {
             const int PCS_PORT = 10000;
             try
@@ -328,7 +331,7 @@ namespace PuppetMaster
                 TcpClient client = new TcpClient(match.Groups["host"].Value, PCS_PORT);
 
                 NetworkStream ns = client.GetStream();
-                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr) + "\0");
+                byte[] arg = Encoding.ASCII.GetBytes(Serialize(info, addr, id) + "\0");
                 byte[] response = new byte[4];
                 try
                 {
@@ -367,10 +370,10 @@ namespace PuppetMaster
             foreach (var op in ops)
             {
                     if(op.Addresses != null)
-                foreach (var addr in op.Addresses)
-                {
-                    tasks.Add(Task.Run(() => CreateProcessAt(addr, op)));
-                }
+                        for (int i = 0; i < op.Addresses.Count; i++)
+                        {
+                            tasks.Add(Task.Run(() => CreateProcessAt(op.Addresses[i], op, i)));
+                        }
             }
             Task.WaitAll(tasks.ToArray());
         }

@@ -12,11 +12,11 @@ namespace Operator
         private object p1;
         private object p2;
 
-        public List<IReplica> list { get; set; }
+        public int countRep { get; set; }
 
-        public RoutingStrategy(List<IReplica> replicas)
+        public RoutingStrategy(int countRep)
         {
-            list = replicas;
+            this.countRep = countRep;
          
         }
 

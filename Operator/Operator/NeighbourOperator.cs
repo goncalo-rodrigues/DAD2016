@@ -30,15 +30,15 @@ namespace Operator
 
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
-                    RoutingStrategy = new PrimaryStrategy(replicas);
+                    RoutingStrategy = new PrimaryStrategy(info.Addresses.Count);
                 }
                 else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
                 {
-                    RoutingStrategy = new HashingStrategy(replicas, info.HashingArg);
+                    RoutingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
                 }
                 else
                 {
-                    RoutingStrategy = new RandomStrategy(replicas);
+                    RoutingStrategy = new RandomStrategy(info.Addresses.Count);
                 }
 
             });
