@@ -196,7 +196,8 @@ namespace PuppetMaster
                     }).ToList();
                 // those inputs that do not match any operator name are considered file inputs
                 op.InputFiles = op.InputOperators.Where((x) => !operators.Keys.Contains(x)).ToList();
-                TempInputReplicas = op.InputOperators.Where((x) => operators.Keys.Contains(x)).ToList();
+
+                op.InputReplicas = new Dictionary<string, List<string>>();
 
                
                 foreach (var input in op.InputOperators)
@@ -252,10 +253,12 @@ namespace PuppetMaster
 
 
             };
-            TextWriter tw = new StringWriter();
-            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(rep.GetType());
-            x.Serialize(tw, rep);
-            return tw.ToString();
+            //TextWriter tw = new StringWriter();
+            MemoryStream stream1 = new MemoryStream();
+            System.Runtime.Serialization.DataContractSerializer serializer = new System.Runtime.Serialization.DataContractSerializer(rep.GetType());
+            serializer.WriteObject(stream1, rep);
+            var s = Encoding.ASCII.GetString(stream1.ToArray());
+            return s.ToString();
         }
         public bool Assert(OperatorInfo op)
         {
@@ -370,10 +373,14 @@ namespace PuppetMaster
             foreach (var op in ops)
             {
                     if(op.Addresses != null)
+                    {
                         for (int i = 0; i < op.Addresses.Count; i++)
                         {
-                            tasks.Add(Task.Run(() => CreateProcessAt(op.Addresses[i], op, i)));
+                            int j = i;
+                            tasks.Add(Task.Run(() => CreateProcessAt(op.Addresses[j], op, j)));
                         }
+                    }
+
             }
             Task.WaitAll(tasks.ToArray());
         }

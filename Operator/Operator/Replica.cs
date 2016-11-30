@@ -33,24 +33,21 @@ namespace Operator
         static extern IntPtr GetConsoleWindow();
         [DllImport("user32")]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
-            int x, int y, int cx, int cy, int flags);
+        int x, int y, int cx, int cy, int flags);
 
-        public bool IsPrimary { get; }
         public string OperatorId { get; }
         public int ID { get; set; }
         public string MasterURL { get; set; }
-        public string selfURL { get; set; }
-        public Dictionary<string, List<string>> InputOperators { get;  }
+        public string SelfURL { get; set; }
+        
         public int TupleCounter { get; set; } = 0;
-
-        public List<ReplicaState> OtherReplicasStates;
 
         private ILogger logger;
         
         private IDictionary<string, Destination> destinations;
         public IList<IReplica> otherReplicas;
         public IList<IReplica> inputReplicas;
-        public List<string> adresses;
+        public Dictionary<string, List<string>> inputOperators;
         private List<string> inputFiles;
         private RoutingStrategy routingStrategy;
 
@@ -58,7 +55,7 @@ namespace Operator
         private MergedInBuffer inBuffer;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
-        private bool processingState = false;
+        public bool processingState = false;
         public Operation ProcessFunction { get; private set; }
 
         // event is raised when processing starts
@@ -79,10 +76,9 @@ namespace Operator
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
             // primary is the first one in the array
-            this.IsPrimary = rep.Id == 0;
-            this.selfURL = rep.Address;
+            this.SelfURL = rep.Address;
             this.MasterURL = info.MasterURL;
-            this.InputOperators = info.InputReplicas;
+            this.inputOperators = info.InputReplicas;
             this.ID = rep.Id;
           
 
@@ -102,10 +98,11 @@ namespace Operator
             }
 
             var allOrigins = new List<OriginOperator>();
-            foreach (var op in this.InputOperators.Keys)
+            this.originOperators = new Dictionary<string, List<OriginOperator>>();
+            foreach (var op in this.inputOperators.Keys)
             {
                 this.originOperators[op] = new List<OriginOperator>();
-                for (int i = 0; i < InputOperators[op].Count; i++)
+                for (int i = 0; i < inputOperators[op].Count; i++)
                 {
                     this.originOperators[op].Add(new OriginOperator(op, i));
                     allOrigins.Add(originOperators[op][i]);
@@ -126,19 +123,19 @@ namespace Operator
                 
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
-                    this.routingStrategy = new PrimaryStrategy(adresses.Count);
+                    this.routingStrategy = new PrimaryStrategy(info.Addresses.Count);
                 }
                 else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
                 {
-                    this.routingStrategy = new HashingStrategy(adresses.Count, info.HashingArg);
+                    this.routingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
                 }
                 else
                 {
-                    this.routingStrategy = new RandomStrategy(adresses.Count, OperatorId.GetHashCode());
+                    this.routingStrategy = new RandomStrategy(info.Addresses.Count, OperatorId.GetHashCode());
                 }
-                foreach (var op in this.InputOperators.Keys)
+                foreach (var op in this.inputOperators.Keys)
                 {
-                    this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators[op]);
+                    this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.inputOperators[op]);
                 }
 
             });
@@ -160,11 +157,10 @@ namespace Operator
             
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
-                destinations.Add("puppet_master_logger", new LoggerDestination(this, info.Semantic, selfURL, MasterURL));
-
+                destinations.Add("puppet_master_logger", new LoggerDestination(this, info.Semantic, SelfURL, MasterURL));
 
                 // Configure windows position
-                Console.Title = this.OperatorId;
+                Console.Title = $"{this.OperatorId} ({ID})";
             string a = this.OperatorId;
 
             if (a.Equals("OP1")) { SetWindowPosition(600, 0, 400, 200); }
@@ -214,7 +210,7 @@ namespace Operator
                     }
                 }
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
             }
@@ -243,7 +239,9 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId)
         {
+            Console.WriteLine("Received " + tuple + " from " + senderId);
             originOperators[senderId][senderReplicaId].Insert(tuple);
+            Console.WriteLine("Successfully inserted");
         }
 
         public void Start()
@@ -264,82 +262,7 @@ namespace Operator
                 Millis = mils
             });
         }
-        public void Status()
-        {
-            // print state of the system
-            string status = "[Operator: " + OperatorId + ", Status: " + (processingState == true ? "Processing" : "Not Processing");
-           
-            int neighboursCnt = 0;
-            int repCnt = 0;
-
-            IList<Destination> onlyOperatorDestinations = null;
-            if (!shouldNotify || destinations == null)
-            {
-
-                onlyOperatorDestinations = destinations.Values.ToList();
-            }
-            else
-            {
-
-                // remove logger from destinations list (https://msdn.microsoft.com/en-us/library/bb549418.aspx)
-                onlyOperatorDestinations = destinations.Values.Where((dest, index) => index < destinations?.Count - 1).ToList();
-            }
-
-            if (onlyOperatorDestinations != null && onlyOperatorDestinations.Count > 0)
-            {
-                foreach (Destination neighbour in onlyOperatorDestinations)
-                {
-                    try
-                    {
-                        if (neighbour != null )
-                        {
-                            var task = Task.Run(() => neighbour.Ping());
-                            if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                            {
-                                neighboursCnt++;
-                            }
-                        }
-                    }
-                    catch (AggregateException e)
-                    {
-                        // does nothing
-                    }
-                    
-                }
-                status += $", Neighbours: {(neighboursCnt)} (of {(onlyOperatorDestinations.Count)})";
-            }
-            else
-            {
-                status += $", Neighbours: 0 (of 0)";
-            }
-              
-            if (otherReplicas != null && otherReplicas.Count >= 0)
-            {
-                foreach (IReplica irep in otherReplicas)
-                {
-                    try
-                    {
-                        if (irep != null)
-                        {
-                            var task = Task.Run(() => irep.Ping());
-                            if (task.Wait(TimeSpan.FromMilliseconds(100)))
-                                repCnt++;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // does nothing
-                    }
-                }
-                status += $", Working Replicas: {(repCnt+1)} (of {(otherReplicas?.Count)})";
-            } 
-            else
-            {
-                //myself only
-                status += $", Working Replicas: 1 (of 1)";
-            }
-            Console.WriteLine(status);
-        }
+ 
         public void Ping()
         {
            // Console.WriteLine($"{OperatorId} was pinged...");

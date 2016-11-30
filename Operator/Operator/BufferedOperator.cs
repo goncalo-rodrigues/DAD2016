@@ -24,6 +24,11 @@ namespace Operator
         {
             return buffer.Take();
         }
+
+        public int Count()
+        {
+            return buffer.Count;
+        }
         
         private void Processor()
         {

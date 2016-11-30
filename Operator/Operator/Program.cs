@@ -6,10 +6,12 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Operator
 {
@@ -31,13 +33,17 @@ namespace Operator
                 loop();
             }
 
+
+
             TextReader tr = new StringReader(args[0]);
+            
             ReplicaCreationInfo rep = null;
             try
             {
-                System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(ReplicaCreationInfo));
-                rep = (ReplicaCreationInfo)x.Deserialize(tr);
-            } catch (Exception e)
+                DataContractSerializer serializer = new DataContractSerializer(typeof(ReplicaCreationInfo));
+                rep = (ReplicaCreationInfo)serializer.ReadObject(XmlReader.Create(tr));
+            }
+            catch (Exception e)
             {
                 Console.WriteLine($"Creation info XML has a wrong format. Exception: {e.Message}");
                 throw;

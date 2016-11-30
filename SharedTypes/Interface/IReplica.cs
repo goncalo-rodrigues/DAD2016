@@ -11,7 +11,7 @@ namespace SharedTypes
 
         void Start(int id);
         void Interval(int id, int mils);
-        void Status(int id);
+        void Status();
         
         
         [OneWayAttribute()]

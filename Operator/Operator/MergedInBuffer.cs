@@ -7,18 +7,30 @@ using SharedTypes;
 
 namespace Operator
 {
-    public class MergedInBuffer
+    public class MergedInBuffer : BufferedOperator
     {
         public List<OriginOperator> Origins;
-        public MergedInBuffer(List<OriginOperator> buffersToMerge) {
+        
+        public MergedInBuffer(List<OriginOperator> buffersToMerge) : base(false) {
             Origins = buffersToMerge;
+        }
+
+        public override void DoStuff(CTuple tuple)
+        {
+            throw new NotImplementedException();
         }
 
         public CTuple Next()
         {
-            // do merge magic here
-
-            return null;
+            if (Count() > 0)
+            {
+                return Take();
+            }
+            foreach (var origin in Origins)
+            {
+                Task.Run(() => Insert(origin.Take()));
+            }
+            return Take();
         }
     }
 }

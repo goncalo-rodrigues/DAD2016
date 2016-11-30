@@ -17,13 +17,13 @@ namespace Operator
         private List<string> adresses;
         private OperatorInfo info;
         private PerfectFailureDetector pfd;
-        private object otherReplicas; 
+        private List<IReplica> otherReplicas;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
-            this.adresses = rep.adresses;
+            this.adresses = info.Addresses;
             this.info = info;
           
             this.otherReplicasStates = new List<ReplicaState>(); 
@@ -31,7 +31,7 @@ namespace Operator
             {
                 await Task.Delay(10000);
                 var initialState = rep.GetState();
-                for (int i = 0; i < rep.adresses.Count; i++)
+                for (int i = 0; i < info.Addresses.Count; i++)
                 {
                     otherReplicasStates.Add(initialState);
                 }
@@ -44,15 +44,15 @@ namespace Operator
                 this.otherReplicas =
                 (await Helper.GetAllStubs<IReplica>(
                     // hack to not get his own stub
-                    info.Addresses.Select((address) => (rep.selfURL != address ? address : null)).ToList()))
+                    info.Addresses.Select((address) => (rep.SelfURL != address ? address : null)).ToList()))
                     .ToList();
-                var allReplicas = (new List<IReplica>(rep.otherReplicas));
+                var allReplicas = (new List<IReplica>(this.otherReplicas));
 
                 for (int i = 0; i < info.Addresses.Count; i++)
                 {
-                    this.adresses.Add(info.Addresses[i]);
-                    if (info.Addresses[i] != rep.selfURL)
-                        pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                    if (i == rep.ID) continue;
+                    
+                    pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
                 }
             });
 
@@ -98,7 +98,7 @@ namespace Operator
 
         public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId, int destinationId)
         {
-            replicas[destinationId].ProcessAndForward(tuple);
+            replicas[destinationId].ProcessAndForward(tuple, senderId, senderReplicaId);
         }
 
         public void Start(int id)
@@ -106,9 +106,22 @@ namespace Operator
             replicas[id].Start();
         }
 
-        public void Status(int id)
+        public void Status()
         {
-            replicas[id].Status();
+            // print state of the system
+            string status = "Operator: " + info.ID + ", Status: " + (replicas.Values.First().processingState == true ? "Processing" : "Not Processing");
+            int repCnt = 0;
+            for (int i=0; i < adresses.Count;i++)
+            {
+                if (replicas.ContainsKey(i)) continue;
+                if (pfd.IsAlive(adresses[i]))
+                {
+                    repCnt += 1;
+                }
+            }
+            status += $", Alive replicas: {replicas.Count + repCnt} (of {adresses.Count}), Recovered: {replicas.Count - 1}";
+            Console.WriteLine(status);
+        
         }
 
         public void Unfreeze(int id)
