@@ -9,6 +9,7 @@ namespace SharedTypes
     public class ReplicaCreationInfo
     {
         public string Address { get; set; }
+        public int Id { get; set; }
         public OperatorInfo Operator { get; set; }
     }
 }

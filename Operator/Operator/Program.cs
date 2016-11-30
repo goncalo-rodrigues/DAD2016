@@ -53,7 +53,8 @@ namespace Operator
 
             
             Replica replica = new Replica(rep);
-            ReplicaManager repManager = new ReplicaManager(replica);
+            ReplicaManager repManager = new ReplicaManager(replica, info);
+            
            
             //FIXME: COUNT and UNIQ doesn't work
             // Operations.ReplicaInstance = replica;
