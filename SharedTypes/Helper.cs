@@ -58,5 +58,10 @@ namespace SharedTypes
             var results = await Task.WhenAll(tasks);
             return results;
         }
+
+        public static Task GetAllStubs<T>(object p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

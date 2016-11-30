@@ -12,16 +12,21 @@ namespace Operator
     {
 
        //private List<Replica> replicas;
-        public IDictionary<int, Replica> replicas;
-        public List<ReplicaState> otherReplicasStates;
-        public List<string> adresses;
+        private IDictionary<int, Replica> replicas;
+        private List<ReplicaState> otherReplicasStates;
+        private List<string> adresses;
+        private OperatorInfo info;
+        private PerfectFailureDetector pfd;
+        private object otherReplicas; 
 
+        public ReplicaManager( Replica rep, OperatorInfo info) {
 
-        public ReplicaManager( Replica rep) {
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
             this.adresses = rep.adresses;
-            this.otherReplicasStates = new List<ReplicaState>();
+            this.info = info;
+          
+            this.otherReplicasStates = new List<ReplicaState>(); 
             Task.Run(async () =>
             {
                 await Task.Delay(10000);
@@ -31,6 +36,36 @@ namespace Operator
                     otherReplicasStates.Add(initialState);
                 }
             });
+            this.pfd = new PerfectFailureDetector();
+            this.pfd.NodeFailed += OnFail;
+
+            var initTask = Task.Run(async () =>
+            {
+                this.otherReplicas =
+                (await Helper.GetAllStubs<IReplica>(
+                    // hack to not get his own stub
+                    info.Addresses.Select((address) => (rep.selfURL != address ? address : null)).ToList()))
+                    .ToList();
+                var allReplicas = (new List<IReplica>(rep.otherReplicas));
+
+                for (int i = 0; i < info.Addresses.Count; i++)
+                {
+                    this.adresses.Add(info.Addresses[i]);
+                    if (info.Addresses[i] != rep.selfURL)
+                        pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                }
+            });
+
+
+           
+
+         
+
+
+
+
+
+
 
         }
 
@@ -96,7 +131,14 @@ namespace Operator
             {
                 foreach (Replica rep in replicas.Values) {
                     if (rep.ID == failedId + 1) {
-                        //recover
+                        //recover 
+                        Replica r = CreateReplica(failedId);
+                        
+                        ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
+                        
+                       
+                        rep.LoadState(repState);
+
                         break;
                     }
                 }
@@ -104,6 +146,16 @@ namespace Operator
 
             }
 
+        }
+
+        private Replica CreateReplica(int failedId)
+        {
+            ReplicaCreationInfo rci = new ReplicaCreationInfo();
+            //adress of crashed replica
+            rci.Address = info.Addresses[failedId];
+            rci.Id = failedId;
+            rci.Operator = info;
+            return new Replica(rci); 
         }
 
         public ReplicaState GetState(int id)

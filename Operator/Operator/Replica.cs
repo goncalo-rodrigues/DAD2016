@@ -52,7 +52,6 @@ namespace Operator
         public IList<IReplica> inputReplicas;
         public List<string> adresses;
         private List<string> inputFiles;
-        private PerfectFailureDetector perfectFailureDetector;
         private RoutingStrategy routingStrategy;
 
         private Dictionary<string, List<OriginOperator>> originOperators;
@@ -85,8 +84,8 @@ namespace Operator
             this.MasterURL = info.MasterURL;
             this.InputOperators = info.InputReplicas;
             this.ID = info.Addresses.IndexOf(selfURL);
-            Console.WriteLine("***url.: " + selfURL);
-            Console.WriteLine("***ID.: " +ID);
+           // Console.WriteLine("***url.: " + selfURL);
+           // Console.WriteLine("***ID.: " +ID);
 
             // ALSO MOVE DESTINATIONS TO ORIGIN'
             this.destinations = new Dictionary<string, Destination>();
@@ -102,11 +101,7 @@ namespace Operator
                     destinations.Add(dstInfo.ID, new NeighbourOperator(this, dstInfo, info.Semantic));
                 }
             }
-            this.perfectFailureDetector = new PerfectFailureDetector();
-            this.perfectFailureDetector.NodeFailed += (sender, args) => {
-                Console.WriteLine($"{args.FailedNodeName} failed");
-            };
-            //this.perfectFailureDetector.NodeFailed += OnFail;
+          
             var initTask = Task.Run(async () =>
             {
                 this.otherReplicas =
@@ -133,12 +128,7 @@ namespace Operator
                 {
                     this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators[op]);
                 }
-                for (int i = 0; i < info.Addresses.Count; i++)
-                {
-                    this.adresses.Add(info.Addresses[i]);
-                    if (info.Addresses[i] != selfURL)
-                        perfectFailureDetector.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
-                }
+
             });
 
             // Start reading from file(s)
@@ -384,6 +374,7 @@ namespace Operator
 
 
         /*Just to configure windows position - END*/
+
 
         public ReplicaState GetState()
         {
