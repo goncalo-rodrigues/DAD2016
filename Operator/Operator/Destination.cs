@@ -11,7 +11,7 @@ namespace Operator
 {
     public abstract class Destination : BufferedOperator
     {
-        public int Interval { get; set; } = -1;
+        public int Interval { get; set; } = 0; // do not equal this to -1
         public bool Processing { get; set; } = false;
         public bool FreezeFlag { get; set; } = false;
         public Semantic Semantic { get; set; }
@@ -42,12 +42,17 @@ namespace Operator
         }
 
         override public void DoStuff(CTuple tuple) {
-            if (Interval != -1)
+            if (Interval > -1)
             {
                 Console.WriteLine($"//DEBUG: Interval: {Interval} ms. //");
-                Thread.Sleep(Interval); // nao pode ser thread sleep caso contrario a thread adormece e nao recebe qualquer tuplo durante esse tempo... => TOO SLEEPY WON'T DO IT NOW xD 01:00am-30/11
+                Task.Delay(Interval).ContinueWith(_ =>
+                {
+                    Deliver(tuple);
+                });
+            } else
+            {
+
             }
-            Deliver(tuple);
         }
 
         public virtual DestinationState GetState()
