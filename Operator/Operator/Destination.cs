@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 
 namespace Operator
 {
-    public abstract class Destination
+    public abstract class Destination : BufferedOperator
     {
-        private List<CTuple> outBuffer;
         public int Interval { get; set; } = -1;
         public bool Processing { get; set; } = false;
         public bool FreezeFlag { get; set; } = false;
@@ -27,54 +26,28 @@ namespace Operator
             return;
         }
 
-        public Destination(Replica parent, Semantic semantic)
+        public Destination(Replica parent, Semantic semantic) : base()
         {
-
             parent.OnFreeze += Parent_OnFreeze;
             parent.OnUnfreeze += Parent_OnUnfreeze;
             parent.OnStart += Parent_OnStart;
             parent.OnInterval += Parent_OnInterval;
 
-            outBuffer = new List<CTuple>();
             Semantic = semantic;
-            Thread t = new Thread(FlushEventBuffer);
-            t.Start();
         }
 
         public void Send(CTuple tuple)
         {
-            lock (this)
-            {
-                outBuffer.Add(tuple);
-                Monitor.Pulse(this);
-            }
+            Insert(tuple);
         }
 
-        private void FlushEventBuffer()
-        {
-            lock (this)
+        override public void DoStuff(CTuple tuple) {
+            if (Interval != -1)
             {
-                while (outBuffer.Count == 0 || FreezeFlag || !Processing)
-                {
-                    Monitor.Wait(this);
-                }
-                   
-                int eventsLeft = outBuffer.Count;
-
-                foreach (CTuple s in outBuffer)
-                {
-                    Deliver(s);
-                    if (Interval != -1)
-                    {
-                        Thread.Sleep(Interval);
-                    }
-                }
-                outBuffer.Clear();
-
-                Monitor.Pulse(this);
+                Console.WriteLine($"//DEBUG: Interval: {Interval} ms. //");
+                Thread.Sleep(Interval); // nao pode ser thread sleep caso contrario a thread adormece e nao recebe qualquer tuplo durante esse tempo... => TOO SLEEPY WON'T DO IT NOW xD 01:00am-30/11
             }
-            Thread.Sleep(10);
-            FlushEventBuffer();
+            Deliver(tuple);
         }
 
         public virtual DestinationState GetState()

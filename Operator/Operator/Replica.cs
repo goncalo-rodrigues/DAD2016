@@ -40,28 +40,22 @@ namespace Operator
         public int ID { get; set; }
         public string MasterURL { get; set; }
         public string selfURL { get; set; }
-        public string FunctionString { get; }
         public List<string> InputOperators { get;  }
         public int TupleCounter { get; set; } = 0;
 
         public List<ReplicaState> OtherReplicasStates;
 
         private ILogger logger;
-
-        private Operation processFunction;
+        
         private IDictionary<string, Destination> destinations;
         public IList<IReplica> otherReplicas;
         public IList<IReplica> inputReplicas;
         public List<string> adresses;
         private List<string> inputFiles;
         private PerfectFailureDetector perfectFailureDetector;
-        private BlockingCollection<CTuple> tuplesToProcess;
-
-
-
         private RoutingStrategy routingStrategy;
 
-        public int totalSeenTuples = 0;
+        private OriginOperator inBuffer;
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
         private bool processingState = false;
@@ -78,8 +72,8 @@ namespace Operator
             var info = rep.Operator;
             this.OperatorId = info.ID;
             this.MasterURL = info.MasterURL;
-            this.processFunction = Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs);
-            this.FunctionString = info.OperatorFunction;
+            this.inBuffer = new OriginOperator(info.OperatorFunction, Operations.GetOperation(info.OperatorFunction, info.OperatorFunctionArgs));
+            
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
             // primary is the first one in the array
@@ -90,15 +84,17 @@ namespace Operator
             this.ID = info.Addresses.IndexOf(selfURL);
             Console.WriteLine("***url.: " + selfURL);
             Console.WriteLine("***ID.: " +ID);
+
+            // ALSO MOVE DESTINATIONS TO ORIGIN'
+            this.destinations = new Dictionary<string, Destination>();
+
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
                 // it is an output operator
-                this.destinations = new Dictionary<string, Destination>();
-                this.destinations.Add("output_file", new OutputFile(this, info.Semantic));
+               this.destinations.Add("output_file", new OutputFile(this, info.Semantic));
             } else
             {
-                this.destinations = new Dictionary<string, Destination>();
-                foreach (var dstInfo in info.OutputOperators)
+               foreach (var dstInfo in info.OutputOperators)
                 {
                     destinations.Add(dstInfo.ID, new NeighbourOperator(this, dstInfo, info.Semantic));
                 }
@@ -140,9 +136,6 @@ namespace Operator
                 }
             });
 
-
-
-
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
@@ -155,11 +148,6 @@ namespace Operator
                 });
 
             };
-
-            tuplesToProcess = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BUFFER_SIZE);
-
-            Task.Run(() => Processor());
-
             
             if (shouldNotify)
                 //destinations.Add(new LoggerDestination(this, info.Semantic, $"{OperatorId}({ID})", MasterURL));
@@ -193,7 +181,7 @@ namespace Operator
                     string line = null;
                     while ((line = f.ReadLine()) != null)
                     {
-                        
+
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
                         TupleCounter++;
@@ -202,27 +190,14 @@ namespace Operator
                         if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
                             ProcessAndForward(ctuple);
-                        }   
+                        }
                     }
                 }
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 Console.WriteLine($"Unable to read from file {path}. Exception: {e.Message}.");
             }
-        }
-
- 
-        private IEnumerable<CTuple> Process(CTuple tuple)
-        {
-            IEnumerable<CTuple> resultTuples = null;
-            // debug print 
-            
-
-            var data = tuple.GetFields();
-            var resultData = processFunction.Process(data);
-            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID));
-            Console.WriteLine($"Processed {tuple.ToString()}");
-            return resultTuples;
         }
 
         private void SendToAll(CTuple tuple)
@@ -236,8 +211,8 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine($"Process And Forward {tuple.ToString()}");
-            tuplesToProcess.Add(tuple);
+            Console.WriteLine($"//DEBUG: Process And Forward {tuple.ToString()}");
+            inBuffer.Insert(tuple);
         }
 
         public void Start()
@@ -359,8 +334,8 @@ namespace Operator
 
         public void Finish()
         {
-            if (/*todo: if all input operators have called this method */false)
-                tuplesToProcess.CompleteAdding();
+           //  if (/*todo: if all input operators have called this method */false)
+                inBuffer.MarkFinish();
         }
 
         #endregion
@@ -379,42 +354,10 @@ namespace Operator
         }
         /*Just to configure windows position - END*/
 
-        private void Processor()
-        {
-            while (!tuplesToProcess.IsCompleted)
-            {
-                CTuple tuple = null;
-                // Blocks if number.Count == 0
-                // IOE means that Take() was called on a completed collection.
-                // Some other thread can call CompleteAdding after we pass the
-                // IsCompleted check but before we call Take. 
-                // In this example, we can simply catch the exception since the 
-                // loop will break on the next iteration.
-                try
-                {
-                    tuple = tuplesToProcess.Take();
-                }
-                catch (InvalidOperationException) { }
-
-                if (tuple != null)
-                {
-
-                    var result = Process(tuple);
-                    Console.WriteLine($"Operator {OperatorId} has received the following tuple: {tuple.ToString()}");
-                    foreach (var tup in result)
-                    {
-                        SendToAll(tup);
-                    }
-                    //tuple é processado -> inserir na lista aqui o seu id (fazer depois da replicaçao)
-
-                }
-            }
-        }
-
         public ReplicaState GetState()
         {
             var result = new ReplicaState();
-            result.OperationInternalState = processFunction.InternalState;
+            // result.OperationInternalState = processFunction.InternalState;
             result.OutputStreamsIds = new Dictionary<string, DestinationState>();
             foreach (var d in destinations)
             {
@@ -427,7 +370,7 @@ namespace Operator
 
         public void LoadState(ReplicaState state)
         {
-            processFunction.InternalState = state.OperationInternalState;
+            // processFunction.InternalState = state.OperationInternalState;
             foreach (var d in state.OutputStreamsIds)
             {
                 destinations[d.Key].LoadState(d.Value);

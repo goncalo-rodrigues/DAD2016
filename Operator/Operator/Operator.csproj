@@ -49,6 +49,8 @@
     <Compile Include="LoggerDestination.cs" />
     <Compile Include="NeighbourOperator.cs" />
     <Compile Include="Operations.cs" />
+    <Compile Include="BufferedOperator.cs" />
+    <Compile Include="OriginOperator.cs" />
     <Compile Include="OutputFile.cs" />
     <Compile Include="PrimaryStrategy.cs" />
     <Compile Include="Program.cs" />
