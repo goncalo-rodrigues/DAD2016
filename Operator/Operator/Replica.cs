@@ -112,6 +112,13 @@ namespace Operator
                 }
                     
             }
+            foreach (var file in this.inputFiles)
+            {
+                this.originOperators[file] = new List<OriginOperator>();
+                this.originOperators[file].Add(new OriginOperator(file, 0));
+                allOrigins.Add(originOperators[file][0]);
+            }
+
             this.inBuffer = new MergedInBuffer(allOrigins);
 
             var initTask = Task.Run(async () =>
@@ -202,7 +209,7 @@ namespace Operator
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         if (routingStrategy.ChooseReplica(ctuple) == ID)
                         {
-                            ProcessAndForward(ctuple);
+                            ProcessAndForward(ctuple, path, 0);
                         }
                     }
                 }
@@ -356,10 +363,10 @@ namespace Operator
             OnUnfreeze?.Invoke(this, new EventArgs());
         }
 
-        public void Finish()
+        public void Finish(string senderId, int replicaId)
         {
-           //  if (/*todo: if all input operators have called this method */false)
-                inBuffer.MarkFinish();
+            //  if (/*todo: if all input operators have called this method */false)
+            originOperators[senderId][replicaId].MarkFinish();
         }
 
         #endregion
