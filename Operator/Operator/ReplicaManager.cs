@@ -96,9 +96,9 @@ namespace Operator
             
         }
 
-        public void ProcessAndForward(CTuple tuple, int id)
+        public void ProcessAndForward(CTuple tuple, string senderId, int senderReplicaId, int destinationId)
         {
-            replicas[id].ProcessAndForward(tuple);
+            replicas[destinationId].ProcessAndForward(tuple);
         }
 
         public void Start(int id)
