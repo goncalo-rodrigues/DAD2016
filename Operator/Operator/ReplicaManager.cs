@@ -18,6 +18,7 @@ namespace Operator
         private OperatorInfo info;
         private PerfectFailureDetector pfd;
         private List<IReplica> otherReplicas;
+        private Dictionary<string, List<IReplica>> inputReplicas;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
@@ -53,6 +54,11 @@ namespace Operator
                     if (i == rep.ID) continue;
                     
                     pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
+                }
+
+                foreach (var op in info.InputReplicas.Keys)
+                {
+                    this.inputReplicas[op] = (await Helper.GetAllStubs<IReplica>(info.InputReplicas[op])).ToList();
                 }
             });
 

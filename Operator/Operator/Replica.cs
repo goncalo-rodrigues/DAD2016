@@ -45,9 +45,6 @@ namespace Operator
         private ILogger logger;
         
         private IDictionary<string, Destination> destinations;
-        public IList<IReplica> otherReplicas;
-        public IList<IReplica> inputReplicas;
-        public Dictionary<string, List<string>> inputOperators;
         private List<string> inputFiles;
         private RoutingStrategy routingStrategy;
 
@@ -78,7 +75,6 @@ namespace Operator
             // primary is the first one in the array
             this.SelfURL = rep.Address;
             this.MasterURL = info.MasterURL;
-            this.inputOperators = info.InputReplicas;
             this.ID = rep.Id;
           
 
@@ -99,10 +95,10 @@ namespace Operator
 
             var allOrigins = new List<OriginOperator>();
             this.originOperators = new Dictionary<string, List<OriginOperator>>();
-            foreach (var op in this.inputOperators.Keys)
+            foreach (var op in info.InputReplicas.Keys)
             {
                 this.originOperators[op] = new List<OriginOperator>();
-                for (int i = 0; i < inputOperators[op].Count; i++)
+                for (int i = 0; i < info.InputReplicas[op].Count; i++)
                 {
                     this.originOperators[op].Add(new OriginOperator(op, i));
                     allOrigins.Add(originOperators[op][i]);
@@ -118,27 +114,22 @@ namespace Operator
 
             this.inBuffer = new MergedInBuffer(allOrigins);
 
-            var initTask = Task.Run(async () =>
-            {
-                
-                if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
-                {
-                    this.routingStrategy = new PrimaryStrategy(info.Addresses.Count);
-                }
-                else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
-                {
-                    this.routingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
-                }
-                else
-                {
-                    this.routingStrategy = new RandomStrategy(info.Addresses.Count, OperatorId.GetHashCode());
-                }
-                foreach (var op in this.inputOperators.Keys)
-                {
-                    this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.inputOperators[op]);
-                }
 
-            });
+                
+            if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
+            {
+                this.routingStrategy = new PrimaryStrategy(info.Addresses.Count);
+            }
+            else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
+            {
+                this.routingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
+            }
+            else
+            {
+                this.routingStrategy = new RandomStrategy(info.Addresses.Count, OperatorId.GetHashCode());
+            }
+
+            
 
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
