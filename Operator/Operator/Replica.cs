@@ -41,6 +41,7 @@ namespace Operator
         public string SelfURL { get; set; }
         
         public int TupleCounter { get; set; } = 0;
+        public int StartFrom { get; set; } = 0;
 
         private ILogger logger;
         
@@ -138,7 +139,7 @@ namespace Operator
                 {
                     foreach (var path in inputFiles)
                     {
-                        StartProcessingFromFile(path);
+                        StartProcessingFromFile(path, StartFrom);
                     }
                 });
 
@@ -178,7 +179,7 @@ namespace Operator
             }
         }
 
-        public void StartProcessingFromFile(string path)
+        public void StartProcessingFromFile(string path, int startFrom = 0)
         {
             try
             {
@@ -191,10 +192,12 @@ namespace Operator
 
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
-                        TupleCounter++;
-                        var ctuple = new CTuple(tupleData, TupleCounter);
+             
+                        var ctuple = new CTuple(tupleData, TupleCounter++);
+                        
                         Console.WriteLine($"Read tuple from file: {ctuple}");
-                        if (routingStrategy.ChooseReplica(ctuple) == ID)
+                        
+                        if (TupleCounter >= startFrom && routingStrategy.ChooseReplica(ctuple) == ID)
                         {
                             ProcessAndForward(ctuple, path, 0);
                         }
@@ -221,7 +224,12 @@ namespace Operator
             IEnumerable<CTuple> resultTuples = null;
             // debug print 
             var data = tuple.GetFields();
-            var resultData = ProcessFunction.Process(data);
+            IEnumerable<IList<string>> resultData;
+            lock (this)
+            {
+                resultData = ProcessFunction.Process(data);
+                // todo: update processedtuples id
+            }
             resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
@@ -304,33 +312,37 @@ namespace Operator
 
         public ReplicaState GetState()
         {
-            var result = new ReplicaState();
-            // result.OperationInternalState = processFunction.InternalState;
-            result.OutputStreamsIds = new Dictionary<string, DestinationState>();
-            foreach (var d in destinations)
+            lock(this)
             {
-                var state = d.Value.GetState();
-                if (state != null)
-                    result.OutputStreamsIds[d.Key] = state;
+                var result = new ReplicaState();
+                result.OperationInternalState = ProcessFunction.InternalState;
+                result.OutputStreamsIds = new Dictionary<string, DestinationState>();
+                foreach (var d in destinations)
+                {
+                    var state = d.Value.GetState();
+                    if (state != null)
+                        result.OutputStreamsIds[d.Key] = state;
+                }
+                result.LastEmittedTuple = TupleCounter;
+                return result;
             }
-            return result;
         }
 
         public void LoadState(ReplicaState state)
         {
-            // processFunction.InternalState = state.OperationInternalState;
+            ProcessFunction.InternalState = state.OperationInternalState;
             foreach (var d in state.OutputStreamsIds)
             {
                 destinations[d.Key].LoadState(d.Value);
             }
-            
-            // ask to resend
+            StartFrom = state.LastEmittedTuple;
         }
 
         public void Resend(int id, string operatorId, int replicaId)
         {
             destinations[operatorId].Resend(id, replicaId);
         }
+
         public void GarbageCollect(int id, string operatorId, int replicaId)
         {
             destinations[operatorId].GarbageCollect(id, replicaId);
