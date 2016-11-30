@@ -60,7 +60,6 @@ namespace Operator
                         {
                             rep.ProcessAndForward(tuple,id);
                             controlFlag = true;
-                            Console.WriteLine("********Processed");
                         }
                         //FIXME Exceção que faz timeout automatico 
                         catch (Exception e) { Console.WriteLine("**********Exception"); };
@@ -92,6 +91,11 @@ namespace Operator
             List<CTuple> toDeliver = new List<CTuple>();
             lock (this)
             {
+                if (CachedOutputTuples.Count == 0 || id < CachedOutputTuples[0].ID)
+                {
+                    // Missing tuples!!!
+                    throw new TuplesNotCachedException(id, CachedOutputTuples[0].ID - 1);
+                }
                 var upTo = SentTupleIds[replicaId];
                 for (int i = 0; i < CachedOutputTuples.Count; i++)
                 {

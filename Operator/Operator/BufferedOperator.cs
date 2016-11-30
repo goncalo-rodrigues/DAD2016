@@ -11,13 +11,18 @@ namespace Operator
         public int BufferSize { get; }
         private BlockingCollection<CTuple> buffer;
   
-        public BufferedOperator() : this(BUFFER_SIZE) { }
-        public BufferedOperator(int BufferSize)
+        public BufferedOperator(bool takeTupleAsSoonAsItArrives = true) : this(BUFFER_SIZE, takeTupleAsSoonAsItArrives) { }
+        public BufferedOperator(int BufferSize, bool takeTupleAsSoonAsItArrives = true)
         {
             this.BufferSize = BufferSize;
             this.buffer = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BufferSize);
+            if (takeTupleAsSoonAsItArrives)
+                Task.Run(() => Processor());
+        }
 
-            Task.Run(() => Processor());
+        public virtual CTuple Take()
+        {
+            return buffer.Take();
         }
         
         private void Processor()

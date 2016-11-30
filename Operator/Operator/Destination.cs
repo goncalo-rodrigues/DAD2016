@@ -44,11 +44,10 @@ namespace Operator
         override public void DoStuff(CTuple tuple) {
             if (Interval > -1)
             {
-                Console.WriteLine($"//DEBUG: Interval: {Interval} ms. //");
-                Task.Delay(Interval).ContinueWith(_ =>
-                {
-                    Deliver(tuple);
-                });
+                Thread.Sleep(Interval);
+
+                Deliver(tuple);
+                
             } else
             {
 
