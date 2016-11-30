@@ -104,13 +104,13 @@ namespace Operator
                 }
                     
             }
-            foreach (var file in this.inputFiles)
+            if (inputFiles!=null && inputFiles.Count > 0)
             {
-                this.originOperators[file] = new List<OriginOperator>();
-                this.originOperators[file].Add(new OriginOperator(file, 0));
-                allOrigins.Add(originOperators[file][0]);
-            }
+                this.originOperators[this.OperatorId] = new List<OriginOperator>();
+                this.originOperators[this.OperatorId].Add(new OriginOperator(this.OperatorId, 0));
+                allOrigins.Add(originOperators[this.OperatorId][0]);
 
+            }
             this.inBuffer = new MergedInBuffer(allOrigins);
 
 
@@ -191,7 +191,7 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
              
-                        var ctuple = new CTuple(tupleData, TupleCounter++, this.OperatorId, this.ID);
+                        var ctuple = new CTuple(tupleData, TupleCounter++, this.OperatorId, 0);
                         
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         
