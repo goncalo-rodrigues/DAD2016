@@ -12,6 +12,7 @@ namespace SharedTypes
         public object OperationInternalState { get; set; }
         public Dictionary<string, OriginState> InputStreamsIds { get; set; } 
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
+        public int LastEmittedTuple { get; set; } // in case it reads from files
 
     }
     [Serializable]
