@@ -13,9 +13,10 @@ namespace Operator
     class HashingStrategy : RoutingStrategy
     {
         private int id { get; set; }
-        public HashingStrategy(List<IReplica> replicas, int id) : base(replicas)
+        public HashingStrategy(int countRep, int id) : base(countRep)
         {
             this.id = id;
+            this.countRep = countRep;
 
         }
 
@@ -25,7 +26,7 @@ namespace Operator
           
             int i = s.GetHashCode();
 
-            return (Math.Abs(i) %list.Count);
+            return (Math.Abs(i) % countRep);
 
         }
 

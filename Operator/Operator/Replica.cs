@@ -76,13 +76,12 @@ namespace Operator
             this.shouldNotify = info.ShouldNotify;
             this.inputFiles = info.InputFiles;
             // primary is the first one in the array
-            this.IsPrimary = rep.Address == info.Addresses[0];
+            this.IsPrimary = rep.Id == 0;
             this.selfURL = rep.Address;
             this.MasterURL = info.MasterURL;
             this.InputOperators = info.InputReplicas;
-            this.ID = info.Addresses.IndexOf(selfURL);
-           // Console.WriteLine("***url.: " + selfURL);
-           // Console.WriteLine("***ID.: " +ID);
+            this.ID = rep.Id;
+          
 
             // ALSO MOVE DESTINATIONS TO ORIGIN'
             this.destinations = new Dictionary<string, Destination>();
@@ -101,25 +100,18 @@ namespace Operator
           
             var initTask = Task.Run(async () =>
             {
-                this.otherReplicas =
-                (await Helper.GetAllStubs<IReplica>(
-                    // hack to not get his own stub
-                    info.Addresses.Select((address) => (selfURL != address ? address : null)).ToList()))
-                    .ToList();
-                var allReplicas = (new List<IReplica>(otherReplicas));
-
-
+                
                 if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
                 {
-                    this.routingStrategy = new PrimaryStrategy(allReplicas);
+                    this.routingStrategy = new PrimaryStrategy(adresses.Count);
                 }
                 else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
                 {
-                    this.routingStrategy = new HashingStrategy(allReplicas, info.HashingArg);
+                    this.routingStrategy = new HashingStrategy(adresses.Count, info.HashingArg);
                 }
                 else
                 {
-                    this.routingStrategy = new RandomStrategy(allReplicas, OperatorId.GetHashCode());
+                    this.routingStrategy = new RandomStrategy(adresses.Count, OperatorId.GetHashCode());
                 }
 
                 this.inputReplicas = await Helper.GetAllStubs<IReplica>(this.InputOperators);

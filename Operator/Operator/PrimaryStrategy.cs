@@ -13,8 +13,8 @@ namespace Operator
     **/
     class PrimaryStrategy : RoutingStrategy
     {
-        public PrimaryStrategy(List<IReplica> replicas):base(replicas){
-           
+        public PrimaryStrategy(int countRep) :base(countRep){
+            this.countRep = countRep;
         }
 
 
