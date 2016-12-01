@@ -315,6 +315,7 @@ namespace Operator
 
         public ReplicaState GetState()
         {
+            Console.WriteLine("Taking snapshot");
             lock(this)
             {
                 var result = new ReplicaState();
@@ -359,6 +360,7 @@ namespace Operator
 
         public void GarbageCollect(int id, string operatorId, int replicaId)
         {
+            Console.WriteLine("Garbage Collecting");
             destinations[operatorId].GarbageCollect(id, replicaId);
         }
     }

@@ -20,8 +20,10 @@ namespace SharedTypes
         void Unfreeze(int id);
 
 
-        ReplicaState GetState(int id);
-        
+        void SendState(ReplicaState state, int id);
+        void GarbageCollect(int tupleId, string senderOpName, int senderRepId, int destinationId);
+
+
 
     }
 }

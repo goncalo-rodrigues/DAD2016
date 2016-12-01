@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Operator
@@ -17,8 +18,10 @@ namespace Operator
         private List<string> adresses;
         private OperatorInfo info;
         private PerfectFailureDetector pfd;
-        private List<IReplica> otherReplicas;
+        private List<IReplica> allReplicas;
         private Dictionary<string, List<IReplica>> inputReplicas;
+        private int PROPAGATE_STATE_PERIOD = 5000;
+        private Timer propagateStateTimer;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
@@ -26,34 +29,33 @@ namespace Operator
             this.replicas.Add(rep.ID, rep);
             this.adresses = info.Addresses;
             this.info = info;
+            this.inputReplicas = new Dictionary<string, List<IReplica>>();
           
-            this.otherReplicasStates = new List<ReplicaState>(); 
-            Task.Run(async () =>
+            this.otherReplicasStates = new List<ReplicaState>(new ReplicaState[adresses.Count]); 
+                //await Task.Delay(10000);
+            var initialState = rep.GetState();
+            for (int i = 0; i < info.Addresses.Count; i++)
             {
-                await Task.Delay(10000);
-                var initialState = rep.GetState();
-                for (int i = 0; i < info.Addresses.Count; i++)
-                {
-                    otherReplicasStates.Add(initialState);
-                }
-            });
+                otherReplicasStates[i] = initialState;
+            }
+            
             this.pfd = new PerfectFailureDetector();
             this.pfd.NodeFailed += OnFail;
 
             var initTask = Task.Run(async () =>
             {
-                this.otherReplicas =
+                this.allReplicas =
                 (await Helper.GetAllStubs<IReplica>(
                     // hack to not get his own stub
                     info.Addresses.Select((address) => (rep.SelfURL != address ? address : null)).ToList()))
                     .ToList();
-               
+                allReplicas[rep.ID] = this;
 
                 for (int i = 0; i < info.Addresses.Count; i++)
                 {
                     if (i == rep.ID) continue;
                     
-                    pfd.StartMonitoringNewNode(info.Addresses[i], otherReplicas[i]);
+                    pfd.StartMonitoringNewNode(info.Addresses[i], allReplicas[i]);
                 }
 
                 foreach (var op in info.InputReplicas.Keys)
@@ -62,12 +64,29 @@ namespace Operator
                 }
             });
 
+            propagateStateTimer = new Timer((e) =>
+            {
+                Dictionary<int, Replica> replicasCopy;
+                lock(replicas)
+                {
+                    replicasCopy = new Dictionary<int, Replica>(replicas);
+                }
+                foreach(var repId in replicasCopy.Keys)
+                {
+                    PropagateState(repId);
+                }
+            }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
+
             Console.Title = $"{rep.OperatorId} ({rep.ID})";
 
         }
 
         public void AddReplica(Replica rep) {
-            this.replicas.Add(rep.ID, rep);
+            lock(replicas)
+            {
+                this.replicas.Add(rep.ID, rep);
+            }
+           
             Console.Title += $" ({rep.ID})";
         }
 
@@ -88,9 +107,14 @@ namespace Operator
 
         public void Ping()
         {
-            foreach (Replica rep in replicas.Values) {
-                rep.Ping();
+            lock(replicas)
+            {
+                foreach (Replica rep in replicas.Values)
+                {
+                    rep.Ping();
+                }
             }
+
             
         }
 
@@ -106,19 +130,23 @@ namespace Operator
 
         public void Status()
         {
-            // print state of the system
-            string status = "Operator: " + info.ID + ", Status: " + (replicas.Values.First().processingState == true ? "Processing" : "Not Processing");
-            int repCnt = 0;
-            for (int i=0; i < adresses.Count;i++)
+            lock (replicas)
             {
-                if (replicas.ContainsKey(i)) continue;
-                if (pfd.IsAlive(adresses[i]))
+                // print state of the system
+                string status = "Operator: " + info.ID + ", Status: " + (replicas.Values.First().processingState == true ? "Processing" : "Not Processing");
+                int repCnt = 0;
+                for (int i = 0; i < adresses.Count; i++)
                 {
-                    repCnt += 1;
+                    if (replicas.ContainsKey(i)) continue;
+                    if (pfd.IsAlive(adresses[i]))
+                    {
+                        repCnt += 1;
+                    }
                 }
+                status += $", Alive replicas: {replicas.Count + repCnt} (of {adresses.Count}), Recovered: {replicas.Count - 1}";
+                Console.WriteLine(status);
             }
-            status += $", Alive replicas: {replicas.Count + repCnt} (of {adresses.Count}), Recovered: {replicas.Count - 1}";
-            Console.WriteLine(status);
+
         
         }
 
@@ -132,6 +160,11 @@ namespace Operator
         {
             Console.WriteLine($"Detected failure of {e.FailedNodeName}");
             int failedId = -1;
+            Dictionary<int, Replica> replicasCopy;
+            lock (replicas)
+            {
+                replicasCopy = new Dictionary<int, Replica>(replicas);
+            }
             for (int i = 0; i < this.adresses.Count; i++)
             {
                 if (this.adresses[i].Equals(e.FailedNodeName))
@@ -141,7 +174,8 @@ namespace Operator
             }
             if (failedId != -1)
             {
-                foreach (Replica rep in replicas.Values) {
+
+                foreach (Replica rep in replicasCopy.Values) {
                     if (rep.ID == failedId + 1) {
                         //recover 
                         Console.WriteLine($"Started to recover replica {failedId}");
@@ -155,10 +189,12 @@ namespace Operator
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
-                                r.Resend(sentIds[j], opName, j);
+                                //r.Resend(sentIds[j], opName, j);
                             }
                         }
-                        replicas.Add(failedId, r);
+                        AddReplica(r);
+                        allReplicas[failedId] = this;
+                        
                         r.Start();
                         
                         
@@ -180,9 +216,49 @@ namespace Operator
             return new Replica(rci); 
         }
 
-        public ReplicaState GetState(int id)
+        public void SendState(ReplicaState state, int id)
         {
-            return replicas[id].GetState();
+            otherReplicasStates[id] = state;
+        }
+
+        public void GarbageCollect(int tupleId, string senderOpName, int senderRepId, int destinationId)
+        {
+            replicas[destinationId].GarbageCollect(tupleId, senderOpName, senderRepId);
+        }
+
+        public void PropagateState(int id)
+        {
+            if (!replicas.ContainsKey(id)) return;
+            var state = replicas[id].GetState();
+            var tasks = new List<Task>();
+            // send state for everyone
+            foreach(var rep in allReplicas)
+            {
+                tasks.Add(Task.Run(() => rep.SendState(state, id)));
+            }
+            try
+            {
+                Task.WaitAll(tasks.ToArray());
+            } catch (AggregateException e)
+            {
+                Console.WriteLine("Failed to propagate state to all replicas. " + e.Flatten().InnerException.Message);
+                return;
+            }
+            
+            // after state is safely delivered, ask every input stream to garbage collect
+            tasks.Clear();
+            foreach(var opName in inputReplicas.Keys)
+            {
+                for(int i=0;i<inputReplicas[opName].Count;i++)
+                {
+                    var rep = inputReplicas[opName][i];
+                    var tupleId = state.InputStreamsIds[opName].SentIds[i];
+                    var thisOperatorId = replicas[id].OperatorId;
+                    var destinationId = i;
+                    tasks.Add(Task.Run(()=>rep.GarbageCollect(tupleId, thisOperatorId, id, destinationId)));
+                }
+            }
+            Task.WaitAll(tasks.ToArray());
         }
     }
 }

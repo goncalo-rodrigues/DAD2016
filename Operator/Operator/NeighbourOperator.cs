@@ -116,17 +116,20 @@ namespace Operator
 
         public override void GarbageCollect(int id, int replicaId)
         {
+            int i = 0;
             lock (this)
             {
                 GarbageCollectedTupleIds[replicaId] = id;
                 var currentMin = id;
 
                 currentMin = Math.Min(currentMin, GarbageCollectedTupleIds.Min());
-                while (CachedOutputTuples[0].ID >= currentMin)
+                while (CachedOutputTuples.Count > 0 && CachedOutputTuples[0].ID >= currentMin)
                 {
                     CachedOutputTuples.RemoveAt(0);
+                    i++;
                 }
             }
+            if (i>0) Console.WriteLine($"GarbageCollect: Removed {i} tuples");
 
         }
 
