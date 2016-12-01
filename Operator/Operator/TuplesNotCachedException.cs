@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace Operator
 {
     public class TuplesNotCachedException : Exception
     {
-        public int FirstTupleNotCached { get; set; }
-        public int LastTupleNotCached { get; set; }
-        public TuplesNotCachedException(int idFirstTuple, int idLastTuple)
+        public TupleID FirstTupleNotCached { get; set; }
+        public TupleID LastTupleNotCached { get; set; }
+        public TuplesNotCachedException(TupleID idFirstTuple, TupleID idLastTuple)
         {
             FirstTupleNotCached = idFirstTuple;
             LastTupleNotCached = idLastTuple;

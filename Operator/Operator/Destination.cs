@@ -60,11 +60,11 @@ namespace Operator
             return;
         }
 
-        public virtual void Resend(int id, int replicaId)
+        public virtual void Resend(TupleID id, int replicaId)
         {
             Console.WriteLine("Resend not implemented.");
         }
-        public virtual void GarbageCollect(int id, int replicaId)
+        public virtual void GarbageCollect(TupleID id, int replicaId)
         {
             Console.WriteLine("GarbageCollect not implemented.");
         }

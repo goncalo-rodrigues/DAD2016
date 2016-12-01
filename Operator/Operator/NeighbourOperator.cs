@@ -13,8 +13,8 @@ namespace Operator
     {
         public List<IReplica> replicas;
         public List<CTuple> CachedOutputTuples;
-        public List<int> GarbageCollectedTupleIds;
-        public List<int> SentTupleIds;
+        public List<TupleID> GarbageCollectedTupleIds;
+        public List<TupleID> SentTupleIds;
         public RoutingStrategy RoutingStrategy { get; set; }
         public bool controlFlag = false;
         private Replica master;
@@ -25,8 +25,13 @@ namespace Operator
             this.master = master;
             this.info = info; 
             CachedOutputTuples = new List<CTuple>();
-            GarbageCollectedTupleIds = new List<int>(new int[info.Addresses.Count]);
-            SentTupleIds = new List<int>(new int[info.Addresses.Count]);
+            GarbageCollectedTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
+            SentTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
+            for(int i=0; i < GarbageCollectedTupleIds.Count; i++)
+            {
+                GarbageCollectedTupleIds[i] = new TupleID(0, 0);
+                SentTupleIds[i] = new TupleID(0, 0);
+            }
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
             {
@@ -90,7 +95,7 @@ namespace Operator
                 SentTupleIds[id] = tuple.ID;
             }
         }
-        public override void Resend(int id, int replicaId)
+        public override void Resend(TupleID id, int replicaId)
         {
             List<CTuple> toDeliver = new List<CTuple>();
             lock (this)
@@ -98,7 +103,7 @@ namespace Operator
                 if (CachedOutputTuples.Count == 0 || id < CachedOutputTuples[0].ID)
                 {
                     // Missing tuples!!!
-                    throw new TuplesNotCachedException(id, CachedOutputTuples[0].ID - 1);
+                    throw new TuplesNotCachedException(id, CachedOutputTuples[0].ID);
                 }
                 var upTo = SentTupleIds[replicaId];
                 for (int i = 0; i < CachedOutputTuples.Count; i++)
@@ -114,15 +119,15 @@ namespace Operator
             }
         }
 
-        public override void GarbageCollect(int id, int replicaId)
+        public override void GarbageCollect(TupleID id, int replicaId)
         {
             int i = 0;
             lock (this)
             {
                 GarbageCollectedTupleIds[replicaId] = id;
                 var currentMin = id;
-
-                currentMin = Math.Min(currentMin, GarbageCollectedTupleIds.Min());
+                var garbageMin = GarbageCollectedTupleIds.Min();
+                currentMin = currentMin < garbageMin ? currentMin : garbageMin;
                 while (CachedOutputTuples.Count > 0 && CachedOutputTuples[0].ID >= currentMin)
                 {
                     CachedOutputTuples.RemoveAt(0);

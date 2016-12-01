@@ -21,7 +21,7 @@ namespace SharedTypes
 
 
         void SendState(ReplicaState state, int id);
-        void GarbageCollect(int tupleId, string senderOpName, int senderRepId, int destinationId);
+        void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId);
 
 
 

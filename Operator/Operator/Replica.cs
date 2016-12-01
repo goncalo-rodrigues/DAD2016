@@ -187,7 +187,7 @@ namespace Operator
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
              
-                        var ctuple = new CTuple(tupleData, TupleCounter++, this.OperatorId, 0);
+                        var ctuple = new CTuple(tupleData, TupleCounter++,0, this.OperatorId, 0);
                         
                         Console.WriteLine($"Read tuple from file: {ctuple}");
                         
@@ -237,7 +237,7 @@ namespace Operator
             //    // todo: update processedtuples id
             //}
            
-            resultTuples = resultData.Select((tupleData) => new CTuple(tupleData.ToList(), tuple.ID, this.OperatorId, this.ID));
+            resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, i, this.OperatorId, this.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
@@ -351,14 +351,14 @@ namespace Operator
             StartFrom = state.LastEmittedTuple;
         }
 
-        public void Resend(int id, string operatorId, int replicaId)
+        public void Resend(TupleID id, string operatorId, int replicaId)
         {
             if (operatorId == this.OperatorId && this.ID == replicaId)
                 return;
             destinations[operatorId].Resend(id, replicaId);
         }
 
-        public void GarbageCollect(int id, string operatorId, int replicaId)
+        public void GarbageCollect(TupleID id, string operatorId, int replicaId)
         {
             Console.WriteLine("Garbage Collecting");
             destinations[operatorId].GarbageCollect(id, replicaId);

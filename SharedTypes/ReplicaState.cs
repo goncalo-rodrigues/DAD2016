@@ -18,12 +18,12 @@ namespace SharedTypes
     [Serializable]
     public class DestinationState
     {
-        public List<int> SentIds;
+        public List<TupleID> SentIds;
     }
 
     [Serializable]
     public class OriginState
     {
-        public List<int> SentIds;
+        public List<TupleID> SentIds;
     }
 }

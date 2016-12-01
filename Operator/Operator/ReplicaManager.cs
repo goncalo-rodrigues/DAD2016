@@ -185,11 +185,12 @@ namespace Operator
                         Dictionary<string, OriginState> os = repState.InputStreamsIds;
                         r.LoadState(repState);
                         foreach (string opName in os.Keys) {
-                            List<int> sentIds = os[opName].SentIds;
+                            var sentIds = os[opName].SentIds;
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
                                 //r.Resend(sentIds[j], opName, j);
+                                //TODO (Telma): tens de pedir aos origins que te façam resend, nao é ao r
                             }
                         }
                         AddReplica(r);
@@ -221,7 +222,7 @@ namespace Operator
             otherReplicasStates[id] = state;
         }
 
-        public void GarbageCollect(int tupleId, string senderOpName, int senderRepId, int destinationId)
+        public void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId)
         {
             replicas[destinationId].GarbageCollect(tupleId, senderOpName, senderRepId);
         }
