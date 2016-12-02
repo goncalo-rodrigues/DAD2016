@@ -317,6 +317,7 @@
             this.UnfreezeOpID.Name = "UnfreezeOpID";
             this.UnfreezeOpID.Size = new System.Drawing.Size(43, 21);
             this.UnfreezeOpID.TabIndex = 36;
+            this.UnfreezeOpID.SelectedIndexChanged += new System.EventHandler(this.UnfreezeOpID_SelectedIndexChanged);
             // 
             // StartOpID
             // 

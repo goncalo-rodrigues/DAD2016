@@ -118,7 +118,6 @@ namespace Operator
                 Deliver(t);
             }
         }
-
         public override void GarbageCollect(TupleID id, int replicaId)
         {
             int i = 0;
@@ -137,7 +136,6 @@ namespace Operator
             if (i>0) Console.WriteLine($"GarbageCollect: Removed {i} tuples");
 
         }
-
         public override DestinationState GetState()
         {
             return new DestinationState
@@ -169,6 +167,5 @@ namespace Operator
             // there are no more replicas 
             throw new NeighbourOperatorIsDeadException("Neighbour Operator has no working replicas.");
         }
-
     }
 }

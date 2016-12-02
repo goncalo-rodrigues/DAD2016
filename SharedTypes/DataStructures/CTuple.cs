@@ -16,7 +16,6 @@ namespace SharedTypes
             GlobalID = global;
             SubID = sub;
         }
-
         public int CompareTo(object obj)
         {
             var other = obj as TupleID;
@@ -27,14 +26,12 @@ namespace SharedTypes
             else
                 return result;
         }
-
         public override bool Equals(object obj)
         {
             var other = obj as TupleID;
             if (other == null) return false;
             return other.GlobalID == GlobalID && other.SubID == SubID;
         }
-
         public override int GetHashCode()
         {
             return GlobalID.GetHashCode();
@@ -71,9 +68,8 @@ namespace SharedTypes
         {
             return $"{GlobalID}.{SubID}";
         }
-
-
     }
+
     [Serializable]
     public class CTuple
     {
@@ -82,8 +78,7 @@ namespace SharedTypes
         public string opName { get;  }
         public int repID { get; }
 
-        public CTuple() {
-        }
+        public CTuple() { }
         public CTuple(List<string> fields, int globalID, int subID, string opName, int repID) {
             foreach (string f in fields)
                 this.fields.Add(f);
@@ -91,17 +86,19 @@ namespace SharedTypes
             this.opName = opName;
             this.repID = repID;
         }
-        public void AddField(string field) {
-            this.fields.Add(field);
+        public IList<string> GetFields() {
+            return fields;
         }
-        public IList<string> GetFields() { return fields; }
-
         public string GetFieldByIndex(int index)
         {
             if (index >= 0 && index < fields.Count)
                 return fields[index];
             else
                 throw new System.IndexOutOfRangeException();
+        }
+        public void AddField(string field)
+        {
+            this.fields.Add(field);
         }
         public override string ToString()
         {

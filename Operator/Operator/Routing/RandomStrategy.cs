@@ -15,7 +15,7 @@ namespace Operator
         public Random random { get; }
         public RandomStrategy(int countRep, int? seed = null):base(countRep)
         {
-           random = seed == null ? new Random() : new Random(seed ?? 0);
+            random = seed == null ? new Random() : new Random(seed ?? 0);
             this.countRep = countRep;
 
         }

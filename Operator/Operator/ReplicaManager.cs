@@ -11,8 +11,9 @@ namespace Operator
 {
     class ReplicaManager : MarshalByRefObject, IReplica
     {
+        private const int PROPAGATE_STATE_PERIOD = 5000;
 
-       //private List<Replica> replicas;
+        //private List<Replica> replicas;
         private IDictionary<int, Replica> replicas;
         private List<ReplicaState> otherReplicasStates;
         private List<string> adresses;
@@ -20,7 +21,6 @@ namespace Operator
         private PerfectFailureDetector pfd;
         private List<IReplica> allReplicas;
         private Dictionary<string, List<IReplica>> inputReplicas;
-        private int PROPAGATE_STATE_PERIOD = 5000;
         private Timer propagateStateTimer;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
@@ -146,8 +146,6 @@ namespace Operator
                 status += $", Alive replicas: {replicas.Count + repCnt} (of {adresses.Count}), Recovered: {replicas.Count - 1}";
                 Console.WriteLine(status);
             }
-
-        
         }
 
         public void Unfreeze(int id)

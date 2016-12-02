@@ -71,9 +71,6 @@ namespace Operator
             this.SelfURL = rep.Address;
             this.MasterURL = info.MasterURL;
             this.ID = rep.Id;
-          
-
-            // ALSO MOVE DESTINATIONS TO ORIGIN'
             this.destinations = new Dictionary<string, Destination>();
 
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
@@ -123,9 +120,7 @@ namespace Operator
             {
                 this.routingStrategy = new RandomStrategy(info.Addresses.Count, OperatorId.GetHashCode());
             }
-
             
-
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
@@ -158,7 +153,6 @@ namespace Operator
             if (a.Equals("OP7")) { SetWindowPosition(600, 600, 400, 200); }
             if (a.Equals("OP8")) { SetWindowPosition(950, 600, 400, 200); }
             if (a.Equals("OP9")) { SetWindowPosition(600, 800, 400, 200); }
-
         }
 
         private void mainLoop()
