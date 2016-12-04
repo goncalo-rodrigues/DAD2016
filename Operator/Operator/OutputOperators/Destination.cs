@@ -108,6 +108,8 @@ namespace Operator
         #region ABSTRACT
         public abstract void Deliver(CTuple tuple);
         public abstract void Ping();
+        internal abstract void UpdateRouting(string oldAddr, string newAddr);
+
         #endregion ABSTRACT
     }
 

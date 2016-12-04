@@ -61,13 +61,6 @@ namespace Operator
             Replica replica = new Replica(rep);
             ReplicaManager repManager = new ReplicaManager(replica, info);
             
-           
-            //FIXME: COUNT and UNIQ doesn't work
-            // Operations.ReplicaInstance = replica;
-
-            //loop();
-
-            // get port from address 
             Regex portRegex = new Regex(@"tcp://(\w|\.)+:(?<port>(\d+))(/(?<name>\w*))?", RegexOptions.IgnoreCase);
             var match = portRegex.Match(address);
             if (!match.Groups["port"].Success || !match.Groups["name"].Success) { 

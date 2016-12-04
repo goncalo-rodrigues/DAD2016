@@ -1,5 +1,6 @@
 ﻿
 using SharedTypes.PerfectFailureDetector;
+using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
 
 namespace SharedTypes
@@ -24,6 +25,6 @@ namespace SharedTypes
         void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId);
         void Resend(TupleID id, string operatorId, int replicaId, int destinationId);
 
-
+        void ReRoute(string oldAddress, string newAddr);
     }
 }

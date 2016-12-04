@@ -175,5 +175,19 @@ namespace Operator
             // there are no more replicas 
             throw new NeighbourOperatorIsDeadException("Neighbour Operator has no working replicas.");
         }
+
+        internal override void UpdateRouting(string oldAddr, string newAddr)
+        {
+            bool updated = false;
+            for(int i = 0; i < info?.Addresses?.Count || updated; i++)
+            {
+                // lets find failed replica ID
+                if (info.Addresses[i].Equals(oldAddr))
+                {
+                    updated = true;
+                    replicas[i] = Helper.GetStub<IReplica>(newAddr);
+                }
+            }
+        }
     }
 }

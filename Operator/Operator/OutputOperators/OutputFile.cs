@@ -64,8 +64,13 @@ namespace Operator
             // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
+
         #endregion
 
+        internal override void UpdateRouting(string oldAddr, string newAddr)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }

@@ -279,6 +279,15 @@ namespace Operator
             OnFreeze?.Invoke(this, new EventArgs());
 
         }
+
+        internal void UpdateRouting(string oldAddr, string newAddr)
+        {
+            foreach(Destination destination in destinations?.Values)
+            {
+                destination.UpdateRouting(oldAddr, newAddr);
+            }
+        }
+
         public void Unfreeze()
         {
             Console.WriteLine($"Unfreezing...");

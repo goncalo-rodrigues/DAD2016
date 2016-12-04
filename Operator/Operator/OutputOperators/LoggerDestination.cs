@@ -35,5 +35,11 @@ namespace Operator
             // does nothing
             return;
         }
+
+        internal override void UpdateRouting(string oldAddr, string newAddr)
+        {
+            // does nothing
+            Console.WriteLine("Debug print: Logger Destination does not need to update Routing.");
+        }
     }
 }

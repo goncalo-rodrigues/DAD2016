@@ -12,8 +12,8 @@ namespace Operator
     class ReplicaManager : MarshalByRefObject, IReplica
     {
         private const int PROPAGATE_STATE_PERIOD = 5000;
-
-        //private List<Replica> replicas;
+        
+        private string SelfURL { get; set; }
         private IDictionary<int, Replica> replicas;
         private List<ReplicaState> otherReplicasStates;
         private List<string> adresses;
@@ -25,6 +25,7 @@ namespace Operator
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
+            this.SelfURL = rep.SelfURL;
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
             this.adresses = info.Addresses;
@@ -153,7 +154,6 @@ namespace Operator
             replicas[id].Unfreeze();
         }
 
-
         public void OnFail(object sender, NodeFailedEventArgs e)
         {
             Console.WriteLine($"Detected failure of {e.FailedNodeName}");
@@ -176,7 +176,7 @@ namespace Operator
                 foreach (Replica rep in replicasCopy.Values) {
                     if (rep.ID == failedId + 1) {
                         //recover 
-                        
+                            
                         Replica r = CreateReplica(failedId);
                         
                         ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
@@ -188,14 +188,23 @@ namespace Operator
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
-                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j);
-                            }
+                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); // (duvida kat) j é o numero de ids, enviados. esta a ser enviado no campo destinationID, é supost?
+                            }                                                                           // se houver mais tuplos do que replicas, obtemos array out of bound exception
                         }
                         AddReplica(r);
                         allReplicas[failedId] = this;
-                        
+                        adresses[failedId] = SelfURL;
                         r.Start();
                         
+                        
+                        // Only after the recovery is completed, it's safe to reroute
+                        foreach (string opName in os.Keys)
+                        {
+                            for (int i = 0; i < inputReplicas[opName].Count; i++)
+                            {
+                                inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                            }
+                        }
                         
                         //resend 
                         break;
@@ -264,6 +273,24 @@ namespace Operator
                 }
             }
             Task.WaitAll(tasks.ToArray());
+        }
+
+        public void ReRoute(string oldAddr, string newAddr)
+        {
+            // update failed ReplicaManager Address in inputStream Replica Manager
+            for (int i = 0; i < adresses.Count; i++)
+            { 
+                if (adresses[i].Equals(oldAddr))
+                {
+                    adresses[i] = newAddr;
+                }
+            }
+            // update replicas which were previously pointing to failed node
+            foreach (Replica rep in replicas?.Values)
+            {
+                rep.UpdateRouting(oldAddr, newAddr);
+            }
+
         }
     }
 }
