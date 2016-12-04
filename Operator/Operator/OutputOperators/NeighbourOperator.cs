@@ -113,16 +113,12 @@ namespace Operator
                         //FIXME Exceção que faz timeout automatico 
                         catch (Exception e) { /*Console.WriteLine("**********Exception");*/ };
                     }
-                    //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
                 case Semantic.AtMostOnce:
-                    rep.ProcessAndForward(tuple, id);
                     break;
                 case Semantic.ExactlyOnce:
-                    //Problema: O custom escreve para ficheiros, se falha a meio volta a escrever
-                    //Transações ?? custom 
-                    //Na replica, antes de fazer process verificar -> ter um id por tuplo a ser processado e verifico se esse id já foi processado é só 
-                    Console.WriteLine($"The semantic exaclty-Once hasn't been implemented yet. Please consider using at-most-once instead...");
+                    //ReplicaManager -> ProcessAndForward  
+                    rep.ProcessAndForward(tuple, id);
                     break;
                 default:
                     Console.WriteLine($"The specified semantic ({Semantic}) is not supported within our system");
