@@ -22,6 +22,7 @@ namespace Operator
         private List<IReplica> allReplicas;
         private Dictionary<string, List<IReplica>> inputReplicas;
         private Timer propagateStateTimer;
+        private List<CTuple> processedTuples;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
@@ -31,7 +32,7 @@ namespace Operator
             this.adresses = info.Addresses;
             this.info = info;
             this.inputReplicas = new Dictionary<string, List<IReplica>>();
-          
+            this.processedTuples = null;
             this.otherReplicasStates = new List<ReplicaState>(new ReplicaState[adresses.Count]); 
                 //await Task.Delay(10000);
             var initialState = rep.GetState();
@@ -82,6 +83,66 @@ namespace Operator
 
         }
 
+        public void OnFail(object sender, NodeFailedEventArgs e)
+        {
+            Console.WriteLine($"Detected failure of {e.FailedNodeName}");
+            int failedId = -1;
+            Dictionary<int, Replica> replicasCopy;
+            lock (replicas)
+            {
+                replicasCopy = new Dictionary<int, Replica>(replicas);
+            }
+            for (int i = 0; i < this.adresses.Count; i++)
+            {
+                if (this.adresses[i].Equals(e.FailedNodeName))
+                {
+                    failedId = i;
+                }
+            }
+            if (failedId != -1)
+            {
+
+                foreach (Replica rep in replicasCopy.Values)
+                {
+                    if (rep.ID == failedId + 1)
+                    {   //recover 
+                        Replica r = CreateReplica(failedId);          
+                        ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
+                        Dictionary<string, OriginState> os = repState.InputStreamsIds;
+                        Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
+                        r.LoadState(repState);
+                        foreach (string opName in os.Keys)
+                        {
+                            
+                            var sentIds = os[opName].SentIds;
+                            //for each operator ask a re-sent
+                            for (int j = 0; j < sentIds.Count; j++)
+                            {
+                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); // (duvida kat) j é o numero de ids, enviados. esta a ser enviado no campo destinationID, é supost?
+                            }                                                                           // se houver mais tuplos do que replicas, obtemos array out of bound exception
+                        }
+                        AddReplica(r);
+                        allReplicas[failedId] = this;
+                        adresses[failedId] = SelfURL;
+                        r.Start();
+
+                        // Only after the recovery is completed, it's safe to reroute
+                        foreach (string opName in os.Keys)
+                        {
+                            for (int i = 0; i < inputReplicas[opName].Count; i++)
+                            {
+                                inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                            }
+                        }
+
+                        //resend 
+                        break;
+                    }
+                }
+            }
+
+        }
+
         public void AddReplica(Replica rep) {
             lock(replicas)
             {
@@ -91,37 +152,16 @@ namespace Operator
             Console.Title += $" ({rep.ID})";
         }
 
-        public void Freeze(int id)
-        {
-            replicas[id].Freeze();
-        }
-
-        public void Interval(int id, int mils)
-        {
-            replicas[id].Interval(mils);
-        }
-
-        public void Kill(int id)
-        {
-            replicas[id].Kill();
-        }
-
-        public void Ping()
-        {
-            lock(replicas)
-            {
-                foreach (Replica rep in replicas.Values)
-                {
-                    rep.Ping();
-                }
-            }
-
-            
-        }
-
         public void ProcessAndForward(CTuple tuple, int destinationId)
-        {
-            replicas[destinationId].ProcessAndForward(tuple);
+        {   //ExactlyOnce semantic
+            if (processedTuples != null) {
+                if (!processedTuples.Contains(tuple)) {
+                    replicas[destinationId].ProcessAndForward(tuple);
+                    processedTuples.Add(tuple);
+                }
+                
+            }
+            
         }
 
         public void Start(int id)
@@ -149,69 +189,37 @@ namespace Operator
             }
         }
 
+        public void Freeze(int id)
+        {
+            replicas[id].Freeze();
+        }
+
+        public void Interval(int id, int mils)
+        {
+            replicas[id].Interval(mils);
+        }
+
+        public void Kill(int id)
+        {
+            replicas[id].Kill();
+        }
+
+        public void Ping()
+        {
+            lock (replicas)
+            {
+                foreach (Replica rep in replicas.Values)
+                {
+                    rep.Ping();
+                }
+            }
+
+
+        }
+
         public void Unfreeze(int id)
         {
             replicas[id].Unfreeze();
-        }
-
-        public void OnFail(object sender, NodeFailedEventArgs e)
-        {
-            Console.WriteLine($"Detected failure of {e.FailedNodeName}");
-            int failedId = -1;
-            Dictionary<int, Replica> replicasCopy;
-            lock (replicas)
-            {
-                replicasCopy = new Dictionary<int, Replica>(replicas);
-            }
-            for (int i = 0; i < this.adresses.Count; i++)
-            {
-                if (this.adresses[i].Equals(e.FailedNodeName))
-                {
-                    failedId = i;
-                }
-            }
-            if (failedId != -1)
-            {
-
-                foreach (Replica rep in replicasCopy.Values) {
-                    if (rep.ID == failedId + 1) {
-                        //recover 
-                            
-                        Replica r = CreateReplica(failedId);
-                        
-                        ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
-                        Dictionary<string, OriginState> os = repState.InputStreamsIds;
-                        Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
-                        r.LoadState(repState);
-                        foreach (string opName in os.Keys) {
-                            var sentIds = os[opName].SentIds;
-                            //for each operator ask a re-sent
-                            for (int j = 0; j < sentIds.Count; j++)
-                            {
-                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); // (duvida kat) j é o numero de ids, enviados. esta a ser enviado no campo destinationID, é supost?
-                            }                                                                           // se houver mais tuplos do que replicas, obtemos array out of bound exception
-                        }
-                        AddReplica(r);
-                        allReplicas[failedId] = this;
-                        adresses[failedId] = SelfURL;
-                        r.Start();
-                        
-                        
-                        // Only after the recovery is completed, it's safe to reroute
-                        foreach (string opName in os.Keys)
-                        {
-                            for (int i = 0; i < inputReplicas[opName].Count; i++)
-                            {
-                                inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
-                            }
-                        }
-                        
-                        //resend 
-                        break;
-                    }
-                }
-            }
-
         }
 
         private Replica CreateReplica(int failedId)
