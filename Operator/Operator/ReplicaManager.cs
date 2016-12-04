@@ -22,7 +22,6 @@ namespace Operator
         private List<IReplica> allReplicas;
         private Dictionary<string, List<IReplica>> inputReplicas;
         private Timer propagateStateTimer;
-        private List<CTuple> processedTuples;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
@@ -32,7 +31,6 @@ namespace Operator
             this.adresses = info.Addresses;
             this.info = info;
             this.inputReplicas = new Dictionary<string, List<IReplica>>();
-            this.processedTuples = null;
             this.otherReplicasStates = new List<ReplicaState>(new ReplicaState[adresses.Count]); 
                 //await Task.Delay(10000);
             var initialState = rep.GetState();
@@ -114,12 +112,13 @@ namespace Operator
                         foreach (string opName in os.Keys)
                         {
                             
-                            var sentIds = os[opName].SentIds;
+                            var sentIds = os[opName].SentIds; // Only keeps the last id sent to each destination
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
-                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); // (duvida kat) j é o numero de ids, enviados. esta a ser enviado no campo destinationID, é supost?
-                            }                                                                           // se houver mais tuplos do que replicas, obtemos array out of bound exception
+                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); 
+                             
+                            }  
                         }
                         AddReplica(r);
                         allReplicas[failedId] = this;
@@ -154,14 +153,7 @@ namespace Operator
 
         public void ProcessAndForward(CTuple tuple, int destinationId)
         {   //ExactlyOnce semantic
-            if (processedTuples != null) {
-                if (!processedTuples.Contains(tuple)) {
-                    replicas[destinationId].ProcessAndForward(tuple);
-                    processedTuples.Add(tuple);
-                }
-                
-            }
-            
+            replicas[destinationId].ProcessAndForward(tuple);
         }
 
         public void Start(int id)
