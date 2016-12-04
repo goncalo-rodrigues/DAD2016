@@ -11,7 +11,7 @@ namespace Operator
     {
         public string OpId { get; }
         public int ReplicaId { get; }
-        public TupleID LastProcessedId { get; set; } = new TupleID(0, 0);
+        public TupleID LastProcessedId { get; set; } = new TupleID();
         public OriginOperator(string opId, int replicaId) : base(false) {
             this.OpId = opId;
             this.ReplicaId = replicaId;

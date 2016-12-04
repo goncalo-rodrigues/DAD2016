@@ -9,6 +9,12 @@ namespace SharedTypes
         public int GlobalID { get; }
         public int SubID { get; }
 
+        public TupleID()
+        {
+            GlobalID = -1;
+            SubID = 0;
+        }
+
         public TupleID(int global, int sub)
         {
             if (global < 0 || sub < 0)

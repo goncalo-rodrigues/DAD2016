@@ -222,20 +222,19 @@ namespace Operator
             // debug print 
             var data = tuple.GetFields();
             IEnumerable<IList<string>> resultData;
-            //lock (this)
-            //{
-                resultData = ProcessFunction.Process(data);
-                //ReplicaState repState = this.GetState();
-              
-                originOperators[tuple.opName][tuple.repID].LastProcessedId = tuple.ID;
-               // Dictionary<string, OriginState> os = repState.InputStreamsIds;
-                //List<int> sentIds = os[tuple.opName].SentIds;
-                //FIXME
-                //id de quem me enviou
-                //sentIds[ID]=tuple.repID;
-                
-            //    // todo: update processedtuples id
-            //}
+            lock (this)
+            {
+                var origin = originOperators[tuple.opName][tuple.repID];
+                if (origin.LastProcessedId < tuple.ID)
+                {
+                    resultData = ProcessFunction.Process(data);
+                    origin.LastProcessedId = tuple.ID;
+                } else
+                {
+                    Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
+                    return new CTuple[0];
+                }
+            }
            
             resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, i, this.OperatorId, this.ID));
             Console.WriteLine($"Processed {tuple.ToString()}");
@@ -315,7 +314,7 @@ namespace Operator
 
         public ReplicaState GetState()
         {
-            Console.WriteLine("Taking snapshot");
+            //Console.WriteLine("Taking snapshot");
             lock(this)
             {
                 var result = new ReplicaState();
@@ -360,7 +359,7 @@ namespace Operator
 
         public void GarbageCollect(TupleID id, string operatorId, int replicaId)
         {
-            Console.WriteLine("Garbage Collecting");
+            //Console.WriteLine("Garbage Collecting");
             destinations[operatorId].GarbageCollect(id, replicaId);
         }
     }

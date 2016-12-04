@@ -29,8 +29,8 @@ namespace Operator
             SentTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             for(int i=0; i < GarbageCollectedTupleIds.Count; i++)
             {
-                GarbageCollectedTupleIds[i] = new TupleID(0, 0);
-                SentTupleIds[i] = new TupleID(0, 0);
+                GarbageCollectedTupleIds[i] = new TupleID();
+                SentTupleIds[i] = new TupleID();
             }
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
@@ -100,21 +100,24 @@ namespace Operator
             List<CTuple> toDeliver = new List<CTuple>();
             lock (this)
             {
-                if (CachedOutputTuples.Count == 0 || id < CachedOutputTuples[0].ID)
+
+                if (id >= new TupleID(0,0) && (CachedOutputTuples.Count == 0 || id < CachedOutputTuples[0].ID))
                 {
                     // Missing tuples!!!
+                    Console.WriteLine($"Tuple {id} is missing");
                     throw new TuplesNotCachedException(id, CachedOutputTuples[0].ID);
                 }
                 var upTo = SentTupleIds[replicaId];
                 for (int i = 0; i < CachedOutputTuples.Count; i++)
                 {
                     if (CachedOutputTuples[i].ID > upTo) break;
-                    if (CachedOutputTuples[i].ID < id) continue;
+                    if (CachedOutputTuples[i].ID <= id) continue;
                     toDeliver.Add(CachedOutputTuples[i]);
                 }
             }
             foreach (var t in toDeliver)
             {
+                Console.WriteLine($"Resending {t.ID} to {this.info.ID} ({replicaId})");
                 Deliver(t);
             }
         }
@@ -125,10 +128,9 @@ namespace Operator
             lock (this)
             {
                 GarbageCollectedTupleIds[replicaId] = id;
-                var currentMin = id;
                 var garbageMin = GarbageCollectedTupleIds.Min();
-                currentMin = currentMin < garbageMin ? currentMin : garbageMin;
-                while (CachedOutputTuples.Count > 0 && CachedOutputTuples[0].ID >= currentMin)
+                //Console.WriteLine($"GC-ing up to {id}");
+                while (CachedOutputTuples.Count > 0 && garbageMin > CachedOutputTuples[0].ID)
                 {
                     CachedOutputTuples.RemoveAt(0);
                     i++;

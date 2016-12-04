@@ -14,6 +14,21 @@ namespace SharedTypes
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
         public int LastEmittedTuple { get; set; } // in case it reads from files
 
+        public override string ToString()
+        {
+            string result = "<";
+            foreach(var opName in InputStreamsIds.Keys)
+            {
+                result += opName + ": <";
+                var state = InputStreamsIds[opName];
+                result += string.Join(",", state.SentIds);
+
+                result += ">";
+            }
+            result += ">";
+            return result;
+        }
+
     }
     [Serializable]
     public class DestinationState

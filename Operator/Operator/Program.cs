@@ -19,10 +19,10 @@ namespace Operator
     {
         static void Main(string[] args)
         {
-            var c = new List<string> { "a", "b" };
-            var op = Operations.GetOperation("COUNT");
-            op.Process(c);
-            op.Process(c);
+            //var c = new List<string> { "a", "b" };
+            //var op = Operations.GetOperation("COUNT");
+            //op.Process(c);
+            //op.Process(c);
             //var a = Operations.GetCustomOperation(@"SharedTypes.dll", "SharedTypes.CustomFunctions", "reverse");
             // var b = Operations.GetCustomOperation(@"C:\Users\Goncalo\Source\Repos\DAD2016\Operator\Operator\bin\Debug\SharedTypes.dll", "SharedTypes.CustomFunctions", "dup");
             //var c = a(new List<string> { "a", "b" });

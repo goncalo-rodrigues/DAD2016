@@ -109,8 +109,20 @@ namespace SharedTypes.PerfectFailureDetector
                     //Console.WriteLine("starting ping...");
                     try
                     {
-                        node.Ping();
-                        success = true;
+                        var action = new Action(node.Ping);
+                        var handler = action.BeginInvoke(null, null);
+
+                        if (handler.AsyncWaitHandle.WaitOne((int)timeOut))
+                        {
+                            success = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ping time out");
+                        }
+                            
+                        //node.Ping();
+                        
                     } catch (Exception e)
                     {
                         Console.WriteLine("fail ping: " + e.Message);

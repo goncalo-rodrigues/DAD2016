@@ -22,7 +22,7 @@ namespace SharedTypes
 
         void SendState(ReplicaState state, int id);
         void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId);
-
+        void Resend(TupleID id, string operatorId, int replicaId, int destinationId);
 
 
     }

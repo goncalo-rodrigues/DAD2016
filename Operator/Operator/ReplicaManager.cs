@@ -73,7 +73,7 @@ namespace Operator
                 }
                 foreach(var repId in replicasCopy.Keys)
                 {
-                    PropagateState(repId);
+                    //PropagateState(repId);
                 }
             }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
 
@@ -178,19 +178,19 @@ namespace Operator
                 foreach (Replica rep in replicasCopy.Values) {
                     if (rep.ID == failedId + 1) {
                         //recover 
-                        Console.WriteLine($"Started to recover replica {failedId}");
+                        
                         Replica r = CreateReplica(failedId);
                         
                         ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
                         Dictionary<string, OriginState> os = repState.InputStreamsIds;
+                        Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
                         r.LoadState(repState);
                         foreach (string opName in os.Keys) {
                             var sentIds = os[opName].SentIds;
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
-                                //r.Resend(sentIds[j], opName, j);
-                                //TODO (Telma): tens de pedir aos origins que te façam resend, nao é ao r
+                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j);
                             }
                         }
                         AddReplica(r);
@@ -220,6 +220,12 @@ namespace Operator
         public void SendState(ReplicaState state, int id)
         {
             otherReplicasStates[id] = state;
+        }
+
+        public void Resend(TupleID id, string operatorId, int replicaId, int destinationId)
+        {
+            Console.WriteLine($"{operatorId} ({replicaId}) asked to resend tuples from {id}");
+            replicas[destinationId].Resend(id, operatorId, replicaId);
         }
 
         public void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId)
