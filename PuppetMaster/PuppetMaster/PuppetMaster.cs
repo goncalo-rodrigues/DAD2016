@@ -60,8 +60,7 @@ namespace PuppetMaster
                     _instance = new PuppetMaster();
                 return _instance;
             }
-        }
-       
+        }    
         private PuppetMaster()
         {
             allCommands = new Dictionary<string, ACommand>
@@ -83,9 +82,7 @@ namespace PuppetMaster
 
             InitEventLogging();
         }
-
         public ILogger getLogger() { return pmLogger; }
-
         #region Initialization
         public void ReadAndInitializeSystem(string config)
         {
@@ -452,7 +449,6 @@ namespace PuppetMaster
             del.EndInvoke(ar);
             return;
         }
-
         public void Start(string opId)
         {
             try
@@ -512,7 +508,6 @@ namespace PuppetMaster
                     }
                 }
         }
-
         public void Crash(string opID,  int index )
         {
             if (!String.IsNullOrEmpty(opID))

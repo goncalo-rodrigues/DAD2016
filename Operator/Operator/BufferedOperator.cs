@@ -19,17 +19,29 @@ namespace Operator
             if (takeTupleAsSoonAsItArrives)
                 Task.Run(() => Processor());
         }
-
         public virtual CTuple Take()
         {
             return buffer.Take();
         }
-
         public int Count()
         {
             return buffer.Count;
+        }      
+        public void Insert(CTuple tuple)
+        {
+            try
+            {
+                buffer?.Add(tuple);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"//DEBUG: The tuple was not inserted due to {e.GetBaseException()}//");
+            }
         }
-        
+        public void MarkFinish() // marks the buffer has not accepting further tuples
+        {
+            buffer?.CompleteAdding();
+        }
         private void Processor()
         {
             while (!buffer.IsCompleted)
@@ -53,25 +65,6 @@ namespace Operator
                 }
             }
         }
-
-
-        public void Insert(CTuple tuple)
-        {
-         
-            try
-            {
-                buffer?.Add(tuple);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"//DEBUG: The tuple was not inserted due to {e.GetBaseException()}//");
-            }
-        }
-        public void MarkFinish() // marks the buffer has not accepting further tuples
-        {
-            buffer?.CompleteAdding();
-        }
         public abstract void DoStuff(CTuple tuple);
-
     }
 }

@@ -14,7 +14,6 @@ namespace SharedTypes
         public string Content { get; set; }
         public string Owner { get; set; }
         
-
         public Record(string type, string owner, string content, DateTime time)
         {
             Type = type;
@@ -24,7 +23,6 @@ namespace SharedTypes
         }
         public override string ToString()
         {
-            //return $"[{Timestamp}  <{Owner}>]: {Content}";
             if (Type == "tuple")
                 return $"{Type} {Owner},{Content}";
             else

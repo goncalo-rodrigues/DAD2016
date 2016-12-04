@@ -90,7 +90,7 @@ namespace PuppetMaster
 
         private void ButtonUnfreeze_Click(object sender, EventArgs e)
         {
-            string opID = FreezeOpID.Text;
+            string opID = UnfreezeOpID.Text;
             string index = UnfreezeID.Value.ToString();
             String[] args = { opID, index };
 
@@ -203,6 +203,11 @@ namespace PuppetMaster
         {
             RichTBEventLog.SelectionStart = RichTBEventLog.Text.Length;
             RichTBEventLog.ScrollToCaret();
+        }
+
+        private void UnfreezeOpID_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
