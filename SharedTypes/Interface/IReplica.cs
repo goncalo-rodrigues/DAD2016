@@ -26,5 +26,6 @@ namespace SharedTypes
         void Resend(TupleID id, string operatorId, int replicaId, int destinationId);
 
         void ReRoute(string oldAddress, string newAddr);
+        void Flush(TupleID id, string operatorId, int repId, int destinationId);
     }
 }

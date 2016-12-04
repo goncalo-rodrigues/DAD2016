@@ -79,15 +79,21 @@ namespace SharedTypes
     [Serializable]
     public class CTuple
     {
-        private List<string> fields = new List<string>();
+        private List<string> fields;
         public TupleID ID { get; }
         public string opName { get;  }
         public int repID { get; }
+        public int destinationId { get; set; } //I'm sorry... i'm desperate
 
         public CTuple() { }
         public CTuple(List<string> fields, int globalID, int subID, string opName, int repID) {
-            foreach (string f in fields)
-                this.fields.Add(f);
+            if (fields != null)
+            {
+                this.fields = new List<string>();
+                foreach (string f in fields)
+                    this.fields.Add(f);
+            }
+
             this.ID = new TupleID(globalID, subID);
             this.opName = opName;
             this.repID = repID;
@@ -111,13 +117,11 @@ namespace SharedTypes
             string repr = $"{ID} [";
             if (fields != null)
             {
-                int i = 0;
-                for( ; i < fields.Count - 1; i++)
-                    repr += fields[i] + ',';
-
-                repr += fields[i];
+                repr += string.Join(",", fields);
             }
             return repr + "]";
         }
     }
+
+   
 }

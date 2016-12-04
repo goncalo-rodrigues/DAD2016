@@ -13,6 +13,7 @@ namespace SharedTypes
         public Dictionary<string, OriginState> InputStreamsIds { get; set; } 
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
         public int LastEmittedTuple { get; set; } // in case it reads from files
+        public TupleID LastProcessedId { get; set; }
 
         public override string ToString()
         {

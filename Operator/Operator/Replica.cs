@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Operator
 {
@@ -42,6 +43,10 @@ namespace Operator
         private IDictionary<string, Destination> destinations;
         private List<string> inputFiles;
         private RoutingStrategy routingStrategy;
+        public TupleID LastProcessedId { get; private set; } = new TupleID();
+        public TupleID LastSentId { get; private set; } = new TupleID();
+
+
 
         private Dictionary<string, List<OriginOperator>> originOperators;
         private MergedInBuffer inBuffer;
@@ -124,13 +129,20 @@ namespace Operator
             // Start reading from file(s)
             this.OnStart += (sender, args) =>
             {
-                Task.Run(() =>
+                if (!processingState)
                 {
-                    foreach (var path in inputFiles)
+                    Task.Run(() =>
                     {
-                        StartProcessingFromFile(path, StartFrom);
-                    }
-                });
+                        foreach (var path in inputFiles)
+                        {
+                            StartProcessingFromFile(path, StartFrom);
+                        }
+                        var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
+                        tuple.destinationId = -1;
+                        originOperators[OperatorId][0].Insert(tuple);
+                    });
+                }
+
 
             };
 
@@ -159,11 +171,29 @@ namespace Operator
         {
             while (true)
             {
-               
+                try
+                {
                     var t = inBuffer.Next();
                     var result = Process(t);
                     foreach (var tuple in result)
+                    {
                         SendToAll(tuple);
+                        LastSentId = tuple.ID;
+                    }
+                    if (!result.Any() && t.ID.GlobalID > 0)
+                    {
+                        // if there are no results, update lastSentId anyways
+                        
+                        var newId = new TupleID(t.ID.GlobalID-1, 0);
+                        LastSentId = LastSentId > newId ? LastSentId : newId;
+                    }
+                } catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
+                    Thread.Sleep(10000);
+                }
+
             }
         }
 
@@ -203,9 +233,9 @@ namespace Operator
         {
              foreach (var neighbor in destinations.Values)
             {
-               
                 neighbor.Send(tuple);
             }
+            
         }
 
         
@@ -216,21 +246,36 @@ namespace Operator
             // debug print 
             var data = tuple.GetFields();
             IEnumerable<IList<string>> resultData;
+            var startSubId = LastProcessedId.GlobalID == tuple.ID.GlobalID ? LastProcessedId.SubID + 1 : 0;
             lock (this)
             {
                 var origin = originOperators[tuple.opName][tuple.repID];
+                
                 if (origin.LastProcessedId < tuple.ID)
                 {
-                    resultData = ProcessFunction.Process(data);
+                    Console.WriteLine("Processing...");
+                    if (data == null)
+                    {
+                        Console.WriteLine($"Processing flush {tuple.ID}");
+                        origin.LastProcessedId = tuple.ID;
+                        //this.LastProcessedId = new TupleID(tuple.ID.GlobalID, startSubId);
+                        return new CTuple[0];
+                    } else
+                    {
+                        resultData = ProcessFunction.Process(data);
+                    }
                     origin.LastProcessedId = tuple.ID;
+                    
                 } else
                 {
                     Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
                     return new CTuple[0];
                 }
+                resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, startSubId + i, this.OperatorId, this.ID));
+                this.LastProcessedId = resultTuples.Last().ID;
             }
-           
-            resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, i, this.OperatorId, this.ID));
+            
+
             Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
@@ -238,7 +283,7 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine("Received " + tuple + " from " + tuple.opName);
+            Console.WriteLine("Received " + tuple + " from " + tuple.opName + "(" + tuple.repID + ")");
             originOperators[tuple.opName][tuple.repID].Insert(tuple);
             Console.WriteLine("Successfully inserted");
         }
@@ -273,6 +318,12 @@ namespace Operator
             //p.Dispose();
             p.Kill();
         }
+
+        public void Flush(TupleID id, string operatorId, int repId)
+        {
+            ProcessAndForward(new CTuple(null, id.GlobalID, 0, operatorId, repId));
+        }
+
         public void Freeze()
         {
             Console.WriteLine("Freezing...");
@@ -315,6 +366,7 @@ namespace Operator
             }
         }
 
+
         public ReplicaState GetState()
         {
             //Console.WriteLine("Taking snapshot");
@@ -339,6 +391,7 @@ namespace Operator
                         result.OutputStreamsIds[d.Key] = state;
                 }
                 result.LastEmittedTuple = TupleCounter;
+                result.LastProcessedId = LastProcessedId;
                 return result;
             }
         }
@@ -350,7 +403,16 @@ namespace Operator
             {
                 destinations[d.Key].LoadState(d.Value);
             }
+            foreach (var opName in state.InputStreamsIds.Keys)
+            {
+                var sentids = state.InputStreamsIds[opName].SentIds;
+                for (int i=0; i < sentids.Count; i++)
+                {
+                    originOperators[opName][i].LastProcessedId = sentids[i];
+                }
+            }
             StartFrom = state.LastEmittedTuple;
+            LastProcessedId = state.LastProcessedId;
         }
 
         public void Resend(TupleID id, string operatorId, int replicaId)

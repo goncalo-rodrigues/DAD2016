@@ -74,7 +74,7 @@ namespace Operator
                 }
                 foreach(var repId in replicasCopy.Keys)
                 {
-                    //PropagateState(repId);
+                    PropagateState(repId);
                 }
             }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
 
@@ -273,6 +273,11 @@ namespace Operator
                 }
             }
             Task.WaitAll(tasks.ToArray());
+        }
+
+        public void Flush(TupleID id, string operatorId, int repId, int destinationId)
+        {
+            replicas[destinationId].Flush(id, operatorId, repId);
         }
 
         public void ReRoute(string oldAddr, string newAddr)

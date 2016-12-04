@@ -15,11 +15,13 @@ namespace Operator
         public List<CTuple> CachedOutputTuples;
         public List<TupleID> GarbageCollectedTupleIds;
         public List<TupleID> SentTupleIds;
+        private List<bool> somethingSentInRecentPast;
         public RoutingStrategy RoutingStrategy { get; set; }
         public bool controlFlag = false;
         private Replica master;
-        private DestinationInfo info; 
-
+        private DestinationInfo info;
+        private Timer flushTimer;
+       
         public NeighbourOperator(Replica master, DestinationInfo info, Semantic semantic) : base(master, semantic)
         {
             this.master = master;
@@ -27,10 +29,12 @@ namespace Operator
             CachedOutputTuples = new List<CTuple>();
             GarbageCollectedTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             SentTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
+            somethingSentInRecentPast = new List<bool>(new bool[info.Addresses.Count]);
             for(int i=0; i < GarbageCollectedTupleIds.Count; i++)
             {
                 GarbageCollectedTupleIds[i] = new TupleID();
                 SentTupleIds[i] = new TupleID();
+                somethingSentInRecentPast[i] = true;
             }
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
@@ -51,12 +55,49 @@ namespace Operator
                 }
 
             });
+
+            flushTimer = new Timer((e) =>
+            {
+
+                for(int i=0; i < replicas.Count; i++)
+                {
+                    if (!somethingSentInRecentPast[i])
+                    {
+                        var flushId = master.LastSentId;
+                        //Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
+                        if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
+                        {
+                            Console.WriteLine($"Emitting flush {master.LastSentId} to {i}");
+                            try
+                            {
+                                var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);
+                                flushTuple.destinationId = i;
+                                Insert(flushTuple);
+                            }
+                            catch (Exception)
+                            {
+                                Console.WriteLine($"Error while flushing");
+                            }
+                        }
+                    }
+                    somethingSentInRecentPast[i] = false;
+                }
+            }, null, 2000, 2000);
         }
         public override void Deliver(CTuple tuple)
         {
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
-            int id = RoutingStrategy.ChooseReplica(tuple);
+            int id;
+            if (tuple.GetFields() == null)
+            {
+                id = tuple.destinationId;
+            } else
+            {
+                id = RoutingStrategy.ChooseReplica(tuple);
+            }
+            
             var rep = replicas[id];
+            somethingSentInRecentPast[id] = true;
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -70,7 +111,7 @@ namespace Operator
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
-                        catch (Exception e) { Console.WriteLine("**********Exception"); };
+                        catch (Exception e) { /*Console.WriteLine("**********Exception");*/ };
                     }
                     //Console.WriteLine($"The semantic At-Least-Once hasn't been implemented yet. Please consider using at-most-once instead...");
                     break;
@@ -89,8 +130,7 @@ namespace Operator
                 
             }
 
-            lock (this)
-            {
+            lock(this) { 
                 CachedOutputTuples.Add(tuple);
                 SentTupleIds[id] = tuple.ID;
             }
@@ -188,6 +228,18 @@ namespace Operator
                     replicas[i] = Helper.GetStub<IReplica>(newAddr);
                 }
             }
+        }
+
+        public override void Finish()
+        {
+            for (int i=0; i < replicas.Count; i++)
+            {
+                var flushTuple = new CTuple(null, 1000000, 0, master.OperatorId, master.ID);
+                flushTuple.destinationId = i;
+                Insert(flushTuple);
+            }
+
+            base.Finish();
         }
     }
 }

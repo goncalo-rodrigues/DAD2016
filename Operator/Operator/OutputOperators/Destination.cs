@@ -47,6 +47,12 @@ namespace Operator
                 Console.WriteLine("Interval!");
                 Thread.Sleep(Interval);
             }
+            lock(this)
+            {
+                while (!Processing || FreezeFlag)
+                    Monitor.Wait(this);
+            }
+
             Deliver(tuple);
         }
 
@@ -67,6 +73,11 @@ namespace Operator
         public virtual void GarbageCollect(TupleID id, int replicaId)
         {
             Console.WriteLine("GarbageCollect not implemented.");
+        }
+
+        public virtual void Finish()
+        {
+            MarkFinish();
         }
 
         #region PARENTCOMMANDS
