@@ -140,14 +140,20 @@ namespace Operator
         }
         public override DestinationState GetState()
         {
-            return new DestinationState
+            lock(this)
             {
-                SentIds = SentTupleIds
-            };
+                return new DestinationState
+                {
+                    SentIds = SentTupleIds,
+                    CachedOutputTuples = CachedOutputTuples
+                };
+            }
+
         }
         public override void LoadState(DestinationState state)
         {
             this.SentTupleIds = state.SentIds;
+            this.CachedOutputTuples = state.CachedOutputTuples;
         }
         public override void Ping()
         {

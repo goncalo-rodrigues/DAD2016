@@ -348,6 +348,7 @@ namespace Operator
         {
             if (operatorId == this.OperatorId && this.ID == replicaId)
                 return;
+
             destinations[operatorId].Resend(id, replicaId);
         }
 

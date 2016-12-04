@@ -34,6 +34,7 @@ namespace SharedTypes
     public class DestinationState
     {
         public List<TupleID> SentIds;
+        public List<CTuple> CachedOutputTuples;
     }
 
     [Serializable]

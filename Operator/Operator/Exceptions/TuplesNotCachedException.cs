@@ -11,7 +11,7 @@ namespace Operator
     {
         public TupleID FirstTupleNotCached { get; set; }
         public TupleID LastTupleNotCached { get; set; }
-        public TuplesNotCachedException(TupleID idFirstTuple, TupleID idLastTuple)
+        public TuplesNotCachedException(TupleID idFirstTuple, TupleID idLastTuple) : base($"Tuples from {idFirstTuple} up to {idLastTuple} were not found in cache")
         {
             FirstTupleNotCached = idFirstTuple;
             LastTupleNotCached = idLastTuple;
