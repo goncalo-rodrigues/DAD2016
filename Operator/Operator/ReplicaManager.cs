@@ -73,7 +73,7 @@ namespace Operator
                 }
                 foreach(var repId in replicasCopy.Keys)
                 {
-                    PropagateState(repId);
+                    //PropagateState(repId);
                 }
             }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
 
@@ -109,6 +109,8 @@ namespace Operator
                         Dictionary<string, OriginState> os = repState.InputStreamsIds;
                         Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
                         r.LoadState(repState);
+                        AddReplica(r);
+
                         foreach (string opName in os.Keys)
                         {
                             
@@ -116,11 +118,11 @@ namespace Operator
                             //for each operator ask a re-sent
                             for (int j = 0; j < sentIds.Count; j++)
                             {
-                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j); 
+                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j, SelfURL); 
                              
                             }  
                         }
-                        AddReplica(r);
+                        
                         allReplicas[failedId] = this;
                         
                         r.Start();
@@ -231,10 +233,10 @@ namespace Operator
             otherReplicasStates[id] = state;
         }
 
-        public void Resend(TupleID id, string operatorId, int replicaId, int destinationId)
+        public void Resend(TupleID id, string operatorId, int replicaId, int destinationId, string destination)
         {
             Console.WriteLine($"{operatorId} ({replicaId}) asked to resend tuples from {id}");
-            replicas[destinationId].Resend(id, operatorId, replicaId);
+            replicas[destinationId].Resend(id, operatorId, replicaId, destination);
         }
 
         public void GarbageCollect(TupleID tupleId, string senderOpName, int senderRepId, int destinationId)

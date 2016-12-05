@@ -67,7 +67,7 @@ namespace Operator
                         //Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
                         if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
                         {
-                            Console.WriteLine($"Emitting flush {master.LastSentId} to {i}");
+                            //Console.WriteLine($"Emitting flush {master.LastSentId} to {i}");
                             try
                             {
                                 var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);
@@ -132,12 +132,14 @@ namespace Operator
                 SentTupleIds[id] = tuple.ID;
             }
         }
-        public override void Resend(TupleID id, int replicaId)
+        public override void Resend(TupleID id, int replicaId, string address)
         {
             List<CTuple> toDeliver = new List<CTuple>();
+            Processing = false;
+            var rep = Helper.GetStub<IReplica>(address);
             lock (this)
             {
-
+                //Console.WriteLine("New destination: " + destination.ToString());
                 if (id >= new TupleID(0,0) && (CachedOutputTuples.Count == 0 || id < CachedOutputTuples[0].ID))
                 {
                     // Missing tuples!!!
@@ -154,8 +156,15 @@ namespace Operator
             }
             foreach (var t in toDeliver)
             {
-                Console.WriteLine($"Resending {t.ID} to {this.info.ID} ({replicaId})");
-                Deliver(t);
+                Console.WriteLine($"****Resending {t.ID} to {this.info.ID} ({replicaId})");
+                try
+                {
+                    rep.ProcessAndForward(t, replicaId);
+                } catch(Exception e)
+                {
+                    Console.WriteLine("Error while resending: " + e.Message);
+                }
+                
             }
         }
         public override void GarbageCollect(TupleID id, int replicaId)

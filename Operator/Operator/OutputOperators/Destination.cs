@@ -66,7 +66,7 @@ namespace Operator
             return;
         }
 
-        public virtual void Resend(TupleID id, int replicaId)
+        public virtual void Resend(TupleID id, int replicaId, string destination)
         {
             Console.WriteLine("Resend not implemented.");
         }

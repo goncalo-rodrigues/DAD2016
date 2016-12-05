@@ -414,12 +414,12 @@ namespace Operator
             LastProcessedId = state.LastProcessedId;
         }
 
-        public void Resend(TupleID id, string operatorId, int replicaId)
+        public void Resend(TupleID id, string operatorId, int replicaId, string destination)
         {
             if (operatorId == this.OperatorId && this.ID == replicaId)
                 return;
 
-            destinations[operatorId].Resend(id, replicaId);
+            destinations[operatorId].Resend(id, replicaId, destination);
         }
 
         public void GarbageCollect(TupleID id, string operatorId, int replicaId)
