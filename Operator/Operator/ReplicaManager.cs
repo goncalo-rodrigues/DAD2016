@@ -268,6 +268,7 @@ namespace Operator
         public void ReRoute(string oldAddr, string newAddr)
         {
             // update failed ReplicaManager Address in inputStream Replica Manager
+            Console.WriteLine($"{oldAddr} -> {newAddr}");
             for (int i = 0; i < adresses.Count; i++)
             { 
                 if (adresses[i].Equals(oldAddr))
@@ -319,34 +320,77 @@ namespace Operator
                                                     //for each operator ask a re-sent
                 for (int j = 0; j < sentIds.Count; j++)
                 {
-                    inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j, SelfURL);
+                    while (true)
+                    {
+                        try
+                        {
+                            Console.WriteLine($"Asking for resend to {opName} ({j})");
+                            inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j, SelfURL);
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Resending failed. Trying again. Stay positive." + e.Message);
+                        }
+                    }
+
+
 
                 }
             }
 
-            allReplicas[failedId] = this;
-                    
+            Console.WriteLine("**1**");
+
+                allReplicas[failedId] = this;
+
 
             foreach (string opName in os.Keys)
             {
                 for (int i = 0; i < inputReplicas[opName].Count; i++)
                 {
-                    inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    try
+                    {
+                        inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error1:" + e.Message);
+                    }
+                
                 }
             }
 
+            Console.WriteLine("**2**");
             foreach (string opName in outputReplicas.Keys)
             {
                 for (int i = 0; i < outputReplicas[opName].Count; i++)
                 {
-                    outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    try
+                    {
+                        outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error2:" + e.Message);
+                    }
                 }
             }
 
 
-            puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
 
-            
+            Console.WriteLine("**3**");
+
+            try
+            {
+                puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error3:" + e.Message);
+            }
+
+            Console.WriteLine("**4**");
+
 
             adresses[failedId] = SelfURL;
             Console.WriteLine("All recovered!");

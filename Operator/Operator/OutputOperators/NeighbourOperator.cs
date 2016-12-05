@@ -127,7 +127,6 @@ namespace Operator
             lock(this) {
                 Console.WriteLine($"Delivered tuple {tuple.ID}");
                 CachedOutputTuples.Add(tuple);
-                
                 SentTupleIds[id] = tuple.ID;
             }
         }
