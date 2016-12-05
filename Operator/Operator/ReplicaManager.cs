@@ -83,7 +83,7 @@ namespace Operator
                 {
                     PropagateState(repId);
                 }
-            }, null, PROPAGATE_STATE_PERIOD*10, PROPAGATE_STATE_PERIOD*10);
+            }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
 
             puppetMaster = (ILogger)Activator.GetObject(typeof(ILogger), info.MasterURL);
             Console.Title = $"{rep.OperatorId} ({rep.ID})";
@@ -166,7 +166,9 @@ namespace Operator
 
                         adresses[failedId] = SelfURL;
                         Console.WriteLine("All recovered!");
-                        if (repState.IsStarted) rep.Start();
+                        if (repState.IsFrozen) r.Freeze(); 
+                        if (repState.IsStarted) r.Start();
+
                         //resend 
                         break;
                     }

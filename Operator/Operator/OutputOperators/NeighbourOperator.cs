@@ -68,7 +68,7 @@ namespace Operator
                         //Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
                         if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
                         {
-                            Console.WriteLine($"Emitting flush {master.LastSentId} from {master.ID} to {i}");
+                            //Console.WriteLine($"Emitting flush {master.LastSentId} from {master.ID} to {i}");
                             try
                             {
                                 var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);

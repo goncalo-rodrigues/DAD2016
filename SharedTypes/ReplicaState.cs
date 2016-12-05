@@ -15,6 +15,7 @@ namespace SharedTypes
         public int LastEmittedTuple { get; set; } // in case it reads from files
         public TupleID LastProcessedId { get; set; }
         public bool IsStarted { get; set; }
+        public bool IsFrozen { get; set; }
         public object RoutingState { get; set; }
 
         public override string ToString()
