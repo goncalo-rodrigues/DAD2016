@@ -73,9 +73,9 @@ namespace Operator
                 }
                 foreach(var repId in replicasCopy.Keys)
                 {
-                    //PropagateState(repId);
+                    PropagateState(repId);
                 }
-            }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
+            }, null, PROPAGATE_STATE_PERIOD*10, PROPAGATE_STATE_PERIOD*10);
 
             Console.Title = $"{rep.OperatorId} ({rep.ID})";
 
@@ -137,7 +137,7 @@ namespace Operator
                         }
 
                         adresses[failedId] = SelfURL;
-
+                        Console.WriteLine("All recovered!");
                         //resend 
                         break;
                     }

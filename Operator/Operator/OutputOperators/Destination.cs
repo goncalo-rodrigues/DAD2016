@@ -47,10 +47,16 @@ namespace Operator
                 Console.WriteLine("Interval!");
                 Thread.Sleep(Interval);
             }
+           
             lock(this)
             {
                 while (!Processing || FreezeFlag)
+                {
+                    Console.WriteLine("Stopped or frozen. Waiting...");
                     Monitor.Wait(this);
+                    Console.WriteLine("UnStopped or Unfrozen. Resuming...");
+                }
+                    
             }
 
             Deliver(tuple);

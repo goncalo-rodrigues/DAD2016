@@ -67,7 +67,7 @@ namespace Operator
                         //Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
                         if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
                         {
-                            //Console.WriteLine($"Emitting flush {master.LastSentId} to {i}");
+                            Console.WriteLine($"Emitting flush {master.LastSentId} from {master.ID} to {i}");
                             try
                             {
                                 var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);
@@ -127,15 +127,16 @@ namespace Operator
                 
             }
 
-            lock(this) { 
+            lock(this) {
+                Console.WriteLine($"Delivered tuple {tuple.ID}");
                 CachedOutputTuples.Add(tuple);
+                
                 SentTupleIds[id] = tuple.ID;
             }
         }
         public override void Resend(TupleID id, int replicaId, string address)
         {
             List<CTuple> toDeliver = new List<CTuple>();
-            Processing = false;
             var rep = Helper.GetStub<IReplica>(address);
             lock (this)
             {
@@ -230,11 +231,9 @@ namespace Operator
                 // lets find failed replica ID
                 if (info.Addresses[i].Equals(oldAddr))
                 {
-                    
                     updated = true;
                     replicas[i] = Helper.GetStub<IReplica>(newAddr);
                     Console.WriteLine($"updating {oldAddr} to {newAddr}");
-                    replicas[i].Ping();
                 }
             }
         }
