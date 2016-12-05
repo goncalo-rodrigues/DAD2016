@@ -326,33 +326,27 @@ namespace Operator
 
             allReplicas[failedId] = this;
                     
-            try
+
+            foreach (string opName in os.Keys)
             {
-                foreach (string opName in os.Keys)
+                for (int i = 0; i < inputReplicas[opName].Count; i++)
                 {
-                    for (int i = 0; i < inputReplicas[opName].Count; i++)
-                    {
-                        inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
-                    }
+                    inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
                 }
-
-                foreach (string opName in outputReplicas.Keys)
-                {
-                    for (int i = 0; i < outputReplicas[opName].Count; i++)
-                    {
-                        outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
-                    }
-                }
-
-
-                puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
-
             }
-            catch (Exception ex)
+
+            foreach (string opName in outputReplicas.Keys)
             {
-                Console.WriteLine("Problems with rerouting " + ex.Message + ex.StackTrace);
-
+                for (int i = 0; i < outputReplicas[opName].Count; i++)
+                {
+                    outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                }
             }
+
+
+            puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
+
+            
 
             adresses[failedId] = SelfURL;
             Console.WriteLine("All recovered!");
