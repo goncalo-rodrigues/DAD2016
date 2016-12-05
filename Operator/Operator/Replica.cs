@@ -439,7 +439,4 @@ namespace Operator
     {
         public int Millis { get; set; }
     }
-
-
-   
 }
