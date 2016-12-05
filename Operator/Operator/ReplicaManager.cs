@@ -83,7 +83,7 @@ namespace Operator
                 {
                     PropagateState(repId);
                 }
-            }, null, PROPAGATE_STATE_PERIOD*10, PROPAGATE_STATE_PERIOD*10);
+            }, null, PROPAGATE_STATE_PERIOD, PROPAGATE_STATE_PERIOD);
 
             puppetMaster = (ILogger)Activator.GetObject(typeof(ILogger), info.MasterURL);
             Console.Title = $"{rep.OperatorId} ({rep.ID})";
@@ -109,7 +109,7 @@ namespace Operator
                 {
                     // recover all replicas
                     while (!pfd.IsAlive(adresses[failedId]))
-                    {
+                        {
                         Recover(failedId);
                         failedId = (failedId-1)%adresses.Count;
                     }

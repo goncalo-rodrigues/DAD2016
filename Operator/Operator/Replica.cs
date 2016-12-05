@@ -53,6 +53,7 @@ namespace Operator
         public ConcurrentDictionary<string, bool> SeenTupleFieldValues = new ConcurrentDictionary<string, bool>();
         private bool shouldNotify = false;
         public bool processingState = false;
+        public bool freezingState = false; 
         public Operation ProcessFunction { get; private set; }
 
         // event is raised when processing starts
@@ -324,6 +325,7 @@ namespace Operator
         {
             Console.WriteLine("Freezing...");
             OnFreeze?.Invoke(this, new EventArgs());
+            freezingState = true;
 
         }
 
@@ -339,6 +341,7 @@ namespace Operator
         {
             Console.WriteLine($"Unfreezing...");
             OnUnfreeze?.Invoke(this, new EventArgs());
+            freezingState = false; 
         }
 
         public void Finish(string senderId, int replicaId)
@@ -389,6 +392,7 @@ namespace Operator
                 result.LastEmittedTuple = TupleCounter;
                 result.LastProcessedId = LastProcessedId;
                 result.IsStarted = processingState;
+                result.IsFrozen = freezingState;
                 
                 return result;
             }
@@ -411,6 +415,8 @@ namespace Operator
             }
             StartFrom = state.LastEmittedTuple;
             LastProcessedId = state.LastProcessedId;
+            freezingState = state.IsFrozen;
+            Console.WriteLine("My State " +freezingState);
         }
 
         public void Resend(TupleID id, string operatorId, int replicaId, string destination)
