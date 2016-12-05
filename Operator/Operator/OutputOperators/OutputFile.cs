@@ -69,7 +69,7 @@ namespace Operator
 
         internal override void UpdateRouting(string oldAddr, string newAddr)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
     }

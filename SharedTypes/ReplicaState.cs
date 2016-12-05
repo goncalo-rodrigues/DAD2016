@@ -14,6 +14,8 @@ namespace SharedTypes
         public Dictionary<string, DestinationState> OutputStreamsIds { get; set; }
         public int LastEmittedTuple { get; set; } // in case it reads from files
         public TupleID LastProcessedId { get; set; }
+        public bool IsStarted { get; set; }
+        public object RoutingState { get; set; }
 
         public override string ToString()
         {
@@ -36,6 +38,7 @@ namespace SharedTypes
     {
         public List<TupleID> SentIds;
         public List<CTuple> CachedOutputTuples;
+        public object RoutingState;
     }
 
     [Serializable]

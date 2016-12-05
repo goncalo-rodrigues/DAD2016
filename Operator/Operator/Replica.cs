@@ -127,24 +127,21 @@ namespace Operator
             }
             
             // Start reading from file(s)
-            this.OnStart += (sender, args) =>
+
+            Task.Run(() =>
             {
-                if (!processingState)
+                foreach (var path in inputFiles)
                 {
-                    Task.Run(() =>
-                    {
-                        foreach (var path in inputFiles)
-                        {
-                            StartProcessingFromFile(path, StartFrom);
-                        }
-                        var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
-                        tuple.destinationId = -1;
-                        originOperators[OperatorId][0].Insert(tuple);
-                    });
+                    StartProcessingFromFile(path, StartFrom);
                 }
+                var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
+                tuple.destinationId = -1;
+                originOperators[OperatorId][0].Insert(tuple);
+            });
+                
 
 
-            };
+            
 
             Task.Run(() => mainLoop());
             
@@ -391,6 +388,8 @@ namespace Operator
                 }
                 result.LastEmittedTuple = TupleCounter;
                 result.LastProcessedId = LastProcessedId;
+                result.IsStarted = processingState;
+                
                 return result;
             }
         }

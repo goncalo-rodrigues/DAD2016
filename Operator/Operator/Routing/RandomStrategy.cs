@@ -12,7 +12,7 @@ namespace Operator
     **/
     class RandomStrategy : RoutingStrategy
     {
-        public Random random { get; }
+        public Random random { get; set; }
         public RandomStrategy(int countRep, int? seed = null):base(countRep)
         {
             random = seed == null ? new Random() : new Random(seed ?? 0);
@@ -27,6 +27,16 @@ namespace Operator
             //TODO: verify if "crash flag" is on - after checkpoint
             return number;
 
+        }
+
+        public override object GetState()
+        {
+            return random;
+        }
+
+        public override void LoadState(object state)
+        {
+            this.random = (Random)state;
         }
     }
 }

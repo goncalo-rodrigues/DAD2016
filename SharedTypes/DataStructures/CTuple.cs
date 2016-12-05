@@ -83,7 +83,7 @@ namespace SharedTypes
         public TupleID ID { get; }
         public string opName { get;  }
         public int repID { get; }
-        public int destinationId { get; set; } //I'm sorry... i'm desperate
+        public int destinationId { get; set; } = -1;//I'm sorry... i'm desperate
 
         public CTuple() { }
         public CTuple(List<string> fields, int globalID, int subID, string opName, int repID) {

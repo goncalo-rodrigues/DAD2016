@@ -114,5 +114,18 @@ namespace PuppetMaster
 
             
         }
+
+        public void ReRoute(string opName, int replicaId, string newAddr)
+        {
+            PuppetMaster master = PuppetMaster.Instance;
+            try
+            {
+                master.nodes[opName].Replicas[replicaId] = Helper.GetStub<IReplica>(newAddr);
+            } catch (Exception e)
+            {
+                Console.WriteLine("Unable to reroute " + e.Message);
+            }
+           
+        }
     }
 }

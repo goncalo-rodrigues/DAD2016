@@ -36,23 +36,24 @@ namespace Operator
                 SentTupleIds[i] = new TupleID();
                 somethingSentInRecentPast[i] = true;
             }
+            if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
+            {
+                RoutingStrategy = new PrimaryStrategy(info.Addresses.Count);
+            }
+            else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
+            {
+                RoutingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
+            }
+            else
+            {
+                RoutingStrategy = new RandomStrategy(info.Addresses.Count);
+            }
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
             {
                 this.replicas = (await replicasTask).ToList();
 
-                if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
-                {
-                    RoutingStrategy = new PrimaryStrategy(info.Addresses.Count);
-                }
-                else if (info.RtStrategy == SharedTypes.RoutingStrategy.Hashing)
-                {
-                    RoutingStrategy = new HashingStrategy(info.Addresses.Count, info.HashingArg);
-                }
-                else
-                {
-                    RoutingStrategy = new RandomStrategy(info.Addresses.Count);
-                }
+
 
             });
 
@@ -87,14 +88,9 @@ namespace Operator
         public override void Deliver(CTuple tuple)
         {
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
-            int id;
-            if (tuple.GetFields() == null)
-            {
-                id = tuple.destinationId;
-            } else
-            {
-                id = RoutingStrategy.ChooseReplica(tuple);
-            }
+            int id = tuple.destinationId == -1 ? RoutingStrategy.ChooseReplica(tuple) : tuple.destinationId;
+
+            tuple.destinationId = id;
             
             var rep = replicas[id];
             somethingSentInRecentPast[id] = true;
@@ -192,7 +188,8 @@ namespace Operator
                 return new DestinationState
                 {
                     SentIds = SentTupleIds,
-                    CachedOutputTuples = CachedOutputTuples
+                    CachedOutputTuples = CachedOutputTuples,
+                    RoutingState = RoutingStrategy.GetState()
                 };
             }
 
@@ -201,6 +198,7 @@ namespace Operator
         {
             this.SentTupleIds = state.SentIds;
             this.CachedOutputTuples = state.CachedOutputTuples;
+            this.RoutingStrategy.LoadState(state.RoutingState);
         }
         public override void Ping()
         {

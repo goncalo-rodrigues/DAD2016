@@ -11,6 +11,14 @@ namespace Operator
             this.countRep = countRep;
         }
         abstract public int ChooseReplica(CTuple tuple);
+        public virtual object GetState()
+        {
+            return null;
+        }
+        public virtual void LoadState(object state)
+        {
+            // do nothing
+        }
     }
 }
 

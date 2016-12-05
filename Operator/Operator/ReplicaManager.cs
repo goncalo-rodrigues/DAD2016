@@ -21,7 +21,9 @@ namespace Operator
         private PerfectFailureDetector pfd;
         private List<IReplica> allReplicas;
         private Dictionary<string, List<IReplica>> inputReplicas;
+        private Dictionary<string, List<IReplica>> outputReplicas;
         private Timer propagateStateTimer;
+        private ILogger puppetMaster;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
 
@@ -31,6 +33,7 @@ namespace Operator
             this.adresses = info.Addresses;
             this.info = info;
             this.inputReplicas = new Dictionary<string, List<IReplica>>();
+            this.outputReplicas = new Dictionary<string, List<IReplica>>();
             this.otherReplicasStates = new List<ReplicaState>(new ReplicaState[adresses.Count]); 
                 //await Task.Delay(10000);
             var initialState = rep.GetState();
@@ -62,6 +65,11 @@ namespace Operator
                 {
                     this.inputReplicas[op] = (await Helper.GetAllStubs<IReplica>(info.InputReplicas[op])).ToList();
                 }
+
+                foreach (var op in info.OutputOperators)
+                {
+                    this.outputReplicas[op.ID] = (await Helper.GetAllStubs<IReplica>(op.Addresses)).ToList();
+                }
             });
 
             propagateStateTimer = new Timer((e) =>
@@ -77,6 +85,7 @@ namespace Operator
                 }
             }, null, PROPAGATE_STATE_PERIOD*10, PROPAGATE_STATE_PERIOD*10);
 
+            puppetMaster = (ILogger)Activator.GetObject(typeof(ILogger), info.MasterURL);
             Console.Title = $"{rep.OperatorId} ({rep.ID})";
 
         }
@@ -125,19 +134,39 @@ namespace Operator
                         
                         allReplicas[failedId] = this;
                         
-                        r.Start();
+                        //r.Start();
 
                         // Only after the recovery is completed, it's safe to reroute
-                        foreach (string opName in os.Keys)
+                        try
                         {
-                            for (int i = 0; i < inputReplicas[opName].Count; i++)
+                            foreach (string opName in os.Keys)
                             {
-                                inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                                for (int i = 0; i < inputReplicas[opName].Count; i++)
+                                {
+                                    inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                                }
                             }
+
+                            foreach (string opName in outputReplicas.Keys)
+                            {
+                                for (int i = 0; i < outputReplicas[opName].Count; i++)
+                                {
+                                    outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                                }
+                            }
+
+
+                            puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
+
+                        } catch(Exception ex)
+                        {
+                            Console.WriteLine("Problems with rerouting " + ex.Message +  ex.StackTrace);
+                            
                         }
 
                         adresses[failedId] = SelfURL;
                         Console.WriteLine("All recovered!");
+                        if (repState.IsStarted) rep.Start();
                         //resend 
                         break;
                     }
@@ -302,6 +331,19 @@ namespace Operator
                 {
                     adresses[i] = newAddr;
                     allReplicas[i] = Helper.GetStub<IReplica>(newAddr);
+                }
+            }
+
+            foreach (var opName in info.InputReplicas.Keys)
+            {
+                var addrs = info.InputReplicas[opName];
+                for(int i=0; i < addrs.Count; i++)
+                {
+                    if (addrs[i].Equals(oldAddr))
+                    {
+                        addrs[i] = newAddr;
+                        inputReplicas[opName][i] = Helper.GetStub<IReplica>(newAddr);
+                    }
                 }
             }
             // update replicas which were previously pointing to failed node
