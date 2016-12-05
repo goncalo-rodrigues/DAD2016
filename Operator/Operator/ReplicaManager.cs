@@ -92,13 +92,10 @@ namespace Operator
 
         public void OnFail(object sender, NodeFailedEventArgs e)
         {
+            
             Console.WriteLine($"Detected failure of {e.FailedNodeName}");
             int failedId = -1;
-            Dictionary<int, Replica> replicasCopy;
-            lock (replicas)
-            {
-                replicasCopy = new Dictionary<int, Replica>(replicas);
-            }
+
             for (int i = 0; i < this.adresses.Count; i++)
             {
                 if (this.adresses[i].Equals(e.FailedNodeName))
@@ -108,67 +105,13 @@ namespace Operator
             }
             if (failedId != -1)
             {
-
-                foreach (Replica rep in replicasCopy.Values)
+                if (replicas.Any((x) => x.Key == (failedId+1)%adresses.Count))
                 {
-                    if (rep.ID == failedId + 1)
-                    {   //recover 
-                        Replica r = CreateReplica(failedId);          
-                        ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
-                        Dictionary<string, OriginState> os = repState.InputStreamsIds;
-                        Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
-                        r.LoadState(repState);
-                        AddReplica(r);
-
-                        foreach (string opName in os.Keys)
-                        {
-                            
-                            var sentIds = os[opName].SentIds; // Only keeps the last id sent to each destination
-                            //for each operator ask a re-sent
-                            for (int j = 0; j < sentIds.Count; j++)
-                            {
-                                inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j, SelfURL); 
-                             
-                            }  
-                        }
-                        
-                        allReplicas[failedId] = this;
-                        
-                        //r.Start();
-
-                        // Only after the recovery is completed, it's safe to reroute
-                        try
-                        {
-                            foreach (string opName in os.Keys)
-                            {
-                                for (int i = 0; i < inputReplicas[opName].Count; i++)
-                                {
-                                    inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
-                                }
-                            }
-
-                            foreach (string opName in outputReplicas.Keys)
-                            {
-                                for (int i = 0; i < outputReplicas[opName].Count; i++)
-                                {
-                                    outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
-                                }
-                            }
-
-
-                            puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
-
-                        } catch(Exception ex)
-                        {
-                            Console.WriteLine("Problems with rerouting " + ex.Message +  ex.StackTrace);
-                            
-                        }
-
-                        adresses[failedId] = SelfURL;
-                        Console.WriteLine("All recovered!");
-                        if (repState.IsStarted) rep.Start();
-                        //resend 
-                        break;
+                    // recover all replicas
+                    while (!pfd.IsAlive(adresses[failedId]))
+                    {
+                        Recover(failedId);
+                        failedId = (failedId-1)%adresses.Count;
                     }
                 }
             }
@@ -353,5 +296,70 @@ namespace Operator
             }
 
         }
+
+        public void Recover(int failedId)
+        {
+            Dictionary<int, Replica> replicasCopy;
+            lock (replicas)
+            {
+                replicasCopy = new Dictionary<int, Replica>(replicas);
+            }
+
+            Replica r = CreateReplica(failedId);
+            ReplicaState repState = otherReplicasStates[failedId]; //get the last state of crashed replica
+            Dictionary<string, OriginState> os = repState.InputStreamsIds;
+            Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
+            r.LoadState(repState);
+            AddReplica(r);
+
+            foreach (string opName in os.Keys)
+            {
+
+                var sentIds = os[opName].SentIds; // Only keeps the last id sent to each destination
+                                                    //for each operator ask a re-sent
+                for (int j = 0; j < sentIds.Count; j++)
+                {
+                    inputReplicas[opName][j].Resend(sentIds[j], this.info.ID, failedId, j, SelfURL);
+
+                }
+            }
+
+            allReplicas[failedId] = this;
+                    
+            try
+            {
+                foreach (string opName in os.Keys)
+                {
+                    for (int i = 0; i < inputReplicas[opName].Count; i++)
+                    {
+                        inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    }
+                }
+
+                foreach (string opName in outputReplicas.Keys)
+                {
+                    for (int i = 0; i < outputReplicas[opName].Count; i++)
+                    {
+                        outputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
+                    }
+                }
+
+
+                puppetMaster.ReRoute(this.info.ID, failedId, this.SelfURL);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Problems with rerouting " + ex.Message + ex.StackTrace);
+
+            }
+
+            adresses[failedId] = SelfURL;
+            Console.WriteLine("All recovered!");
+            if (repState.IsStarted) r.Start();
+            //resend 
+                  
+        }
+        
     }
 }
