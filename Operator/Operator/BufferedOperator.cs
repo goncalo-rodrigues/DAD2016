@@ -9,29 +9,29 @@ namespace Operator
     {
         const int BUFFER_SIZE = 128;
         public int BufferSize { get; }
-        private BlockingCollection<CTuple> buffer;
+        public BlockingCollection<CTuple> Buffer { get; set; }
   
         public BufferedOperator(bool takeTupleAsSoonAsItArrives = true) : this(BUFFER_SIZE, takeTupleAsSoonAsItArrives) { }
         public BufferedOperator(int BufferSize, bool takeTupleAsSoonAsItArrives = true)
         {
             this.BufferSize = BufferSize;
-            this.buffer = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BufferSize);
+            this.Buffer = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BufferSize);
             if (takeTupleAsSoonAsItArrives)
                 Task.Run(() => Processor());
         }
         public virtual CTuple Take()
         {
-            return buffer.Take();
+            return Buffer.Take();
         }
         public int Count()
         {
-            return buffer.Count;
+            return Buffer.Count;
         }      
         public void Insert(CTuple tuple)
         {
             try
             {
-                buffer?.Add(tuple);
+                Buffer?.Add(tuple);
             }
             catch (Exception e)
             {
@@ -40,11 +40,11 @@ namespace Operator
         }
         public void MarkFinish() // marks the buffer has not accepting further tuples
         {
-            buffer?.CompleteAdding();
+            Buffer?.CompleteAdding();
         }
         private void Processor()
         {
-            while (!buffer.IsCompleted)
+            while (!Buffer.IsCompleted)
             {
                 CTuple tuple = null;
                 // Blocks if number.Count == 0
@@ -55,7 +55,7 @@ namespace Operator
                 // loop will break on the next iteration.
                 try
                 {
-                    tuple = buffer.Take();
+                    tuple = Buffer.Take();
                 }
                 catch (InvalidOperationException) { }
 
