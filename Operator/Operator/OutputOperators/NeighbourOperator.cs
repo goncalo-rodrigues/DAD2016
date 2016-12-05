@@ -1,5 +1,6 @@
 ﻿using SharedTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -190,16 +191,26 @@ namespace Operator
                 {
                     SentIds = SentTupleIds,
                     CachedOutputTuples = CachedOutputTuples,
-                    RoutingState = RoutingStrategy.GetState()
+                    RoutingState = RoutingStrategy?.GetState(),
+                    //OutputBuffer = Buffer?.ToArray<CTuple>()
                 };
             }
 
         }
+
         public override void LoadState(DestinationState state)
         {
-            this.SentTupleIds = state.SentIds;
-            this.CachedOutputTuples = state.CachedOutputTuples;
-            this.RoutingStrategy.LoadState(state.RoutingState);
+            if( state != null ) { 
+                this.SentTupleIds = state.SentIds;
+                this.CachedOutputTuples = state.CachedOutputTuples;
+                this.RoutingStrategy.LoadState(state.RoutingState);
+
+                //this.Buffer = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BufferSize); // start a buffer from the beginning
+                //foreach(CTuple tuple in state.OutputBuffer)
+                //{
+                //    this.Buffer.Add(tuple);
+                //}
+            }
         }
         public override void Ping()
         {
@@ -224,13 +235,11 @@ namespace Operator
 
         internal override void UpdateRouting(string oldAddr, string newAddr)
         {
-            bool updated = false;
             for(int i = 0; i < info?.Addresses?.Count; i++)
             {
                 // lets find failed replica ID
                 if (info.Addresses[i].Equals(oldAddr))
                 {
-                    updated = true;
                     replicas[i] = Helper.GetStub<IReplica>(newAddr);
                     Console.WriteLine($"updating {oldAddr} to {newAddr}");
                 }

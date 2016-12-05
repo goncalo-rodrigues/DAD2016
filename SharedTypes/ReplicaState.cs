@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,13 +33,14 @@ namespace SharedTypes
             result += ">";
             return result;
         }
-
     }
+
     [Serializable]
     public class DestinationState
     {
         public List<TupleID> SentIds;
         public List<CTuple> CachedOutputTuples;
+        public CTuple[] OutputBuffer;
         public object RoutingState;
     }
 

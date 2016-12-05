@@ -1,5 +1,6 @@
 ﻿using SharedTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -64,12 +65,12 @@ namespace Operator
 
         public virtual DestinationState GetState()
         {
-            return null;
+           return null;
         }
 
         public virtual void LoadState(DestinationState state)
         {
-            return;
+            return ;
         }
 
         public virtual void Resend(TupleID id, int replicaId, string destination)
