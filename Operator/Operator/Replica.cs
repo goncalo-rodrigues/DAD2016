@@ -285,7 +285,6 @@ namespace Operator
         {
             Console.WriteLine("Received " + tuple + " from " + tuple.opName + "(" + tuple.repID + ")");
             originOperators[tuple.opName][tuple.repID].Insert(tuple);
-            Console.WriteLine("Successfully inserted");
         }
 
         public void Start()

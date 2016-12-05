@@ -122,7 +122,7 @@ namespace Operator
                         }
                         AddReplica(r);
                         allReplicas[failedId] = this;
-                        adresses[failedId] = SelfURL;
+                        
                         r.Start();
 
                         // Only after the recovery is completed, it's safe to reroute
@@ -133,6 +133,8 @@ namespace Operator
                                 inputReplicas[opName][i].ReRoute(this.adresses[failedId], this.SelfURL);
                             }
                         }
+
+                        adresses[failedId] = SelfURL;
 
                         //resend 
                         break;
@@ -269,7 +271,16 @@ namespace Operator
                     var tupleId = state.InputStreamsIds[opName].SentIds[i];
                     var thisOperatorId = replicas[id].OperatorId;
                     var destinationId = i;
-                    tasks.Add(Task.Run(()=>rep.GarbageCollect(tupleId, thisOperatorId, id, destinationId)));
+                    tasks.Add(Task.Run(()=>
+                    {
+                        try
+                        {
+                            rep.GarbageCollect(tupleId, thisOperatorId, id, destinationId);
+                        } catch (Exception e)
+                        {
+                            Console.WriteLine("Error while garbage collecting: " + e.Message);
+                        }
+                    }));
                 }
             }
             Task.WaitAll(tasks.ToArray());
@@ -288,6 +299,7 @@ namespace Operator
                 if (adresses[i].Equals(oldAddr))
                 {
                     adresses[i] = newAddr;
+                    allReplicas[i] = Helper.GetStub<IReplica>(newAddr);
                 }
             }
             // update replicas which were previously pointing to failed node

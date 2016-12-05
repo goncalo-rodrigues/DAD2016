@@ -105,13 +105,14 @@ namespace Operator
                     
                     while (!controlFlag)
                     {
+                        rep = replicas[id]; //maybe someone updated it
                         try
                         {
                             rep.ProcessAndForward(tuple, id);
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
-                        catch (Exception e) { /*Console.WriteLine("**********Exception");*/ };
+                        catch (Exception e) { Console.WriteLine($"**********Exception: {e.Message}"); };
                     }
                     break;
                 case Semantic.AtMostOnce:
@@ -215,13 +216,16 @@ namespace Operator
         internal override void UpdateRouting(string oldAddr, string newAddr)
         {
             bool updated = false;
-            for(int i = 0; i < info?.Addresses?.Count || updated; i++)
+            for(int i = 0; i < info?.Addresses?.Count; i++)
             {
                 // lets find failed replica ID
                 if (info.Addresses[i].Equals(oldAddr))
                 {
+                    
                     updated = true;
                     replicas[i] = Helper.GetStub<IReplica>(newAddr);
+                    Console.WriteLine($"updating {oldAddr} to {newAddr}");
+                    replicas[i].Ping();
                 }
             }
         }
