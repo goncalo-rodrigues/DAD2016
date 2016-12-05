@@ -30,6 +30,7 @@ namespace Operator
             GarbageCollectedTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             SentTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             somethingSentInRecentPast = new List<bool>(new bool[info.Addresses.Count]);
+            replicas = new List<IReplica>();
             for(int i=0; i < GarbageCollectedTupleIds.Count; i++)
             {
                 GarbageCollectedTupleIds[i] = new TupleID();
