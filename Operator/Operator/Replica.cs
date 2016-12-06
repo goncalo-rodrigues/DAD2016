@@ -172,19 +172,23 @@ namespace Operator
                 try
                 {
                     var t = inBuffer.Next();
-                    var result = Process(t);
-                    foreach (var tuple in result)
+                    lock(this)
                     {
-                        SendToAll(tuple);
-                        LastSentId = tuple.ID;
+                        var result = Process(t);
+                        foreach (var tuple in result)
+                        {
+                            SendToAll(tuple);
+                            LastSentId = tuple.ID;
+                        }
+                        if (!result.Any() && t.ID.GlobalID > 0)
+                        {
+                            // if there are no results, update lastSentId anyways
+
+                            var newId = new TupleID(t.ID.GlobalID - 1, 0);
+                            LastSentId = LastSentId > newId ? LastSentId : newId;
+                        }
                     }
-                    if (!result.Any() && t.ID.GlobalID > 0)
-                    {
-                        // if there are no results, update lastSentId anyways
-                        
-                        var newId = new TupleID(t.ID.GlobalID-1, 0);
-                        LastSentId = LastSentId > newId ? LastSentId : newId;
-                    }
+
                 } catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
@@ -205,7 +209,6 @@ namespace Operator
                     string line = null;
                     while ((line = f.ReadLine()) != null)
                     {
-
                         if (line.StartsWith("%")) continue;
                         var tupleData = line.Split(',').Select((x) => x.Trim()).ToList();
              
@@ -245,33 +248,32 @@ namespace Operator
             var data = tuple.GetFields();
             IEnumerable<IList<string>> resultData;
             var startSubId = LastProcessedId.GlobalID == tuple.ID.GlobalID ? LastProcessedId.SubID + 1 : 0;
-            lock (this)
-            {
-                var origin = originOperators[tuple.opName][tuple.repID];
+
+            var origin = originOperators[tuple.opName][tuple.repID];
                 
-                if (origin.LastProcessedId < tuple.ID)
-                {
-                    Console.WriteLine("Processing...");
-                    if (data == null)
-                    {
-                        Console.WriteLine($"Processing flush {tuple.ID}");
-                        origin.LastProcessedId = tuple.ID;
-                        //this.LastProcessedId = new TupleID(tuple.ID.GlobalID, startSubId);
-                        return new CTuple[0];
-                    } else
-                    {
-                        resultData = ProcessFunction.Process(data);
-                    }
-                    origin.LastProcessedId = tuple.ID;
+            if (origin.LastProcessedId < tuple.ID)
+            {
                     
+                if (data == null)
+                {
+                    Console.WriteLine($"Processing flush {tuple.ID}");
+                    origin.LastProcessedId = tuple.ID;
+                    //this.LastProcessedId = new TupleID(tuple.ID.GlobalID, startSubId);
+                    return new CTuple[0];
                 } else
                 {
-                    Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
-                    return new CTuple[0];
+                    resultData = ProcessFunction.Process(data);
                 }
-                resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, startSubId + i, this.OperatorId, this.ID));
-                this.LastProcessedId = resultTuples.Last().ID;
+                origin.LastProcessedId = tuple.ID;
+                    
+            } else
+            {
+                Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
+                return new CTuple[0];
             }
+            resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, startSubId + i, this.OperatorId, this.ID));
+            this.LastProcessedId = resultTuples.Last().ID;
+            
             
 
             Console.WriteLine($"Processed {tuple.ToString()}");
@@ -281,19 +283,15 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine("Received " + tuple + " from " + tuple.opName + "(" + tuple.repID + ")");
+            
+            Console.WriteLine($"Received {tuple.ID} from {tuple.opName} ({ tuple.repID })");
             originOperators[tuple.opName][tuple.repID].Insert(tuple);
         }
 
         public void Start()
         {
-            if (!processingState)
-            {
-                OnStart.Invoke(this, new EventArgs());
-                processingState = true;
-            }
-
-
+            OnStart.Invoke(this, new EventArgs());
+            processingState = true;
         }
 
         public void Interval(int mils)
@@ -327,7 +325,6 @@ namespace Operator
             Console.WriteLine("Freezing...");
             OnFreeze?.Invoke(this, new EventArgs());
             freezingState = true;
-
         }
 
         internal void UpdateRouting(string oldAddr, string newAddr)
@@ -418,7 +415,7 @@ namespace Operator
             LastProcessedId = state.LastProcessedId;
             freezingState = state.IsFrozen;
             processingState = state.IsStarted;
-            Console.WriteLine("My State " +freezingState);
+            
         }
 
         public void Resend(TupleID id, string operatorId, int replicaId, string destination)
@@ -433,6 +430,21 @@ namespace Operator
         {
             //Console.WriteLine("Garbage Collecting");
             destinations[operatorId].GarbageCollect(id, replicaId);
+        }
+
+        public string Status()
+        {
+            string result = $"{ID}: in:";
+            foreach (var opName in originOperators.Keys)
+            {
+                result += $"<{opName}: {string.Join(",", originOperators[opName].Select((x, i) => "<" + i.ToString() + ":" + x.Status() + ">"))}>, ";
+            }
+            result += " out:";
+            foreach (var opName in destinations.Keys)
+            {
+                result += $"<{opName}: {destinations[opName].Status()}>, ";
+            }
+            return result;
         }
     }
 

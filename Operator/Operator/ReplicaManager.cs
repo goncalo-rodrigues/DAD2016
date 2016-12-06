@@ -109,7 +109,7 @@ namespace Operator
                 {
                     // recover all replicas
                     while (!pfd.IsAlive(adresses[failedId]))
-                        {
+                    {
                         Recover(failedId);
                         failedId = (failedId-1)%adresses.Count;
                     }
@@ -153,6 +153,10 @@ namespace Operator
                     }
                 }
                 status += $", Alive replicas: {replicas.Count + repCnt} (of {adresses.Count}), Recovered: {replicas.Count - 1}";
+                foreach(var r in replicas)
+                {
+                    status += "\n\r" + r.Value.Status();
+                }
                 Console.WriteLine(status);
             }
         }
@@ -312,6 +316,7 @@ namespace Operator
             Console.WriteLine($"Started to recover replica {failedId} from state {repState}");
             r.LoadState(repState);
             AddReplica(r);
+            allReplicas[failedId] = this;
 
             foreach (string opName in os.Keys)
             {
@@ -339,9 +344,9 @@ namespace Operator
                 }
             }
 
-            Console.WriteLine("**1**");
+            Console.WriteLine("Phase 1 completed: Tuples were resent.");
 
-                allReplicas[failedId] = this;
+            
 
 
             foreach (string opName in os.Keys)
@@ -360,7 +365,7 @@ namespace Operator
                 }
             }
 
-            Console.WriteLine("**2**");
+            Console.WriteLine("Phase 2 completed: Input replicas were rerouted.");
             foreach (string opName in outputReplicas.Keys)
             {
                 for (int i = 0; i < outputReplicas[opName].Count; i++)
@@ -377,8 +382,7 @@ namespace Operator
             }
 
 
-
-            Console.WriteLine("**3**");
+            Console.WriteLine("Phase 3 completed: Output replicas were rerouted.");
 
             try
             {
@@ -389,14 +393,14 @@ namespace Operator
                 Console.WriteLine("Error3:" + e.Message);
             }
 
-            Console.WriteLine("**4**");
+            Console.WriteLine("Phase 4 completed: Puppet master was rerouted.");
 
 
             adresses[failedId] = SelfURL;
             Console.WriteLine("All recovered!");
+            if (repState.IsFrozen) r.Freeze();
             if (repState.IsStarted) r.Start();
             //resend 
-                  
         }
         
     }

@@ -39,7 +39,9 @@ namespace Operator
 
         public void Send(CTuple tuple)
         {
+            Console.WriteLine($"Inserting {tuple.ID}");
             Insert(tuple);
+            Console.WriteLine($"Inserted {tuple.ID}");
         }
 
         override public void DoStuff(CTuple tuple) {

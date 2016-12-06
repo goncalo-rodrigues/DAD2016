@@ -96,6 +96,7 @@ namespace Operator
             
             var rep = replicas[id];
             somethingSentInRecentPast[id] = true;
+            if (tuple.GetFields() == null) Console.WriteLine($"Delivering flush {tuple.ID} to {id}");
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -110,7 +111,7 @@ namespace Operator
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
-                        catch (Exception e) { Console.WriteLine($"**********Exception: {e.Message}"); };
+                        catch (Exception e) { Console.WriteLine($"**********Exception: {e.Message}, {e.StackTrace}"); };
                     }
                     break;
                 case Semantic.AtMostOnce:
@@ -126,7 +127,7 @@ namespace Operator
             }
 
             lock(this) {
-                Console.WriteLine($"Delivered tuple {tuple.ID}");
+                Console.WriteLine($"Delivered tuple {tuple.ID} to {info.ID} ({id})");
                 CachedOutputTuples.Add(tuple);
                 SentTupleIds[id] = tuple.ID;
             }
@@ -188,7 +189,10 @@ namespace Operator
             {
                 //Console.WriteLine($"Getting state, {string.Join(",", Buffer?.ToList())}");
                 var outputBuffer = Buffer?.ToList();
-                //outputBuffer.Insert(0, LastTakenTuple);
+                if (LastTakenTuple != null)
+                {
+                    outputBuffer.Insert(0, LastTakenTuple);
+                }
                 return new DestinationState
                 {
                     SentIds = SentTupleIds,
@@ -197,7 +201,6 @@ namespace Operator
                     OutputBuffer = outputBuffer
                 };
             }
-
         }
 
         public override void LoadState(DestinationState state)

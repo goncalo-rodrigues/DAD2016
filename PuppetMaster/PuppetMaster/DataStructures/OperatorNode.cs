@@ -73,9 +73,9 @@ namespace PuppetMaster
                             try
                             {
                                 Replicas[i].Status();
-                            } catch (Exception)
+                            } catch (Exception e)
                             {
-                                Console.WriteLine("At least I tried...");
+                                Console.WriteLine($"At least I tried... {e.Message} {e.StackTrace}");
                             }
                             
                         }

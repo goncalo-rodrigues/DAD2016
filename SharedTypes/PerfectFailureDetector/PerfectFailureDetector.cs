@@ -39,9 +39,9 @@ namespace SharedTypes.PerfectFailureDetector
     public delegate void NodeFailedEventHandler(object sender, NodeFailedEventArgs e);
     public class PerfectFailureDetector
     {
-        public int TIMEOUT_MILLIS_FIRST_TIME = 3000;
-        public int TIMEOUT_MILLIS = 2000;
-        public int PING_PERIOD = 5000;
+        public int TIMEOUT_MILLIS_FIRST_TIME = 5000;
+        public int TIMEOUT_MILLIS = 5000;
+        public int PING_PERIOD = 10000;
         public event NodeFailedEventHandler NodeFailed;
         private IDictionary<string, MonitoredNode> monitoredNodes = new Dictionary<string, MonitoredNode>();
         private Timer mainTimer;
