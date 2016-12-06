@@ -10,7 +10,7 @@ namespace Operator
         const int BUFFER_SIZE = 128;
         public int BufferSize { get; }
         public BlockingCollection<CTuple> Buffer { get; set; }
-  
+        public CTuple LastTakenTuple = new CTuple();
         public BufferedOperator(bool takeTupleAsSoonAsItArrives = true) : this(BUFFER_SIZE, takeTupleAsSoonAsItArrives) { }
         public BufferedOperator(int BufferSize, bool takeTupleAsSoonAsItArrives = true)
         {
@@ -21,7 +21,7 @@ namespace Operator
         }
         public virtual CTuple Take()
         {
-            return Buffer.Take();
+            return LastTakenTuple = Buffer.Take();
         }
         public int Count()
         {
@@ -55,13 +55,13 @@ namespace Operator
                 // loop will break on the next iteration.
                 try
                 {
-                    tuple = Buffer.Take();
+                    LastTakenTuple = Buffer.Take();
                 }
                 catch (InvalidOperationException) { }
 
-                if (tuple != null)
+                if (LastTakenTuple != null)
                 {
-                    DoStuff(tuple);
+                    DoStuff(LastTakenTuple);
                 }
             }
         }

@@ -40,7 +40,7 @@ namespace SharedTypes
     {
         public List<TupleID> SentIds;
         public List<CTuple> CachedOutputTuples;
-        public CTuple[] OutputBuffer;
+        public List<CTuple> OutputBuffer;
         public object RoutingState;
     }
 

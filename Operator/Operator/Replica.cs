@@ -293,6 +293,7 @@ namespace Operator
                 processingState = true;
             }
 
+
         }
 
         public void Interval(int mils)
@@ -416,6 +417,7 @@ namespace Operator
             StartFrom = state.LastEmittedTuple;
             LastProcessedId = state.LastProcessedId;
             freezingState = state.IsFrozen;
+            processingState = state.IsStarted;
             Console.WriteLine("My State " +freezingState);
         }
 

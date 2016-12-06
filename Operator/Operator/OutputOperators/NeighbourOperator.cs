@@ -186,12 +186,15 @@ namespace Operator
         {
             lock(this)
             {
+                //Console.WriteLine($"Getting state, {string.Join(",", Buffer?.ToList())}");
+                var outputBuffer = Buffer?.ToList();
+                //outputBuffer.Insert(0, LastTakenTuple);
                 return new DestinationState
                 {
                     SentIds = SentTupleIds,
                     CachedOutputTuples = CachedOutputTuples,
                     RoutingState = RoutingStrategy?.GetState(),
-                    //OutputBuffer = Buffer?.ToArray<CTuple>()
+                    OutputBuffer = outputBuffer
                 };
             }
 
@@ -205,10 +208,11 @@ namespace Operator
                 this.RoutingStrategy.LoadState(state.RoutingState);
 
                 //this.Buffer = new BlockingCollection<CTuple>(new ConcurrentQueue<CTuple>(), BufferSize); // start a buffer from the beginning
-                //foreach(CTuple tuple in state.OutputBuffer)
-                //{
-                //    this.Buffer.Add(tuple);
-                //}
+                foreach (CTuple tuple in state.OutputBuffer)
+                {
+                    Console.WriteLine($"Loadstate: inserting tuple {tuple}");
+                    this.Buffer.Add(tuple);
+                }
             }
         }
         public override void Ping()
