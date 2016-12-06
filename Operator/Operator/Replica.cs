@@ -257,7 +257,8 @@ namespace Operator
                 return new CTuple[0];
             }
             resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, startSubId + i, this.OperatorId, this.ID));
-            this.LastProcessedId = resultTuples.Last().ID;
+
+            if (resultTuples.Any()) this.LastProcessedId = resultTuples.Last().ID;
             
             
 

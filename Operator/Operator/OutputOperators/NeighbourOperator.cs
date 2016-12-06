@@ -154,6 +154,7 @@ namespace Operator
                 {
                     if (CachedOutputTuples[i].ID > upTo) break;
                     if (CachedOutputTuples[i].ID <= id) continue;
+                    if (CachedOutputTuples[i].destinationId != replicaId) continue;
                     toDeliver.Add(CachedOutputTuples[i]);
                 }
             }
