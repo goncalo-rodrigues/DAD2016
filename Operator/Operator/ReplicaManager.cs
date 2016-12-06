@@ -26,7 +26,7 @@ namespace Operator
         private ILogger puppetMaster;
 
         public ReplicaManager( Replica rep, OperatorInfo info) {
-
+            rep.Init();
             this.SelfURL = rep.SelfURL;
             this.replicas = new Dictionary<int, Replica>();
             this.replicas.Add(rep.ID, rep);
@@ -322,7 +322,8 @@ namespace Operator
             {
 
                 var sentIds = os[opName].SentIds; // Only keeps the last id sent to each destination
-                                                    //for each operator ask a re-sent
+                                                  //for each operator ask a re-sent
+                if (opName == this.info.ID) continue;
                 for (int j = 0; j < sentIds.Count; j++)
                 {
                     while (true)
@@ -349,7 +350,7 @@ namespace Operator
             
 
 
-            foreach (string opName in os.Keys)
+            foreach (string opName in inputReplicas.Keys)
             {
                 for (int i = 0; i < inputReplicas[opName].Count; i++)
                 {
@@ -400,6 +401,7 @@ namespace Operator
             Console.WriteLine("All recovered!");
             if (repState.IsFrozen) r.Freeze();
             if (repState.IsStarted) r.Start();
+            r.Init();
             //resend 
         }
         

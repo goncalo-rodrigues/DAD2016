@@ -127,22 +127,7 @@ namespace Operator
                 this.routingStrategy = new RandomStrategy(info.Addresses.Count, OperatorId.GetHashCode());
             }
             
-            // Start reading from file(s)
-
-            Task.Run(() =>
-            {
-                foreach (var path in inputFiles)
-                {
-                    StartProcessingFromFile(path, StartFrom);
-                }
-                var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
-                tuple.destinationId = -1;
-                originOperators[OperatorId][0].Insert(tuple);
-            });
-                
-
-
-            
+            // Start reading from file(s)  
 
             Task.Run(() => mainLoop());
             
@@ -445,6 +430,20 @@ namespace Operator
                 result += $"<{opName}: {destinations[opName].Status()}>, ";
             }
             return result;
+        }
+
+        public void Init()
+        {
+            Task.Run(() =>
+            {
+                foreach (var path in inputFiles)
+                {
+                    StartProcessingFromFile(path, StartFrom);
+                }
+                var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
+                tuple.destinationId = -1;
+                originOperators[OperatorId][0].Insert(tuple);
+            });
         }
     }
 

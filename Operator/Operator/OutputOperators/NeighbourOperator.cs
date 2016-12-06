@@ -48,7 +48,7 @@ namespace Operator
             }
             else
             {
-                RoutingStrategy = new RandomStrategy(info.Addresses.Count);
+                RoutingStrategy = new RandomStrategy(info.Addresses.Count, (master.OperatorId + info.ID + master.ID.ToString()).GetHashCode());
             }
             var replicasTask = Helper.GetAllStubs<IReplica>(info.Addresses);
             var initTask = Task.Run(async () =>
@@ -90,9 +90,13 @@ namespace Operator
         public override void Deliver(CTuple tuple)
         {
             // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
-            int id = tuple.destinationId == -1 ? RoutingStrategy.ChooseReplica(tuple) : tuple.destinationId;
+            int id = 0;
+            lock(this)
+            {
+                id = tuple.destinationId == -1 ? RoutingStrategy.ChooseReplica(tuple) : tuple.destinationId;
+                tuple.destinationId = id;
+            }
 
-            tuple.destinationId = id;
             
             var rep = replicas[id];
             somethingSentInRecentPast[id] = true;
