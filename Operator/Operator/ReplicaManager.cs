@@ -105,6 +105,7 @@ namespace Operator
             }
             if (failedId != -1)
             {
+                // my responsibility
                 if (replicas.Any((x) => x.Key == (failedId+1)%adresses.Count))
                 {
                     // recover all replicas
@@ -113,6 +114,16 @@ namespace Operator
                         Recover(failedId);
                         failedId = (failedId-1)%adresses.Count;
                     }
+                } else
+                // someone else gonna do it
+                {
+                    int replicaWhoWillRecoverFailedOne = (failedId + 1) % adresses.Count;
+                    // check first non-failed replica who will attempt to recover the failed one
+                    while (!pfd.IsAlive(adresses[replicaWhoWillRecoverFailedOne]))
+                    {
+                        replicaWhoWillRecoverFailedOne = (replicaWhoWillRecoverFailedOne + 1) % adresses.Count;
+                    }
+                    allReplicas[failedId] = allReplicas[replicaWhoWillRecoverFailedOne];
                 }
             }
 
