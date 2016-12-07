@@ -103,7 +103,7 @@ namespace Operator
             //if (tuple.GetFields() == null) //Console.WriteLine($"Delivering flush {tuple.ID} to {id}");
             switch (Semantic)
             {
-                case Semantic.AtLeastOnce:
+                case Semantic.AtLeastOnce: case Semantic.ExactlyOnce:
                     controlFlag = false;
                     
                     while (!controlFlag)
@@ -115,14 +115,10 @@ namespace Operator
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
-                        catch (Exception e) { Console.WriteLine($"AtLeastOnce : {e.Message}, {e.StackTrace}"); };
+                        catch (Exception e) { Console.WriteLine($"AtLeastOnce : {e.Message}"); };
                     }
                     break;
                 case Semantic.AtMostOnce:
-                    rep.ProcessAndForward(tuple, id);
-                    break;
-                case Semantic.ExactlyOnce:
-                    //ReplicaManager -> ProcessAndForward  
                     rep.ProcessAndForward(tuple, id);
                     break;
                 default:
