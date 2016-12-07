@@ -256,7 +256,7 @@ namespace Operator
                             rep.GarbageCollect(tupleId, thisOperatorId, id, destinationId);
                         } catch (Exception e)
                         {
-                            Console.WriteLine("Error while garbage collecting: " + e.Message);
+                            Console.WriteLine("Error while garbage collecting.. ");
                         }
                     }));
                 }
@@ -345,7 +345,7 @@ namespace Operator
                 }
             }
 
-            Console.WriteLine("Phase 1 completed: Tuples were resent.");
+          //  Console.WriteLine("Phase 1 completed: Tuples were resent.");
 
             
 
@@ -360,13 +360,13 @@ namespace Operator
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Error1:" + e.Message);
+                        Console.WriteLine("ReplicaManager.Recover: Reroute of input replicas failed " + e.Message);
                     }
                 
                 }
             }
 
-            Console.WriteLine("Phase 2 completed: Input replicas were rerouted.");
+           // Console.WriteLine("Phase 2 completed: Input replicas were rerouted.");
             foreach (string opName in outputReplicas.Keys)
             {
                 for (int i = 0; i < outputReplicas[opName].Count; i++)
@@ -377,13 +377,13 @@ namespace Operator
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Error2:" + e.Message);
+                        Console.WriteLine("ReplicaManager.Recover: Reroute of output replicas failed" + e.Message);
                     }
                 }
             }
 
 
-            Console.WriteLine("Phase 3 completed: Output replicas were rerouted.");
+           // Console.WriteLine("Phase 3 completed: Output replicas were rerouted.");
 
             try
             {
@@ -391,14 +391,14 @@ namespace Operator
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error3:" + e.Message);
+                Console.WriteLine("ReplicaManager.Recover: Reroute of puppet master failed" + e.Message);
             }
 
-            Console.WriteLine("Phase 4 completed: Puppet master was rerouted.");
+            //Console.WriteLine("Phase 4 completed: Puppet master was rerouted.");
 
 
             adresses[failedId] = SelfURL;
-            Console.WriteLine("All recovered!");
+            Console.WriteLine("MISSION COMPLETED: all recovered!");
             if (repState.IsFrozen) r.Freeze();
             if (repState.IsStarted) r.Start();
             r.Init();

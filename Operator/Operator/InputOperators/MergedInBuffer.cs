@@ -25,7 +25,7 @@ namespace Operator
             // takes a tuple from each origin and puts it into currentTuple list
             for (int i = 0; i < Origins.Count; i++)
             {
-                Console.WriteLine($"Waiting for {Origins[i].OpId} ({Origins[i].ReplicaId})");
+               // Console.WriteLine($"Waiting for {Origins[i].OpId} ({Origins[i].ReplicaId})");
                 if (currentTuple[i] != null) continue;
                 currentTuple[i] = Origins[i].Take();
             }
@@ -34,7 +34,7 @@ namespace Operator
             // non-data tuple (could be from flush)
             chosenTuple = currentTuple[chosen];
             currentTuple[chosen] = null;
-            Console.WriteLine($"Chosen = {chosen}");
+            //Console.WriteLine($"Chosen = {chosen}");
             
             
             return chosenTuple;

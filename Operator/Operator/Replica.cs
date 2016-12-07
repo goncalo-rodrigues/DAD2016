@@ -176,8 +176,7 @@ namespace Operator
 
                 } catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    Console.WriteLine("Replica.mainloop : " +e.Message);    
                     Thread.Sleep(10000);
                 }
 
@@ -241,7 +240,6 @@ namespace Operator
                     
                 if (data == null)
                 {
-                    Console.WriteLine($"Processing flush {tuple.ID}");
                     origin.LastProcessedId = tuple.ID;
                     //this.LastProcessedId = new TupleID(tuple.ID.GlobalID, startSubId);
                     return new CTuple[0];
@@ -253,7 +251,7 @@ namespace Operator
                     
             } else
             {
-                Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
+               // Console.WriteLine($"Already seen {tuple.ID} from {origin.OpId} ({origin.ReplicaId}). Ignoring.");
                 return new CTuple[0];
             }
             resultTuples = resultData.Select((tupleData, i) => new CTuple(tupleData.ToList(), tuple.ID.GlobalID, startSubId + i, this.OperatorId, this.ID));
@@ -262,14 +260,13 @@ namespace Operator
             
             
 
-            Console.WriteLine($"Processed {tuple.ToString()}");
+           // Console.WriteLine($"Processed {tuple.ToString()}");
             return resultTuples;
         }
 
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            
             Console.WriteLine($"Received {tuple.ID} from {tuple.opName} ({ tuple.repID })");
             originOperators[tuple.opName][tuple.repID].Insert(tuple);
         }
@@ -323,7 +320,7 @@ namespace Operator
 
         public void Unfreeze()
         {
-            Console.WriteLine($"Unfreezing...");
+            Console.WriteLine("Unfreezing...");
             OnUnfreeze?.Invoke(this, new EventArgs());
             freezingState = false; 
         }

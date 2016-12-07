@@ -25,10 +25,6 @@ namespace Operator
             OutputStream.Flush();
         }
 
-        public override void Ping()
-        {
-            return;
-        }
 
 
         #region IDisposable Support

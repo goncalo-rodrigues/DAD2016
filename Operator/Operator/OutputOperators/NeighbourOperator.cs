@@ -79,7 +79,7 @@ namespace Operator
                             }
                             catch (Exception)
                             {
-                                Console.WriteLine($"Error while flushing");
+                                Console.WriteLine("Error while flushing");
                             }
                         }
                     }
@@ -100,7 +100,7 @@ namespace Operator
             
             var rep = replicas[id];
             somethingSentInRecentPast[id] = true;
-            if (tuple.GetFields() == null) Console.WriteLine($"Delivering flush {tuple.ID} to {id}");
+            //if (tuple.GetFields() == null) //Console.WriteLine($"Delivering flush {tuple.ID} to {id}");
             switch (Semantic)
             {
                 case Semantic.AtLeastOnce:
@@ -115,10 +115,11 @@ namespace Operator
                             controlFlag = true;
                         }
                         //FIXME Exceção que faz timeout automatico 
-                        catch (Exception e) { Console.WriteLine($"**********Exception: {e.Message}, {e.StackTrace}"); };
+                        catch (Exception e) { Console.WriteLine($"AtLeastOnce : {e.Message}, {e.StackTrace}"); };
                     }
                     break;
                 case Semantic.AtMostOnce:
+                    rep.ProcessAndForward(tuple, id);
                     break;
                 case Semantic.ExactlyOnce:
                     //ReplicaManager -> ProcessAndForward  
@@ -160,7 +161,7 @@ namespace Operator
             }
             foreach (var t in toDeliver)
             {
-                Console.WriteLine($"****Resending {t.ID} to {this.info.ID} ({replicaId})");
+               // Console.WriteLine($"****Resending {t.ID} to {this.info.ID} ({replicaId})");
                 try
                 {
                     rep.ProcessAndForward(t, replicaId);
@@ -223,26 +224,6 @@ namespace Operator
                 }
             }
         }
-        public override void Ping()
-        {
-            // Just need to ensure that one replica is alive
-            if (replicas != null && replicas.Count > 0)
-                foreach (IReplica rep in replicas)
-                {
-                    try
-                    {
-                        var task = Task.Run(() => rep.Ping());
-                        if (task.Wait(TimeSpan.FromMilliseconds(10)))
-                            return;
-                    }
-                    catch (Exception e)
-                    {
-                        // does nothing, there might be a working replica
-                    }
-                }
-            // there are no more replicas 
-            throw new NeighbourOperatorIsDeadException("Neighbour Operator has no working replicas.");
-        }
 
         internal override void UpdateRouting(string oldAddr, string newAddr)
         {
@@ -252,7 +233,7 @@ namespace Operator
                 if (info.Addresses[i].Equals(oldAddr))
                 {
                     replicas[i] = Helper.GetStub<IReplica>(newAddr);
-                    Console.WriteLine($"updating {oldAddr} to {newAddr}");
+                  //  Console.WriteLine($"updating {oldAddr} to {newAddr}");
                 }
             }
         }

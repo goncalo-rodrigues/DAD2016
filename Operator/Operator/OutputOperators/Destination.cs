@@ -39,15 +39,15 @@ namespace Operator
 
         public void Send(CTuple tuple)
         {
-            Console.WriteLine($"Inserting {tuple.ID}");
+           // Console.WriteLine($"Inserting {tuple.ID}");
             Insert(tuple);
-            Console.WriteLine($"Inserted {tuple.ID}");
+          //  Console.WriteLine($"Inserted {tuple.ID}");
         }
 
         override public void DoStuff(CTuple tuple) {
             if (Interval > 0)
             {
-                Console.WriteLine("Interval!");
+               // Console.WriteLine("Interval!");
                 Thread.Sleep(Interval);
             }
            
@@ -55,9 +55,9 @@ namespace Operator
             {
                 while (!Processing || FreezeFlag)
                 {
-                    Console.WriteLine("Stopped or frozen. Waiting...");
+                   // Console.WriteLine("Stopped or frozen. Waiting...");
                     Monitor.Wait(this);
-                    Console.WriteLine("UnStopped or Unfrozen. Resuming...");
+                    //Console.WriteLine("UnStopped or Unfrozen. Resuming...");
                 }
                     
             }
@@ -127,7 +127,6 @@ namespace Operator
 
         #region ABSTRACT
         public abstract void Deliver(CTuple tuple);
-        public abstract void Ping();
         internal abstract void UpdateRouting(string oldAddr, string newAddr);
 
         #endregion ABSTRACT

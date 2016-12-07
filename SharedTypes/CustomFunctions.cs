@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace c
+namespace SharedTypes
 {
-    public static class CustomFunctions
+    [Serializable]
+    public class CustomFunctions
     {
-        public static IList<string>[] reverse(IList<string> tuple)
+        public IList<string>[] reverse(IList<string> tuple)
         {
             return new IList<string>[] { tuple.Reverse().ToList() };
         }
-        public static IList<string>[] dup(IList<string> tuple)
+        public IList<string>[] dup(IList<string> tuple)
         {
             return new IList<string>[] { tuple, tuple };
         }

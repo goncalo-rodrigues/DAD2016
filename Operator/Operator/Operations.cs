@@ -119,7 +119,7 @@ namespace Operator
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message + ";" + e.InnerException?.Message);
+                Console.WriteLine("Operations.Custom: "+e.Message + ";" + e.InnerException?.Message);
                 return new List<IList<string>>();
             }
         }
