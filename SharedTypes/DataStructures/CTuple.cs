@@ -86,6 +86,14 @@ namespace SharedTypes
         public int destinationId { get; set; } = -1;//I'm sorry... i'm desperate
 
         public CTuple() { }
+        public CTuple(CTuple copy)
+        {
+            fields = copy.fields;
+            ID = copy.ID;
+            repID = copy.repID;
+            destinationId = copy.destinationId;
+            opName = copy.opName;
+        }
         public CTuple(List<string> fields, int globalID, int subID, string opName, int repID) {
             if (fields != null)
             {

@@ -229,7 +229,7 @@ namespace Operator
         {
              foreach (var neighbor in destinations.Values)
             {
-                neighbor.Send(tuple);
+                neighbor.Send(new CTuple(tuple));
             }
             
         }
