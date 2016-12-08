@@ -55,9 +55,9 @@ namespace Operator
             {
                 while (!Processing || FreezeFlag)
                 {
-                   // Console.WriteLine("Stopped or frozen. Waiting...");
+                    // Console.WriteLine("Stopped or frozen. Waiting...");
                     Monitor.Wait(this);
-                    //Console.WriteLine("UnStopped or Unfrozen. Resuming...");
+                     //Console.WriteLine("UnStopped or Unfrozen. Resuming...");
                 }
                     
             }
@@ -73,6 +73,11 @@ namespace Operator
         public virtual void LoadState(DestinationState state)
         {
             return ;
+        }
+
+        public virtual void Flush(TupleID id)
+        {
+            return;
         }
 
         public virtual void Resend(TupleID id, int replicaId, string destination)

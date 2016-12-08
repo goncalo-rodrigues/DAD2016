@@ -31,12 +31,12 @@ namespace Operator
             GarbageCollectedTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             SentTupleIds = new List<TupleID>(new TupleID[info.Addresses.Count]);
             somethingSentInRecentPast = new List<bool>(new bool[info.Addresses.Count]);
-            replicas = new List<IReplica>();
+            replicas = new List<IReplica>(new IReplica[info.Addresses.Count]);
             for(int i=0; i < GarbageCollectedTupleIds.Count; i++)
             {
                 GarbageCollectedTupleIds[i] = new TupleID();
                 SentTupleIds[i] = new TupleID();
-                somethingSentInRecentPast[i] = true;
+                somethingSentInRecentPast[i] = false;
             }
             if (info.RtStrategy == SharedTypes.RoutingStrategy.Primary)
             {
@@ -62,34 +62,40 @@ namespace Operator
             flushTimer = new Timer((e) =>
             {
 
-                for(int i=0; i < replicas.Count; i++)
+                Flush(master.LastSentId);
+                for (int i = 0; i < replicas.Count; i++)
+                    somethingSentInRecentPast[i] = false;
+
+            }, null, 1000, 1000);
+        }
+
+        public override void Flush(TupleID flushId)
+        {
+            for (int i = 0; i < replicas.Count; i++)
+            {
+                if (!somethingSentInRecentPast[i])
                 {
-                    if (!somethingSentInRecentPast[i])
+                    // Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
+                    if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
                     {
-                        var flushId = master.LastSentId;
-                        //Console.WriteLine($"Checking if need to flush. {SentTupleIds[i]} < {flushId}");
-                        if (flushId >= new TupleID(0, 0) && SentTupleIds[i] < flushId)
+                        //   Console.WriteLine($"Emitting flush {master.LastSentId} from {master.ID} to {i}");
+                        try
                         {
-                            //Console.WriteLine($"Emitting flush {master.LastSentId} from {master.ID} to {i}");
-                            try
-                            {
-                                var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);
-                                flushTuple.destinationId = i;
-                                Insert(flushTuple);
-                            }
-                            catch (Exception)
-                            {
-                                Console.WriteLine("Error while flushing");
-                            }
+                            var flushTuple = new CTuple(null, flushId.GlobalID, flushId.SubID, master.OperatorId, master.ID);
+                            flushTuple.destinationId = i;
+                            Insert(flushTuple);
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("Error while flushing");
                         }
                     }
-                    somethingSentInRecentPast[i] = false;
                 }
-            }, null, 2000, 2000);
+            }
         }
         public override void Deliver(CTuple tuple)
         {
-            // Console.WriteLine($"NeighbourOperator: Delivering Tuple {tuple.ToString()}.");
+            // Console.WriteLine($"{GetHashCode()}: Delivering Tuple {tuple.ToString()} to {tuple.destinationId}.");
             int id = 0;
             lock(this)
             {
@@ -97,13 +103,15 @@ namespace Operator
                 tuple.destinationId = id;
             }
 
-            
+            // Console.WriteLine($"{GetHashCode()}: Consulting semantic {Semantic}");
+
             var rep = replicas[id];
             somethingSentInRecentPast[id] = true;
             //if (tuple.GetFields() == null) //Console.WriteLine($"Delivering flush {tuple.ID} to {id}");
             switch (Semantic)
             {
-                case Semantic.AtLeastOnce: case Semantic.ExactlyOnce:
+                case Semantic.AtLeastOnce:
+                case Semantic.ExactlyOnce:
                     controlFlag = false;
                     
                     while (!controlFlag)
@@ -216,7 +224,7 @@ namespace Operator
                 foreach (CTuple tuple in state.OutputBuffer)
                 {
                     Console.WriteLine($"Loadstate: inserting tuple {tuple}");
-                    this.Buffer.Add(tuple);
+                    Insert(tuple);
                 }
             }
         }

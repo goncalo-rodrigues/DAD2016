@@ -64,7 +64,7 @@ namespace Operator
 
         public Replica(ReplicaCreationInfo rep)
         {
-
+            // Console.WriteLine("\a");
             var info = rep.Operator;
             this.OperatorId = info.ID;
             this.MasterURL = info.MasterURL;
@@ -82,7 +82,7 @@ namespace Operator
             if (info.OutputOperators == null || info.OutputOperators.Count == 0)
             {
                 // it is an output operator
-               this.destinations.Add("output_file", new OutputFile(this, info.Semantic));
+               //this.destinations.Add("output_file", new OutputFile(this, info.Semantic));
             } else
             {
                foreach (var dstInfo in info.OutputOperators)
@@ -152,6 +152,7 @@ namespace Operator
 
         private void mainLoop()
         {
+            int i = 0;
             while (true)
             {
                 try
@@ -172,7 +173,15 @@ namespace Operator
                             var newId = new TupleID(t.ID.GlobalID - 1, 0);
                             LastSentId = LastSentId > newId ? LastSentId : newId;
                         }
+
+                        // every 20 tuples, flush
+                        if (i % 20 == 0)
+                        {
+                            foreach (var d in destinations.Values)
+                                d.Flush(LastSentId);
+                        }
                     }
+                    i++;
 
                 } catch (Exception e)
                 {
@@ -205,6 +214,8 @@ namespace Operator
                             
                             ProcessAndForward(ctuple);
                         }
+
+
                     }
                 }
             }
@@ -235,6 +246,7 @@ namespace Operator
 
             var origin = originOperators[tuple.opName][tuple.repID];
                 
+
             if (origin.LastProcessedId < tuple.ID)
             {
                     
@@ -439,7 +451,6 @@ namespace Operator
                     StartProcessingFromFile(path, StartFrom);
                 }
                 var tuple = new CTuple(null, Int32.MaxValue, 0, OperatorId, 0);
-                tuple.destinationId = -1;
                 originOperators[OperatorId][0].Insert(tuple);
             });
         }

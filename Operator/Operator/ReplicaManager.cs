@@ -411,7 +411,7 @@ namespace Operator
             adresses[failedId] = SelfURL;
             Console.WriteLine("MISSION COMPLETED: all recovered!");
             if (repState.IsFrozen) r.Freeze();
-            if (repState.IsStarted) r.Start();
+            if (replicas.First().Value.processingState) r.Start();
             r.Init();
             //resend 
         }
