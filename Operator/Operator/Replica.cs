@@ -279,7 +279,8 @@ namespace Operator
         #region IReplica Implementation
         public void ProcessAndForward(CTuple tuple)
         {
-            Console.WriteLine($"Received {tuple.ID} from {tuple.opName} ({ tuple.repID })");
+            if (tuple.GetFields() != null)
+                Console.WriteLine($"Received {tuple.ID} from {tuple.opName} ({ tuple.repID })");
             originOperators[tuple.opName][tuple.repID].Insert(tuple);
         }
 
