@@ -136,7 +136,8 @@ namespace Operator
             }
 
             lock(this) {
-                Console.WriteLine($"Delivered tuple {tuple.ID} to {info.ID} ({id})");
+                if (tuple.GetFields() != null)
+                    Console.WriteLine($"Delivered tuple {tuple.ID} to {info.ID} ({id})");
                 CachedOutputTuples.Add(tuple);
                 SentTupleIds[id] = tuple.ID;
             }
