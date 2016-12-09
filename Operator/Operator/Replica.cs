@@ -365,7 +365,8 @@ namespace Operator
             lock(this)
             {
                 var result = new ReplicaState();
-                result.OperationInternalState = ProcessFunction.InternalState;
+                if (result.OperationInternalState != null && result.OperationInternalState.GetType().IsSerializable)
+                    result.OperationInternalState = ProcessFunction.InternalState;
                 result.OutputStreamsIds = new Dictionary<string, DestinationState>();
                 result.InputStreamsIds = new Dictionary<string, OriginState>();
 
@@ -393,7 +394,8 @@ namespace Operator
 
         public void LoadState(ReplicaState state)
         {
-            ProcessFunction.InternalState = state.OperationInternalState;
+            if (state.OperationInternalState != null)
+                ProcessFunction.InternalState = state.OperationInternalState;
             foreach (var d in state.OutputStreamsIds)
             {
                 destinations[d.Key].LoadState(d.Value);
