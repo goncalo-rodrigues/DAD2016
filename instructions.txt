@@ -1,4 +1,4 @@
-Steps to execute the project:
+BUILDING INSTRUCTIONS
 
 To build ProcessCreationService please open Visual Studio and execute build (ctrl shift b).
 Then build the Operator project again opening Visual Studio and executing build (ctrl shift b).
@@ -11,3 +11,13 @@ Run ProcessCreationService.exe
 Run PuppetMaster using Visual Studio
 
 The config file is located at "DAD2016\PuppetMaster\PuppetMaster\bin\Debug\dadstorm.config". Change according to needs.
+
+
+Notes regarding config files:
+We assumed no underscores
+Custom Operators must include full namespace of the class. Ex: CUSTOM "SharedTypes.dll", "SharedTypes.OperatorFunctions", "dup"
+Custom Operators class MUST be serializable
+Tuples are 0-indexed
+
+Notes regarding input:
+Quotes are not supported
